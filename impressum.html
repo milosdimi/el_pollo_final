@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de" translate="no">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Impressum • El Pollo Loco</title>
+  <meta name="theme-color" content="#f3c53f">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" type="image/png" href="./img/icons/chicken.png">
+  <link rel="stylesheet" href="css/impressum.css">
+</head>
+
+<body>
+  <header class="page-header" role="banner">
+    <img class="page-header__logo" src="./img/icons/chicken.png" alt="El Pollo Loco Logo">
+    <h2 class="page-header__title">El Pollo Loco – Impressum</h2>
+    <a class="back-link" href="index.html">← Zurück zum Spiel</a>
+  </header>
+
+  <main class="content" role="main">
+    <h1>Impressum</h1>
+    <p class="muted">Stand: <span id="stand-date">10.09.2025</span></p>
+
+    <!-- § 5 ECG – Anbieterkennzeichnung -->
+    <h2>Angaben gemäß § 5 ECG (Österreich)</h2>
+    <p>
+      <strong>Dimit (Milos Dimitrijevic)</strong><br>
+      Feldgasse 70<br>
+      6330 Kufstein, Österreich
+    </p>
+
+    <h2>Kontakt</h2>
+    <p>
+      Telefon: +43 664 217 83 13<br>
+      E-Mail: <a href="mailto:dm@dimit.cc">dm@dimit.cc</a>
+    </p>
+
+    <!-- MedienG – „kleine Offenlegung“ -->
+    <h2>Offenlegung gemäß § 25 MedienG (kleine Offenlegung)</h2>
+    <p>
+      Medieninhaber und inhaltlich verantwortlich: Milos Dimitrijevic, Kufstein, Österreich.<br>
+      Zweck der Website: Bereitstellung eines privaten Browser-Spiels („El Pollo Loco“) sowie begleitender
+      Informationen.
+    </p>
+
+    <!-- Unternehmensangaben – nur falls zutreffend -->
+    <h2>Unternehmensangaben (falls zutreffend)</h2>
+    <ul class="bullet">
+      <li>Rechtsform / Unternehmensgegenstand: Dimit</li>
+      <li>UID-Nr. (USt-IdNr.): ATU 79325758</li>
+      <li>Zuständige Gewerbebehörde: Bezirkshauptmannschaft Kufstein</li>
+      <li>Kammerzugehörigkeit: WKO Tirol</li>
+    </ul>
+
+    <!-- EU-Streitschlichtung -->
+    <h2>EU-Streitschlichtung</h2>
+    <p>
+      Verbraucher haben die Möglichkeit, Beschwerden an die Online-Streitbeilegungsplattform der EU zu richten:
+      <a href="https://ec.europa.eu/consumers/odr" rel="noopener"
+        target="_blank">https://ec.europa.eu/consumers/odr</a>.<br>
+      Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle
+      teilzunehmen.
+    </p>
+
+    <h2>Haftungsausschluss</h2>
+    <p>
+      Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und
+      Aktualität der Inhalte wird keine Gewähr übernommen. Externe Links wurden zum Zeitpunkt der Verlinkung geprüft;
+      für deren Inhalte sind ausschließlich deren Betreiber verantwortlich.
+    </p>
+
+    <h2>Urheberrecht</h2>
+    <p>
+      Sofern nicht anders gekennzeichnet, sind Inhalte, Grafiken, Sounds und Quellcode urheberrechtlich geschützt.
+      Die Nutzung ist ausschließlich im Rahmen des Spiels gestattet.
+    </p>
+
+        <h2>Bild- &amp; Soundnachweise</h2>
+    <ul class="bullet">
+      <li>Eigenes Artwork / Spielgrafiken: Milos Dimitrijevic</li>
+      <li>Externe Assets:</li>
+      <li>Icons: Flaticon</li>
+      <li>Sounds/Musik: Freesound</li>
+    </ul>
+
+    <p class="note">
+      Hinweis: Dieses Impressum ist auf österreichisches Recht (ECG & MedienG) ausgerichtet. Falls die Website
+      (auch) aus Deutschland angeboten wird, können ergänzend TMG-Pflichten bestehen.
+    </p>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-copy">© <span id="year">2025</span> El Pollo Loco</div>
+      <nav class="footer-nav" aria-label="Fußnavigation">
+        <a href="index.html">Startseite</a>
+        <a href="datenschutz.html">Datenschutz</a>
+        <a href="impressum.html" aria-current="page">Impressum</a>
+
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const d = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    document.getElementById('stand-date').textContent =
+      `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+  </script>
+</body>
+
+</html>
