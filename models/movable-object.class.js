@@ -4,6 +4,13 @@ class MovableObject {
     img;
     speed = 0.15;
 
+    loadImage(path) {
+        this.img = new Image();
+        this.img.src = path;
+    }
+
+
+
     moveRight() {
         console.log('move right');
     }
