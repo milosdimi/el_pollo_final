@@ -32,16 +32,18 @@ class Cloud extends MovableObject {
         }, 1000 / 60);
     }
     repositionIfOffscreen() {
-        const camLeft = this.world ? this.world.camera_x : 0;
-        const screenW = this.world ? this.world.canvas.width : 720;
+        if (!this.world) return;
 
+        const leftEdge = -this.world.camera_x;                 
+        const rightEdge = leftEdge + this.world.canvas.width;
 
-        if (this.x + this.width < camLeft) {
-            this.x = camLeft + screenW + Math.random() * 300; // rechts wieder rein
+        if (this.x + this.width < leftEdge) {
+            this.x = rightEdge + Math.random() * 300;
             this.y = 10 + Math.random() * 120;
-            this.setRandomCloudImage(); // motiv wechseln
+            this.setRandomCloudImage();
             this.speed = 0.06 + Math.random() * 0.08;
         }
     }
+
 
 }
