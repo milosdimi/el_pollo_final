@@ -7,6 +7,7 @@ class World {
     camera_x = 0;
     statusBarHealth = new StatusbarHealth();
     statusBarCoins = new StatusbarCoins();
+    statusBarBottles = new StatusbarBottles();
     throwableObjects = [];
     bottlesCount = 0;
 
@@ -27,13 +28,14 @@ class World {
             this.checkCoinPickup();
             this.checkBottlePickup();
         }, 200);
-    }
+    } 
 
     checkThrowObjects() {
         if (this.keyboard.D && this.bottlesCount > 0) {
             const bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
             this.throwableObjects.push(bottle);
             this.bottlesCount--;
+            this.statusBarBottles.add(-20);
         }
     }
 
@@ -53,7 +55,7 @@ class World {
         this.level.coins = this.level.coins.filter(coin => {
             if (this.character.isColliding(coin)) {
                 this.coinsCount = (this.coinsCount || 0) + 1;
-                this.statusBarCoins.add(10); 
+                this.statusBarCoins.add(20); 
                 return false;
             }
             return true;
@@ -67,7 +69,7 @@ class World {
         this.level.bottles = this.level.bottles.filter(b => {
             if (this.character.isColliding(b)) {
                 this.bottlesCount++;
-                console.log('Bottle eingesammelt! Insgesamt:', this.bottlesCount);
+                this.statusBarBottles.add(20);
                 return false;
             }
             return true;
@@ -84,6 +86,7 @@ class World {
         this.ctx.translate(-this.camera_x, 0); // reverse camera movement
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoins);
+        this.addToMap(this.statusBarBottles);
         this.ctx.translate(this.camera_x, 0); // reverse camera movement
 
 
