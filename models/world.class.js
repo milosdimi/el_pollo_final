@@ -8,6 +8,7 @@ class World {
     statusBarHealth = new StatusbarHealth();
     throwableObjects = [];
 
+
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
@@ -55,6 +56,9 @@ class World {
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.throwableObjects);
+        if (this.level.coins) {
+            this.addObjectsToMap(this.level.coins);
+        }
         this.ctx.translate(-this.camera_x, 0); // reverse camera movement
 
         requestAnimationFrame(() => this.draw());
