@@ -6,6 +6,7 @@ class World {
     keyboard;
     camera_x = 0;
     statusBarHealth = new StatusbarHealth();
+    statusBarBoss = new StatusbarBoss();
     statusBarCoins = new StatusbarCoins();
     statusBarBottles = new StatusbarBottles();
     throwableObjects = [];
@@ -87,6 +88,7 @@ class World {
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoins);
         this.addToMap(this.statusBarBottles);
+        this.addToMap(this.statusBarBoss);
         this.ctx.translate(this.camera_x, 0); // reverse camera movement
 
 
