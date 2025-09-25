@@ -29,7 +29,7 @@ class World {
             this.checkCoinPickup();
             this.checkBottlePickup();
         }, 200);
-    } 
+    }
 
     checkThrowObjects() {
         if (this.keyboard.D && this.bottlesCount > 0) {
@@ -56,7 +56,7 @@ class World {
         this.level.coins = this.level.coins.filter(coin => {
             if (this.character.isColliding(coin)) {
                 this.coinsCount = (this.coinsCount || 0) + 1;
-                this.statusBarCoins.add(20); 
+                this.statusBarCoins.add(20);
                 return false;
             }
             return true;
@@ -79,30 +79,24 @@ class World {
 
 
     draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // clear canvas
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.ctx.translate(this.camera_x, 0); // camera movement
+        this.ctx.translate(this.camera_x, 0);
+
         this.addObjectsToMap(this.level.backgroundObjects);
+        this.addObjectsToMap(this.level.clouds);
+        if (this.level.bottles) this.addObjectsToMap(this.level.bottles);
+        if (this.level.coins) this.addObjectsToMap(this.level.coins);
+        this.addObjectsToMap(this.level.enemies);
+        this.addObjectsToMap(this.throwableObjects);
+        this.addToMap(this.character);
 
-        this.ctx.translate(-this.camera_x, 0); // reverse camera movement
+        this.ctx.translate(-this.camera_x, 0);
+
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoins);
         this.addToMap(this.statusBarBottles);
         this.addToMap(this.statusBarBoss);
-        this.ctx.translate(this.camera_x, 0); // reverse camera movement
-
-
-        this.addToMap(this.character);
-        this.addObjectsToMap(this.level.enemies);
-        this.addObjectsToMap(this.level.clouds);
-        this.addObjectsToMap(this.throwableObjects);
-        if (this.level.bottles) {
-            this.addObjectsToMap(this.level.bottles);
-        }
-        if (this.level.coins) {
-            this.addObjectsToMap(this.level.coins);
-        }
-        this.ctx.translate(-this.camera_x, 0); // reverse camera movement
 
         requestAnimationFrame(() => this.draw());
     }
@@ -139,5 +133,6 @@ class World {
 
     setWorld() {
         this.character.world = this;
+        (this.level.clouds || []).forEach(c => c.world = this);
     }
 }
