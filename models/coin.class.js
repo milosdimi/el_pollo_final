@@ -11,12 +11,11 @@ class Coin extends MovableObject {
 
     constructor(x, y) {
         super().loadImage(this.IMAGES_COIN[0]);
-        // erst mal OHNE großen Zufall, damit du sie siehst:
         this.x = x;
         this.y = y;
         this.loadImages(this.IMAGES_COIN);
 
-        // einfache Animation (3x pro Sekunde):
+
         setInterval(() => {
             this.playAnimation(this.IMAGES_COIN);
         }, 1000 / 3);

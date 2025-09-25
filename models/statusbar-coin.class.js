@@ -1,0 +1,3 @@
+class StatusbarCoins extends DrawableObject {
+    
+}

@@ -7,6 +7,7 @@ class World {
     camera_x = 0;
     statusBarHealth = new StatusbarHealth();
     throwableObjects = [];
+    bottlesCount = 0;
 
 
     constructor(canvas, keyboard) {
@@ -22,15 +23,19 @@ class World {
         setInterval(() => {
             this.checkCollisions();
             this.checkThrowObjects();
+            this.checkCoinPickup();
+            this.checkBottlePickup();
         }, 200);
     }
 
     checkThrowObjects() {
-        if (this.keyboard.D) {
-            let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+        if (this.keyboard.D && this.bottlesCount > 0) {
+            const bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
             this.throwableObjects.push(bottle);
+            this.bottlesCount--; 
         }
     }
+
 
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {
@@ -40,6 +45,34 @@ class World {
             }
         });
     }
+
+    checkCoinPickup() {
+        if (!this.level?.coins || !this.character) return;
+
+        this.level.coins = this.level.coins.filter(coin => {
+            if (this.character.isColliding(coin)) {
+                
+                console.log('Coin eingesammelt!');
+                return false; 
+            }
+            return true;
+        });
+    }
+
+
+    checkBottlePickup() {
+        if (!this.level?.bottles || !this.character) return;
+
+        this.level.bottles = this.level.bottles.filter(b => {
+            if (this.character.isColliding(b)) {
+                this.bottlesCount++;
+                console.log('Bottle eingesammelt! Insgesamt:', this.bottlesCount);
+                return false; 
+            }
+            return true;
+        });
+    }
+
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // clear canvas
@@ -56,6 +89,9 @@ class World {
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.level.clouds);
         this.addObjectsToMap(this.throwableObjects);
+        if (this.level.bottles) {
+            this.addObjectsToMap(this.level.bottles);
+        }
         if (this.level.coins) {
             this.addObjectsToMap(this.level.coins);
         }
