@@ -11,12 +11,17 @@ class World {
     statusBarBottles = new StatusbarBottles();
     throwableObjects = [];
     bottlesCount = 0;
+    coinSfx = new Audio('audio/coinRecievedEffect.mp3');
+    bottleSfx = new Audio('audio/bottleCollectedEffect.mp3');
+
 
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
+        this.coinSfx.volume = 0.6;
+        this.bottleSfx.volume = 0.6;
         this.draw();
         this.setWorld();
         this.run();
@@ -57,10 +62,12 @@ class World {
             if (this.character.isColliding(coin)) {
                 this.coinsCount = (this.coinsCount || 0) + 1;
                 this.statusBarCoins.add(20);
+                this.coinSfx.currentTime = 0; this.coinSfx.play();
                 return false;
             }
             return true;
         });
+
     }
 
 
@@ -71,10 +78,12 @@ class World {
             if (this.character.isColliding(b)) {
                 this.bottlesCount++;
                 this.statusBarBottles.add(20);
+                this.bottleSfx.currentTime = 0; this.bottleSfx.play();
                 return false;
             }
             return true;
         });
+
     }
 
 
