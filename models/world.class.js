@@ -57,35 +57,30 @@ class World {
 
     checkCoinPickup() {
         if (!this.level?.coins || !this.character) return;
-
-        this.level.coins = this.level.coins.filter(coin => {
-            if (this.character.isColliding(coin)) {
+        this.level.coins = this.level.coins.filter(c => {
+            if (this.character.isPickupColliding(c, 6)) { // leichtes „Magnet“-Gefühl
                 this.coinsCount = (this.coinsCount || 0) + 1;
-                this.statusBarCoins.add(20);
-                this.coinSfx.currentTime = 0; this.coinSfx.play();
+                this.statusBarCoins?.add?.(10);
+                this.coinSfx && (this.coinSfx.currentTime = 0, this.coinSfx.play());
                 return false;
             }
             return true;
         });
 
     }
-
 
     checkBottlePickup() {
         if (!this.level?.bottles || !this.character) return;
-
         this.level.bottles = this.level.bottles.filter(b => {
-            if (this.character.isColliding(b)) {
+            if (this.character.isPickupColliding(b, 6)) {
                 this.bottlesCount++;
-                this.statusBarBottles.add(20);
-                this.bottleSfx.currentTime = 0; this.bottleSfx.play();
+                this.statusBarBottles?.add?.(10);
+                this.bottleSfx && (this.bottleSfx.currentTime = 0, this.bottleSfx.play());
                 return false;
             }
             return true;
         });
-
     }
-
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

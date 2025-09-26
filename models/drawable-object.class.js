@@ -31,6 +31,17 @@ class DrawableObject {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     }
 
+    getHitBox() {
+        const o = this.offset || { top: 0, bottom: 0, left: 0, right: 0 };
+        return {
+            x: this.x + o.left,
+            y: this.y + o.top,
+            w: Math.max(8, this.width - o.left - o.right),
+            h: Math.max(8, this.height - o.top - o.bottom),
+        };
+
+    }
+
     drawFrame(ctx) {
         if (this instanceof Character || this instanceof Chicken || this instanceof EndBoss) {
             ctx.beginPath();

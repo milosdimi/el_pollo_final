@@ -5,12 +5,7 @@ class Character extends MovableObject {
     lastActiveAt = Date.now();
     LONG_IDLE_AFTER_MS = 3000; // 4s bis Long-Idle
 
-    offset = {
-        top: 115,
-        bottom: 130,
-        left: 30,
-        right: 70,
-    }
+    offset = { top: 90, bottom: 40, left: 35, right: 35 };
 
     IMAGES_WALKING = [
         'img/2_character_pepe/2_walk/W-21.png',

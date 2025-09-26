@@ -26,11 +26,21 @@ class MovableObject extends DrawableObject {
 
 
     isColliding(mo) {
-        return this.x + this.width > mo.x &&
-            this.y + this.height > mo.y &&
-            this.x < mo.x + mo.width &&
-            this.y < mo.y + mo.height;
+        const a = this.getHitBox();
+        const b = (mo.getHitBox ? mo.getHitBox() : { x: mo.x, y: mo.y, w: mo.width, h: mo.height });
+        return a.x < b.x + b.w &&
+            a.x + a.w > b.x &&
+            a.y < b.y + b.h &&
+            a.y + a.h > b.y;
     }
+
+    isPickupColliding(mo, pad = 8) {
+        const a = this.getHitBox();
+        const b = mo.getHitBox ? mo.getHitBox() : { x: mo.x, y: mo.y, w: mo.width, h: mo.height };
+        return (a.x < b.x + b.w + pad) && (a.x + a.w + pad > b.x) &&
+            (a.y < b.y + b.h + pad) && (a.y + a.h + pad > b.y);
+    }
+
 
     hit() {
         this.energy -= 5;
@@ -44,7 +54,7 @@ class MovableObject extends DrawableObject {
     isHurt() {
         let timepassed = new Date().getTime() - this.lastHit; // difference in ms
         timepassed = timepassed / 1000;
-        return timepassed < 0.20; 
+        return timepassed < 0.20;
     }
 
     isDead() {
