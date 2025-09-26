@@ -11,6 +11,7 @@ class World {
     statusBarBottles = new StatusbarBottles();
     throwableObjects = [];
     bottlesCount = 0;
+    groundY = 390;
     coinSfx = new Audio('audio/coinRecievedEffect.mp3');
     bottleSfx = new Audio('audio/bottleCollectedEffect.mp3');
 
@@ -33,16 +34,44 @@ class World {
             this.checkThrowObjects();
             this.checkCoinPickup();
             this.checkBottlePickup();
+            this.checkThrowableImpacts(); 
         }, 200);
     }
 
     checkThrowObjects() {
         if (this.keyboard.D && this.bottlesCount > 0) {
-            const bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
-            this.throwableObjects.push(bottle);
+            const dir = this.character.otherDirection ? -1 : 1;
+            const b = new ThrowableObject(this.character.x + 60, this.character.y + 80, dir, this);
+            this.throwableObjects.push(b);
             this.bottlesCount--;
             this.statusBarBottles.add(-20);
         }
+    }
+
+    checkThrowableImpacts() {
+        if (!this.throwableObjects.length) return;
+
+        this.throwableObjects.forEach(b => {
+            if (b.splashed) return;
+
+            const bossHit = this.endBoss && b.isColliding(this.endBoss);
+            const enemyHit = (this.level.enemies || []).find(e => b.isColliding(e));
+            const groundHit = b.y + b.height >= this.groundY;
+
+            if (bossHit || enemyHit || groundHit) {
+                if (bossHit) {
+                    this.endBoss.energy = Math.max(0, (this.endBoss.energy ?? 100) - 10);
+                    this.statusBarBoss?.setPercentage(this.endBoss.energy);
+                }
+                if (enemyHit) {
+                    // optional: Chicken entfernen – sonst nur splashen
+                    this.level.enemies = this.level.enemies.filter(e => e !== enemyHit);
+                }
+                b.splash();
+            }
+        });
+
+        this.throwableObjects = this.throwableObjects.filter(o => !o.removeMe);
     }
 
 

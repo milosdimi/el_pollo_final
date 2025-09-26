@@ -49,7 +49,8 @@ class DrawableObject {
             this instanceof Chicken ||
             this instanceof EndBoss ||
             this instanceof Coin ||
-            this instanceof Bottle;
+            this instanceof Bottle ||
+            this instanceof ThrowableObject;
 
         if (!show) return;
 

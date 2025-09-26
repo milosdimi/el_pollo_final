@@ -5,13 +5,13 @@
 
 ## P0 — Core Gameplay (Basis)
 
-- [ ] **Collision hitbox offsets**
-  - [ ] `MovableObject.isColliding()` nutzt `offset` von beiden Objekten
-  - [ ] Tests: Character↔Chicken, Bottle↔Boss, Character↔Bottle
-- [ ] **Throwable bottle: spin + splash**
-  - [ ] In-flight: Rotations-/Frame-Animation in `ThrowableObject`
-  - [ ] On hit(): `bottle_splash` animieren, danach Objekt entfernen
-  - [ ] (Optional) Bodenaufprall splasht (wenn `y` Boden erreicht)
+- [*] **Collision hitbox offsets**
+  - [*] `MovableObject.isColliding()` nutzt `offset` von beiden Objekten
+  - [*] Tests: Character↔Chicken, Bottle↔Boss, Character↔Bottle
+- [*] **Throwable bottle: spin + splash**
+  - [*] In-flight: Rotations-/Frame-Animation in `ThrowableObject`
+  - [*] On hit(): `bottle_splash` animieren, danach Objekt entfernen
+  - [*] (Optional) Bodenaufprall splasht (wenn `y` Boden erreicht)
 - [ ] **Stomp kill on chickens**
   - [ ] Downward-Kontakt (fallend) ⇒ Chicken stirbt (Dead-Sprite/Remove)
   - [ ] Charakter bounct leicht hoch (`speedY` z. B. 15)
