@@ -43,12 +43,31 @@ class DrawableObject {
     }
 
     drawFrame(ctx) {
-        if (this instanceof Character || this instanceof Chicken || this instanceof EndBoss) {
-            ctx.beginPath();
-            ctx.lineWidth = '5';
-            ctx.strokeStyle = 'blue';
-            ctx.rect(this.x, this.y, this.width, this.height);
-            ctx.stroke();
-        }
+        const show =
+            this.debug ||
+            this instanceof Character ||
+            this instanceof Chicken ||
+            this instanceof EndBoss ||
+            this instanceof Coin ||
+            this instanceof Bottle;
+
+        if (!show) return;
+
+        ctx.save();
+
+        // 1) Roh-Sprite-Bounds (ohne Offset) – blau
+        ctx.lineWidth = 2;
+        ctx.setLineDash([]);
+        ctx.strokeStyle = 'rgba(0, 102, 255, .9)';
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+        // 2) Offset-Hitbox – rot gestrichelt
+        const hb = this.getHitBox ? this.getHitBox() : { x: this.x, y: this.y, w: this.width, h: this.height };
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = 'rgba(255, 0, 0, .95)';
+        ctx.strokeRect(hb.x, hb.y, hb.w, hb.h);
+
+        ctx.restore();
     } // löschen am Ende des Projekts
 }
