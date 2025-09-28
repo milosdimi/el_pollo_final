@@ -3,7 +3,7 @@ class Character extends MovableObject {
     y = 80;
     speed = 10;
     lastActiveAt = Date.now();
-    LONG_IDLE_AFTER_MS = 3000; 
+    LONG_IDLE_AFTER_MS = 3000;
 
     offset = { top: 90, bottom: 40, left: 35, right: 35 };
 
@@ -153,10 +153,13 @@ class Character extends MovableObject {
         if (!enemy?.getHitBox) return false;
         const a = this.getHitBox(), b = enemy.getHitBox();
         const feet = a.y + a.h;
-        const headband = feet >= b.y && feet <= b.y + 22;           
-        const horiz = a.x + a.w > b.x + 8 && a.x < b.x + b.w - 8;    
-        return (this.speedY <= 0) && headband && horiz;              
+        const headY = b.y;
+        const downwards = this.speedY <= 0;                      // fallend oder null
+        const headband = feet >= headY && feet <= headY + Math.min(28, b.h * 0.5);
+        const horiz = a.x + a.w > b.x + 6 && a.x < b.x + b.w - 6;
+        return downwards && headband && horiz;
     }
+
 
 
     bounce() { this.speedY = 18; }

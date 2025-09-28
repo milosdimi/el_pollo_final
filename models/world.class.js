@@ -5,20 +5,22 @@ class World {
     ctx;
     keyboard;
     camera_x = 0;
+
     statusBarHealth = new StatusbarHealth();
     statusBarBoss = new StatusbarBoss();
     statusBarCoins = new StatusbarCoins();
     statusBarBottles = new StatusbarBottles();
+
     throwableObjects = [];
     bottlesCount = 0;
     groundY = 390;
+
     THROW_COOLDOWN_MS = 350;
     lastThrowAt = 0;
-    throwHeld = false; // entprellt Taste D
+    throwHeld = false;
+
     coinSfx = new Audio('audio/coinRecievedEffect.mp3');
     bottleSfx = new Audio('audio/bottleCollectedEffect.mp3');
-
-
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -41,7 +43,7 @@ class World {
         }, 1000 / 25);
     }
 
-
+    // ── THROW: one per press + cooldown ───────────────────────────────
     checkThrowObjects() {
         const now = Date.now();
         if (this.keyboard.D) {
@@ -50,15 +52,16 @@ class World {
                 const b = new ThrowableObject(this.character.x + 60, this.character.y + 80, dir, this);
                 this.throwableObjects.push(b);
                 this.bottlesCount--;
-                this.statusBarBottles.add(-20);
+                this.statusBarBottles?.add?.(-20);
                 this.lastThrowAt = now;
-                this.throwHeld = true;   
+                this.throwHeld = true;
             }
         } else {
-            this.throwHeld = false;    
+            this.throwHeld = false;
         }
     }
 
+    // ── IMPACTS: boss takeHit, enemy die, ground splash ───────────────
     checkThrowableImpacts() {
         if (!this.throwableObjects.length) return;
 
@@ -66,20 +69,19 @@ class World {
             if (b.splashed) return;
 
             const bossHit = this.endBoss && b.isColliding(this.endBoss);
-            const enemyHit = (this.level.enemies || []).find(e => b.isColliding(e));
+            const enemyHit = (this.level.enemies || []).find(
+                e => !(e instanceof EndBoss) && b.isColliding(e)   // ❗ Boss explizit ausschließen
+            );
             const groundHit = b.y + b.height >= this.groundY;
 
-            if (bossHit || enemyHit || groundHit) {
-                if (bossHit) {
-                    this.endBoss.energy = Math.max(0, (this.endBoss.energy ?? 100) - 10);
-                    this.statusBarBoss?.setPercentage(this.endBoss.energy);
-                }
-                if (enemyHit) enemyHit.die?.();
-                b.splash();
-            }
+            if (!(bossHit || enemyHit || groundHit)) return;
+
+            if (bossHit) this.endBoss.takeHit?.(25);  // Speed-Up + Hurt-Anim
+            if (enemyHit) enemyHit.die?.();            // Chicken sterben
+            b.splash();
         });
 
-        this.level.enemies = this.level.enemies.filter(e => !e.removeMe);
+        this.level.enemies = (this.level.enemies || []).filter(e => !e.removeMe);
         this.throwableObjects = this.throwableObjects.filter(o => !o.removeMe);
     }
 
@@ -98,21 +100,20 @@ class World {
                 return;
             }
 
-            if (enemy.harmful !== false) {
+            if (enemy.harmful !== false && !this.character.isHurt()) {
                 this.character.hit();
                 this.statusBarHealth.setPercentage(this.character.energy);
-                this.character.applyKnockBack?.(enemy.x);
+                this.character.applyKnockback?.(enemy.x);
             }
         });
 
         this.level.enemies = enemies.filter(e => !e.removeMe);
     }
 
-
     checkCoinPickup() {
         if (!this.level?.coins || !this.character) return;
         this.level.coins = this.level.coins.filter(c => {
-            if (this.character.isPickupColliding(c, 6)) { // leichtes „Magnet“-Gefühl
+            if (this.character.isPickupColliding(c, 6)) {
                 this.coinsCount = (this.coinsCount || 0) + 1;
                 this.statusBarCoins?.add?.(10);
                 this.coinSfx && (this.coinSfx.currentTime = 0, this.coinSfx.play());
@@ -120,7 +121,6 @@ class World {
             }
             return true;
         });
-
     }
 
     checkBottlePickup() {
@@ -138,7 +138,6 @@ class World {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         this.ctx.translate(this.camera_x, 0);
 
         this.addObjectsToMap(this.level.backgroundObjects);
@@ -150,7 +149,6 @@ class World {
         this.addToMap(this.character);
 
         this.ctx.translate(-this.camera_x, 0);
-
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoins);
         this.addToMap(this.statusBarBottles);
@@ -159,38 +157,29 @@ class World {
         requestAnimationFrame(() => this.draw());
     }
 
-    addObjectsToMap(objects) {
-        objects.forEach(o => {
-            this.addToMap(o);
-        });
-    }
+    addObjectsToMap(objects) { objects.forEach(o => this.addToMap(o)); }
 
     addToMap(mo) {
-        if (mo.otherDirection) {
-            this.flipImage(mo);
-        }
+        if (mo.otherDirection) this.flipImage(mo);
         mo.draw(this.ctx);
         mo.drawFrame(this.ctx);
-
-        if (mo.otherDirection) {
-            this.flipImageBack(mo);
-        }
+        if (mo.otherDirection) this.flipImageBack(mo);
     }
 
-    flipImage(mo) {
-        this.ctx.save();
-        this.ctx.translate(mo.width, 0);
-        this.ctx.scale(-1, 1);
-        mo.x = mo.x * -1;
-    }
-
-    flipImageBack(mo) {
-        this.ctx.restore();
-        mo.x = mo.x * -1;
-    }
+    flipImage(mo) { this.ctx.save(); this.ctx.translate(mo.width, 0); this.ctx.scale(-1, 1); mo.x = mo.x * -1; }
+    flipImageBack(mo) { this.ctx.restore(); mo.x = mo.x * -1; }
 
     setWorld() {
         this.character.world = this;
-        (this.level.clouds || []).forEach(c => c.world = this);
+        const setW = arr => (arr || []).forEach(o => o.world = this);
+        setW(this.level.clouds);
+        setW(this.level.enemies);
+        setW(this.level.coins);
+        setW(this.level.bottles);
+
+        this.endBoss = (this.level.enemies || []).find(e =>
+            e instanceof EndBoss || e?.constructor?.name === 'EndBoss'
+        );
+        if (this.endBoss) this.statusBarBoss.setPercentage(this.endBoss.energy);
     }
 }
