@@ -12,6 +12,9 @@ class World {
     throwableObjects = [];
     bottlesCount = 0;
     groundY = 390;
+    THROW_COOLDOWN_MS = 350;
+    lastThrowAt = 0;
+    throwHeld = false; // entprellt Taste D
     coinSfx = new Audio('audio/coinRecievedEffect.mp3');
     bottleSfx = new Audio('audio/bottleCollectedEffect.mp3');
 
@@ -34,17 +37,25 @@ class World {
             this.checkThrowObjects();
             this.checkCoinPickup();
             this.checkBottlePickup();
-            this.checkThrowableImpacts(); 
-        }, 200);
+            this.checkThrowableImpacts();
+        }, 1000 / 25);
     }
 
+
     checkThrowObjects() {
-        if (this.keyboard.D && this.bottlesCount > 0) {
-            const dir = this.character.otherDirection ? -1 : 1;
-            const b = new ThrowableObject(this.character.x + 60, this.character.y + 80, dir, this);
-            this.throwableObjects.push(b);
-            this.bottlesCount--;
-            this.statusBarBottles.add(-20);
+        const now = Date.now();
+        if (this.keyboard.D) {
+            if (!this.throwHeld && this.bottlesCount > 0 && now - this.lastThrowAt >= this.THROW_COOLDOWN_MS) {
+                const dir = this.character.otherDirection ? -1 : 1;
+                const b = new ThrowableObject(this.character.x + 60, this.character.y + 80, dir, this);
+                this.throwableObjects.push(b);
+                this.bottlesCount--;
+                this.statusBarBottles.add(-20);
+                this.lastThrowAt = now;
+                this.throwHeld = true;   
+            }
+        } else {
+            this.throwHeld = false;    
         }
     }
 
@@ -63,26 +74,40 @@ class World {
                     this.endBoss.energy = Math.max(0, (this.endBoss.energy ?? 100) - 10);
                     this.statusBarBoss?.setPercentage(this.endBoss.energy);
                 }
-                if (enemyHit) {
-                    // optional: Chicken entfernen – sonst nur splashen
-                    this.level.enemies = this.level.enemies.filter(e => e !== enemyHit);
-                }
+                if (enemyHit) enemyHit.die?.();
                 b.splash();
             }
         });
 
+        this.level.enemies = this.level.enemies.filter(e => !e.removeMe);
         this.throwableObjects = this.throwableObjects.filter(o => !o.removeMe);
     }
 
 
     checkCollisions() {
-        this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy)) {
+        const enemies = this.level.enemies || [];
+
+        enemies.forEach(enemy => {
+            if (enemy.dead) return;
+            if (!this.character.isColliding(enemy)) return;
+
+            if (this.character.isStomping(enemy)) {
+                enemy.die?.();
+                this.character.bounce();
+                this.character.y -= 6;
+                return;
+            }
+
+            if (enemy.harmful !== false) {
                 this.character.hit();
                 this.statusBarHealth.setPercentage(this.character.energy);
+                this.character.applyKnockBack?.(enemy.x);
             }
         });
+
+        this.level.enemies = enemies.filter(e => !e.removeMe);
     }
+
 
     checkCoinPickup() {
         if (!this.level?.coins || !this.character) return;

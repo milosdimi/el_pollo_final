@@ -3,7 +3,7 @@ class Character extends MovableObject {
     y = 80;
     speed = 10;
     lastActiveAt = Date.now();
-    LONG_IDLE_AFTER_MS = 3000; // 4s bis Long-Idle
+    LONG_IDLE_AFTER_MS = 3000; 
 
     offset = { top: 90, bottom: 40, left: 35, right: 35 };
 
@@ -146,7 +146,25 @@ class Character extends MovableObject {
     markActive() { this.lastActiveAt = Date.now(); }
 
     isMovingKeyDown() {
-        // Guards, damit nichts crasht, falls world/keyboard mal kurz undefined ist
         return !!(this.world && this.world.keyboard && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT));
     }
+
+    isStomping(enemy) {
+        if (!enemy?.getHitBox) return false;
+        const a = this.getHitBox(), b = enemy.getHitBox();
+        const feet = a.y + a.h;
+        const headband = feet >= b.y && feet <= b.y + 22;           
+        const horiz = a.x + a.w > b.x + 8 && a.x < b.x + b.w - 8;    
+        return (this.speedY <= 0) && headband && horiz;              
+    }
+
+
+    bounce() { this.speedY = 18; }
+
+    applyKnockBack(fromX) {
+        const dir = Math.sign(this.x - fromX) || -1;
+        this.x += dir * 15;
+        this.speedY = 12;
+    }
+
 }
