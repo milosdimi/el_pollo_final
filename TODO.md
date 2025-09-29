@@ -12,23 +12,23 @@
   - [*] In-flight: Rotations-/Frame-Animation in `ThrowableObject`
   - [*] On hit(): `bottle_splash` animieren, danach Objekt entfernen
   - [*] (Optional) Bodenaufprall splasht (wenn `y` Boden erreicht)
-- [ ] **Stomp kill on chickens**
-  - [ ] Downward-Kontakt (fallend) ⇒ Chicken stirbt (Dead-Sprite/Remove)
-  - [ ] Charakter bounct leicht hoch (`speedY` z. B. 15)
-  - [ ] Seitenkollisionen verletzen weiterhin den Spieler
-- [ ] **Player hurt knockback**
-  - [ ] Bei `isHurt()`: kurzer horizontaler Rückstoß + Mini-Hop
-  - [ ] I-Frames (~0.2 s) bleiben aktiv
-- [ ] **Endboss AI + damage**
-  - [ ] Aktiviert bei Sichtkontakt/Viewport
-  - [ ] `moveLeft()` Richtung Spieler; Speed steigt pro Treffer
-  - [ ] Flaschen-Treffer reduzieren Boss-Energie (3–4 Hits total)
-  - [ ] `StatusbarBoss` bei Treffern updaten
-  - [ ] (Optional) Boss-Kontakt = sofortiger Tod
-- [ ] **Bottle throw rules**
-  - [ ] Wurf nur bei `bottlesCount > 0`
-  - [ ] Wurf-Cooldown (z. B. 300–500 ms)
-  - [ ] Count verringern + Bottle-Leiste aktualisieren
+- [*] **Stomp kill on chickens**
+  - [*] Downward-Kontakt (fallend) ⇒ Chicken stirbt (Dead-Sprite/Remove)
+  - [*] Charakter bounct leicht hoch (`speedY` z. B. 15)
+  - [*] Seitenkollisionen verletzen weiterhin den Spieler
+- [*] **Player hurt knockback**
+  - [*] Bei `isHurt()`: kurzer horizontaler Rückstoß + Mini-Hop
+  - [*] I-Frames (~0.2 s) bleiben aktiv
+- [*] **Endboss AI + damage**
+  - [*] Aktiviert bei Sichtkontakt/Viewport
+  - [*] `moveLeft()` Richtung Spieler; Speed steigt pro Treffer
+  - [*] Flaschen-Treffer reduzieren Boss-Energie (3–4 Hits total)
+  - [*] `StatusbarBoss` bei Treffern updaten
+  - [*] (Optional) Boss-Kontakt = sofortiger Tod
+- [*] **Bottle throw rules**
+  - [*] Wurf nur bei `bottlesCount > 0`
+  - [*] Wurf-Cooldown (z. B. 300–500 ms)
+  - [*] Count verringern + Bottle-Leiste aktualisieren
 
 ## P1 — Content & Balancing
 

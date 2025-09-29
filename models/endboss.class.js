@@ -4,6 +4,14 @@ class EndBoss extends MovableObject {
     y = 60;
     offset = { top: 40, bottom: 35, left: 25, right: 30 };
 
+    // Timing-Regler
+    ANIM_FPS = 9;
+    ALERT_MS = 900;
+    HURT_MS = 450;
+    DEAD_FRAME_MS = 140;
+    DEAD_HOLD_MS = 800;
+    NEAR_RANGE = 120;
+
     IMAGES_ALERT = [
         'img/4_enemie_boss_chicken/2_alert/G5.png',
         'img/4_enemie_boss_chicken/2_alert/G6.png',
@@ -48,6 +56,10 @@ class EndBoss extends MovableObject {
     activated = false;
     harmful = true;
 
+    isBoss = true;
+    alertUntil = null;
+    deadPlaying = false;
+
     constructor() {
         super().loadImage(this.IMAGES_ALERT[0]);
         this.loadImages(this.IMAGES_ALERT);
@@ -55,53 +67,60 @@ class EndBoss extends MovableObject {
         this.loadImages(this.IMAGES_ATTACK);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_DEAD);
+
         this.x = 2500;
-        this.isBoss = true;
 
         this.aiLoop = setInterval(() => this.updateAI(), 1000 / 20);
-        this.animLoop = setInterval(() => this.playStateAnimation(), 1000 / 10);
+        this.animLoop = setInterval(() => this.playStateAnimation(), 1000 / this.ANIM_FPS);
     }
 
-    // --- Helpers ---
     choose(frames, fallback = this.IMAGES_ALERT) {
         return (frames && frames.length) ? frames : fallback;
     }
-    setState(s) { if (!this.dead && this.state !== s) this.state = s; }
 
-    // --- Animation ---
+    setState(s) {
+        if (this.dead || this.state === s) return;
+        this.state = s;
+    }
+
     playStateAnimation() {
         if (this.state === 'dead') { this.playAnimation(this.choose(this.IMAGES_DEAD)); return; }
         if (this.state === 'hurt') { this.playAnimation(this.choose(this.IMAGES_HURT)); return; }
         if (this.state === 'attack') { this.playAnimation(this.choose(this.IMAGES_ATTACK)); return; }
         if (this.state === 'alert') { this.playAnimation(this.IMAGES_ALERT); return; }
-        this.playAnimation(this.choose(this.IMAGES_WALK)); // default: walk
+        this.playAnimation(this.choose(this.IMAGES_WALK)); // default
     }
 
-    // --- Sichtprüfung (Boss erst aktiv, wenn im Bild) ---
     isInView() {
         if (!this.world) return false;
         const left = -this.world.camera_x;
         const right = left + this.world.canvas.width;
         return this.x < right + 50 && this.x + this.width > left - 50;
     }
+
     updateAI() {
-        if (this.dead) return;
-        if (this.state === 'hurt' || this.state === 'alert') return;
+        if (this.dead || this.deadPlaying) return;
+
+        // während garantierter Alert-Phase und während Hurt keine AI
+        if (this.alertUntil && Date.now() < this.alertUntil) return;
+        if (this.state === 'hurt') return;
 
         if (!this.activated) {
             if (this.isInView()) {
                 this.activated = true;
                 this.setState('alert');
+                this.alertUntil = Date.now() + this.ALERT_MS;
                 setTimeout(() => {
                     if (!this.dead && this.state === 'alert') this.setState('walk');
-                }, 600);
+                    this.alertUntil = null;
+                }, this.ALERT_MS + 20);
             }
             return;
         }
 
         const cx = this.world?.character?.x ?? this.x;
         const dx = cx - this.x;
-        const near = Math.abs(dx) < 120;
+        const near = Math.abs(dx) < this.NEAR_RANGE;
 
         if (near) { this.setState('attack'); return; }
 
@@ -110,16 +129,15 @@ class EndBoss extends MovableObject {
         else { this.otherDirection = true; this.moveRight(); }
     }
 
-
-
-    // --- Treffer / Speedup / Death ---
     takeHit(dmg = 25) {
-        if (this.dead) return;
+        if (this.dead || this.deadPlaying) return;
         this.energy = Math.max(0, this.energy - dmg);
-        this.speed = Math.min(this.speed + 0.25, 3.0); // pro Treffer schneller
+        this.speed = Math.min(this.speed + 0.25, 3.0);
         this.setState('hurt');
         this.world?.statusBarBoss?.setPercentage?.(this.energy);
-        setTimeout(() => { if (!this.dead) this.setState('attack'); }, 250);
+
+        setTimeout(() => { if (!this.dead) this.setState('attack'); }, this.HURT_MS);
+
         if (this.energy === 0) this.die();
     }
 
@@ -128,11 +146,29 @@ class EndBoss extends MovableObject {
         this.dead = true;
         this.harmful = false;
         this.speed = 0;
-        this.setState('dead');
-        clearInterval(this.aiLoop);       
-       
-        setTimeout(() => this.removeMe = true, 900);
+
+        clearInterval(this.aiLoop);
+        this.playDeadOnce();
     }
 
+    // Dead einmal durchspielen, dann kurz stehen lassen & entfernen
+    playDeadOnce() {
+        if (this.deadPlaying) return;
+        this.deadPlaying = true;
+        this.setState('dead');
 
+        clearInterval(this.animLoop);
+
+        const frames = this.choose(this.IMAGES_DEAD);
+        let i = 0;
+        const frameMs = this.DEAD_FRAME_MS;
+
+        this._deadLoop = setInterval(() => {
+            this.img = this.imageCache[frames[i++]];
+            if (i >= frames.length) {
+                clearInterval(this._deadLoop);
+                setTimeout(() => this.removeMe = true, this.DEAD_HOLD_MS);
+            }
+        }, frameMs);
+    }
 }

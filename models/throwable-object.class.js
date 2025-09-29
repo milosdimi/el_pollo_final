@@ -24,13 +24,12 @@ class ThrowableObject extends MovableObject {
         super().loadImage(this.IMAGES_ROTATE[0]);
         this.loadImages(this.IMAGES_ROTATE);
         this.loadImages(this.IMAGES_SPLASH);
-
         this.world = world;
         this.x = x;
         this.y = y;
+        this.bornAt = Date.now();    
         this.throwVx = (dir >= 0 ? 1 : -1) * 8;
         this.speedY = 20;
-
         this.applyGravity();
         this.start();
         this.bottleSound?.play();
