@@ -50,18 +50,16 @@ class EndBoss extends MovableObject {
 
     constructor() {
         super().loadImage(this.IMAGES_ALERT[0]);
-
         this.loadImages(this.IMAGES_ALERT);
         this.loadImages(this.IMAGES_WALK);
         this.loadImages(this.IMAGES_ATTACK);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_DEAD);
-
         this.x = 2500;
+        this.isBoss = true;
 
-        // Loops
-        this.aiLoop = setInterval(() => this.updateAI(), 1000 / 20); // 50ms
-        this.animLoop = setInterval(() => this.playStateAnimation(), 1000 / 10); // 100ms
+        this.aiLoop = setInterval(() => this.updateAI(), 1000 / 20);
+        this.animLoop = setInterval(() => this.playStateAnimation(), 1000 / 10);
     }
 
     // --- Helpers ---
@@ -86,17 +84,17 @@ class EndBoss extends MovableObject {
         const right = left + this.world.canvas.width;
         return this.x < right + 50 && this.x + this.width > left - 50;
     }
-
-    // --- AI / Bewegung ---
     updateAI() {
         if (this.dead) return;
-        if (this.state === 'hurt') return;
+        if (this.state === 'hurt' || this.state === 'alert') return;
 
         if (!this.activated) {
             if (this.isInView()) {
                 this.activated = true;
                 this.setState('alert');
-                setTimeout(() => { if (!this.dead && this.state === 'alert') this.setState('walk'); }, 600);
+                setTimeout(() => {
+                    if (!this.dead && this.state === 'alert') this.setState('walk');
+                }, 600);
             }
             return;
         }
@@ -111,6 +109,7 @@ class EndBoss extends MovableObject {
         if (dx < 0) { this.otherDirection = false; this.moveLeft(); }
         else { this.otherDirection = true; this.moveRight(); }
     }
+
 
 
     // --- Treffer / Speedup / Death ---
@@ -130,8 +129,10 @@ class EndBoss extends MovableObject {
         this.harmful = false;
         this.speed = 0;
         this.setState('dead');
-        clearInterval(this.aiLoop);
-        clearInterval(this.animLoop);
+        clearInterval(this.aiLoop);       
+       
         setTimeout(() => this.removeMe = true, 900);
     }
+
+
 }

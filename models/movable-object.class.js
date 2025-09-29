@@ -6,14 +6,21 @@ class MovableObject extends DrawableObject {
     energy = 100;
     lastHit = 0;
 
+
     applyGravity() {
         setInterval(() => {
+            const was = this.y;
             if (this.isAboveGround() || this.speedY > 0) {
+                this.prevY = was;
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
+            } else {
+                this.prevY = was;
             }
         }, 1000 / 25);
     }
+
+
 
     isAboveGround() {
         if (this instanceof ThrowableObject) {
@@ -53,7 +60,7 @@ class MovableObject extends DrawableObject {
 
     isHurt() {
         let t = new Date().getTime() - this.lastHit;
-        return (t / 1000) < 0.35;   // vorher 0.20
+        return (t / 1000) < 0.35;
     }
 
 

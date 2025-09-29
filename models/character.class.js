@@ -148,18 +148,21 @@ class Character extends MovableObject {
     isMovingKeyDown() {
         return !!(this.world && this.world.keyboard && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT));
     }
-
     isStomping(enemy) {
         if (!enemy?.getHitBox) return false;
         const a = this.getHitBox(), b = enemy.getHitBox();
-        const feet = a.y + a.h;
-        const headY = b.y;
-        const downwards = this.speedY <= 0;                      // fallend oder null
-        const headband = feet >= headY && feet <= headY + Math.min(28, b.h * 0.5);
-        const horiz = a.x + a.w > b.x + 6 && a.x < b.x + b.w - 6;
-        return downwards && headband && horiz;
-    }
 
+        const feetNow = a.y + a.h;
+        const feetPrev = (this.prevY ?? this.y) + a.h;
+        const headY = b.y;
+
+        const downwards = this.speedY <= 0;
+        const crossed = feetPrev <= headY && feetNow >= headY;
+        const headband = feetNow >= headY && feetNow <= headY + Math.min(28, b.h * 0.5);
+        const horiz = a.x + a.w > b.x + 8 && a.x < b.x + b.w - 8;
+
+        return (downwards || crossed) && headband && horiz;
+    }
 
 
     bounce() { this.speedY = 18; }
