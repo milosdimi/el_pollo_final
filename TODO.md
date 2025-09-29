@@ -32,14 +32,14 @@
 
 ## P1 — Content & Balancing
 
-- [ ] **SmallChicken enemy**
-  - [ ] Neue Klasse `SmallChicken` (kleiner, schneller, weniger HP)
-  - [ ] Spawn-Mix in `level1.js` ergänzen
+- [*] **SmallChicken enemy**
+  - [*] Neue Klasse `SmallChicken` (kleiner, schneller, weniger HP)
+  - [*] Spawn-Mix in `level1.js` ergänzen
 - [ ] **Enemy speeds & counts**
-  - [ ] `speed`/Anzahl für Chicken/SmallChicken/Endboss feinjustieren
-  - [ ] Schwierigkeit kurvig statt spiky
+  - [*] `speed`/Anzahl für Chicken/SmallChicken/Endboss feinjustieren
+  - [*] Schwierigkeit kurvig statt spiky
 - [ ] **Coins & Bottles placements**
-  - [ ] Positionen/Mengen so setzen, dass vor dem Boss genug Flaschen da sind
+  - [*] Positionen/Mengen so setzen, dass vor dem Boss genug Flaschen da sind
 
 ## P2 — UX & Quality
 

@@ -1,64 +1,71 @@
+// --- helpers ----------------------------------------
+const BIMG = [
+  'img/6_salsa_bottle/1_salsa_bottle_on_ground.png',
+  'img/6_salsa_bottle/2_salsa_bottle_on_ground.png'
+];
+const B = (x, i) => new Bottle(x, BIMG[i % 2]); // Bottle an x, Bild wechselt
+
+// --- level -----------------------------------------------------------
 const level1 = new Level(
-    [
-        new Chicken(),
-        new SmallChicken(),
-        new Chicken(),
-        new SmallChicken(),
-        new Chicken(),
-        new SmallChicken(),
-        new EndBoss(),
-    ],
-    [
-        new Cloud(),
-        new Cloud(),
-        new Cloud(),
-        new Cloud(),
-    ],
-    [
-        new Coin(150, 230),
-        new Coin(150 * 2, 210),
-        new Coin(150 * 3, 250),
-        new Coin(150 * 4, 240),
-        new Coin(150 * 5, 260),
-        new Coin(150 * 6, 250),
-        new Coin(150 * 7, 210),
-        new Coin(150 * 8, 250),
-        new Coin(150 * 9, 240),
-        new Coin(150 * 10, 260),
-        new Coin(150 * 11, 250),
-    ],
-    [
-        new Bottle(0, 'img/6_salsa_bottle/1_salsa_bottle_on_ground.png'),
-        new Bottle(150, 'img/6_salsa_bottle/2_salsa_bottle_on_ground.png'),
-        new Bottle(350, 'img/6_salsa_bottle/1_salsa_bottle_on_ground.png'),
-        new Bottle(400, 'img/6_salsa_bottle/2_salsa_bottle_on_ground.png'),
-        new Bottle(600, 'img/6_salsa_bottle/1_salsa_bottle_on_ground.png'),
-        new Bottle(850, 'img/6_salsa_bottle/2_salsa_bottle_on_ground.png'),
-        new Bottle(1000, 'img/6_salsa_bottle/1_salsa_bottle_on_ground.png'),
-        new Bottle(1350, 'img/6_salsa_bottle/2_salsa_bottle_on_ground.png'),
-    ],
-    [
-        new BackgroundObject('img/5_background/layers/air.png', -719),
-        new BackgroundObject('img/5_background/layers/3_third_layer/2.png', -719),
-        new BackgroundObject('img/5_background/layers/2_second_layer/2.png', -719),
-        new BackgroundObject('img/5_background/layers/1_first_layer/1.png', -719),
+  // Enemies
+  [
+    new Chicken(),
+    new SmallChicken(),
+    new Chicken(),
+    new SmallChicken(),
+    new Chicken(),
+    new SmallChicken(),
+    new EndBoss(),
+  ],
 
-        new BackgroundObject('img/5_background/layers/air.png', 0),
-        new BackgroundObject('img/5_background/layers/3_third_layer/1.png', 0),
-        new BackgroundObject('img/5_background/layers/2_second_layer/1.png', 0),
-        new BackgroundObject('img/5_background/layers/1_first_layer/2.png', 0),
-        new BackgroundObject('img/5_background/layers/air.png', 719),
-        new BackgroundObject('img/5_background/layers/3_third_layer/2.png', 719),
-        new BackgroundObject('img/5_background/layers/2_second_layer/2.png', 719),
-        new BackgroundObject('img/5_background/layers/1_first_layer/1.png', 719),
+  // Clouds
+  [
+    new Cloud(),
+    new Cloud(),
+    new Cloud(),
+    new Cloud(),
+  ],
 
-        new BackgroundObject('img/5_background/layers/air.png', 719 * 2),
-        new BackgroundObject('img/5_background/layers/3_third_layer/1.png', 719 * 2),
-        new BackgroundObject('img/5_background/layers/2_second_layer/1.png', 719 * 2),
-        new BackgroundObject('img/5_background/layers/1_first_layer/2.png', 719 * 2),
-        new BackgroundObject('img/5_background/layers/air.png', 719 * 3),
-        new BackgroundObject('img/5_background/layers/3_third_layer/2.png', 719 * 3),
-        new BackgroundObject('img/5_background/layers/2_second_layer/2.png', 719 * 3),
-        new BackgroundObject('img/5_background/layers/1_first_layer/1.png', 719 * 3),
-    ]
+  // Coins
+  [
+    new Coin(150, 230),  new Coin(300, 210),  new Coin(450, 240),
+    new Coin(700, 230),  new Coin(850, 210),  new Coin(1000, 250),
+    new Coin(1350, 240), new Coin(1500, 260), new Coin(1700, 240),
+    new Coin(1900, 260), new Coin(2100, 245),
+  ],
+
+  // Bottles
+  [
+    B(500,0),  B(700,1),  B(900,2),
+    B(1100,3), B(1300,4), B(1550,5),
+    B(1800,6), B(2050,7), B(2250,8),
+  ],
+
+  // Background
+  [
+    new BackgroundObject('img/5_background/layers/air.png', -719),
+    new BackgroundObject('img/5_background/layers/3_third_layer/2.png', -719),
+    new BackgroundObject('img/5_background/layers/2_second_layer/2.png', -719),
+    new BackgroundObject('img/5_background/layers/1_first_layer/1.png', -719),
+
+    new BackgroundObject('img/5_background/layers/air.png', 0),
+    new BackgroundObject('img/5_background/layers/3_third_layer/1.png', 0),
+    new BackgroundObject('img/5_background/layers/2_second_layer/1.png', 0),
+    new BackgroundObject('img/5_background/layers/1_first_layer/2.png', 0),
+
+    new BackgroundObject('img/5_background/layers/air.png', 719),
+    new BackgroundObject('img/5_background/layers/3_third_layer/2.png', 719),
+    new BackgroundObject('img/5_background/layers/2_second_layer/2.png', 719),
+    new BackgroundObject('img/5_background/layers/1_first_layer/1.png', 719),
+
+    new BackgroundObject('img/5_background/layers/air.png', 719 * 2),
+    new BackgroundObject('img/5_background/layers/3_third_layer/1.png', 719 * 2),
+    new BackgroundObject('img/5_background/layers/2_second_layer/1.png', 719 * 2),
+    new BackgroundObject('img/5_background/layers/1_first_layer/2.png', 719 * 2),
+
+    new BackgroundObject('img/5_background/layers/air.png', 719 * 3),
+    new BackgroundObject('img/5_background/layers/3_third_layer/2.png', 719 * 3),
+    new BackgroundObject('img/5_background/layers/2_second_layer/2.png', 719 * 3),
+    new BackgroundObject('img/5_background/layers/1_first_layer/1.png', 719 * 3),
+  ]
 );
