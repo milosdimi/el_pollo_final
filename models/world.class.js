@@ -94,6 +94,7 @@ class World {
             this.statusBarBottles?.add?.(-20);
             this.lastThrowAt = now;
             this.throwHeld = true;
+            this.character.markActive();
         }
     }
 
