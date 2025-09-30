@@ -5,18 +5,13 @@ class World {
     ctx;
     keyboard;
     camera_x = 0;
-
     statusBarHealth = new StatusbarHealth();
     statusBarBoss = new StatusbarBoss();
     statusBarCoins = new StatusbarCoins();
     statusBarBottles = new StatusbarBottles();
-
     throwableObjects = [];
     bottlesCount = 0;
-
-    // fester Boden für Bottle/Splash (passt zu deinen Sprites)
     groundY = 420;
-
     // Wurf-Entprellung
     THROW_COOLDOWN_MS = 350;
     lastThrowAt = 0;

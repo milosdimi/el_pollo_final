@@ -165,7 +165,7 @@ class Character extends MovableObject {
     }
 
 
-    bounce() { this.speedY = 18; }
+    bounce() { this.speedY = 8; }
 
     applyKnockBack(fromX) {
         const dir = Math.sign(this.x - fromX) || -1;
