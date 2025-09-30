@@ -59,8 +59,8 @@ class MovableObject extends DrawableObject {
     }
 
     isHurt() {
-        let t = new Date().getTime() - this.lastHit;
-        return (t / 1000) < 0.35;
+        let t = (new Date().getTime() - this.lastHit) / 1000;
+        return t < 0.33;
     }
 
 

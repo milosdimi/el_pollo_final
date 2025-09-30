@@ -112,32 +112,33 @@ class World {
         this.throwableObjects = this.throwableObjects.filter(o => !o.removeMe);
     }
 
-    // — Char ↔ Enemies: Stomp vor Hurt, Hurt mit I-Frames —
     checkCollisions() {
         const enemies = this.level.enemies || [];
 
-        enemies.forEach(enemy => {
-            if (enemy.dead) return;
-            if (!this.character.isColliding(enemy)) return;
+        for (const enemy of enemies) {
+            if (enemy.dead) continue;
+            if (!this.character.isColliding(enemy)) continue;
 
-            // Stomp (fallend, oben drauf)
+
             if (this.character.isStomping(enemy)) {
                 enemy.die?.();
                 this.character.bounce();
-                this.character.y -= 6; 
-                return;
+                this.character.y -= 6;
+                break;
             }
 
-            // Seiten-/Frontal-Treffer
+
             if (enemy.harmful !== false && !this.character.isHurt()) {
                 this.character.hit();
                 this.statusBarHealth.setPercentage(this.character.energy);
                 this.character.applyKnockBack?.(enemy.x);
+                break;
             }
-        });
+        }
 
         this.level.enemies = enemies.filter(e => !e.removeMe);
     }
+
 
     // — Pickups —
     checkCoinPickup() {
