@@ -115,10 +115,9 @@ class World {
     checkCollisions() {
         const enemies = this.level.enemies || [];
 
-        for (const enemy of enemies) {
+        for (const enemy of (this.level.enemies || [])) {
             if (enemy.dead) continue;
             if (!this.character.isColliding(enemy)) continue;
-
 
             if (this.character.isStomping(enemy)) {
                 enemy.die?.();
@@ -126,7 +125,6 @@ class World {
                 this.character.y -= 6;
                 break;
             }
-
 
             if (enemy.harmful !== false && !this.character.isHurt()) {
                 this.character.hit();

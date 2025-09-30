@@ -151,53 +151,29 @@ class Character extends MovableObject {
     }
 
     isStomping(enemy) {
-        if (!enemy) return false;
-        if (this.isHurt()) return false;
-        if (Date.now() < (this.stompLockUntil || 0)) return false;
-        if (this.speedY >= 0) return false;
-        const a = this.getHitBox ? this.getHitBox() : { x: this.x, y: this.y, w: this.width, h: this.height };
-        const b = enemy.getHitBox ? enemy.getHitBox() : { x: enemy.x, y: enemy.y, w: enemy.width, h: enemy.height };
-        const feet = a.y + a.h;
-        const top = b.y;
-        if (feet < top - 4) return false;
-        const windowPx = (enemy.height && enemy.height < 60) ? 26 : 22;
+        if (!enemy || this.isHurt()) return false;                     // keine Stomps während I-Frames
+        if (Date.now() < (this.stompLockUntil || 0)) return false;     // Lock nach Knockback
+        if (this.speedY >= 0) return false;                            // nur fallend
 
-        const horizOk =
-            (a.x + a.w * 0.35) < (b.x + b.w) &&
-            (a.x + a.w * 0.65) > b.x;
+        const a = this.getHitBox?.() ?? this.getHitBox?.() ?? { x: this.x, y: this.y, w: this.width, h: this.height };
+        const b = enemy.getHitBox?.() ?? enemy.getHitBox?.() ?? { x: enemy.x, y: enemy.y, w: enemy.width, h: enemy.height };
 
-        return horizOk && feet <= top + windowPx;
+        const feet = a.y + a.h, top = b.y;
+        if (feet < top - 4) return false;                              // noch klar über dem Kopf
+
+        const windowPx = (enemy.height && enemy.height < 60) ? 26 : 24;// small etwas großzügiger
+        const horizOk = (a.x + a.w * 0.35) < (b.x + b.w) && (a.x + a.w * 0.65) > b.x;
+
+        return horizOk && feet <= top + windowPx;                      // im „Kopf-Fenster“ gelandet
     }
 
     bounce() { this.speedY = 8; }
 
     applyKnockBack(fromX) {
         const dir = this.x < fromX ? -1 : 1;
-        this.x += dir * 26;                 
-        this.speedY = 14;                   
+        this.x += dir * 35;
+        this.speedY = 14;
         this.stompLockUntil = Date.now() + 350;
-    }
-
-    
-    isStomping(enemy) {
-        if (!enemy) return false;
-        if (this.isHurt()) return false;
-        if (Date.now() < (this.stompLockUntil || 0)) return false;
-        if (this.speedY >= 0) return false; 
-
-        const a = this.getHitBox?.() ?? { x: this.x, y: this.y, w: this.width, h: this.height };
-        const b = enemy.getHitBox?.() ?? { x: enemy.x, y: enemy.y, w: enemy.width, h: enemy.height };
-
-        const feet = a.y + a.h;
-        const top = b.y;
-        if (feet < top - 4) return false;
-
-        const windowPx = (enemy.height && enemy.height < 60) ? 26 : 24; 
-        const horizOk =
-            (a.x + a.w * 0.35) < (b.x + b.w) &&
-            (a.x + a.w * 0.65) > b.x;
-
-        return horizOk && feet <= top + windowPx;
     }
 
 }
