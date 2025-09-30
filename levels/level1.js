@@ -15,6 +15,12 @@ const level1 = new Level(
     new SmallChicken(),
     new Chicken(),
     new SmallChicken(),
+    new Chicken(), 
+    new SmallChicken(),
+    new Chicken(),
+    new SmallChicken(),
+    new Chicken(),
+    new SmallChicken(), 
     new EndBoss(),
   ],
 
@@ -28,17 +34,25 @@ const level1 = new Level(
 
   // Coins
   [
-    new Coin(150, 230),  new Coin(300, 210),  new Coin(450, 240),
-    new Coin(700, 230),  new Coin(850, 210),  new Coin(1000, 250),
+    new Coin(150, 230), new Coin(300, 210), new Coin(450, 240),
+    new Coin(700, 230), new Coin(850, 210), new Coin(1000, 250),
     new Coin(1350, 240), new Coin(1500, 260), new Coin(1700, 240),
     new Coin(1900, 260), new Coin(2100, 245),
   ],
 
   // Bottles
   [
-    B(500,0),  B(700,1),  B(900,2),
-    B(1100,3), B(1300,4), B(1550,5),
-    B(1800,6), B(2050,7), B(2250,8),
+    B(350, 0),
+    B(300, 1),
+    B(400, 2),
+    B(500, 3),
+    B(600, 4),
+    B(700, 5),
+    B(950, 6),
+    B(1250, 7),
+    B(1550, 8),
+    B(1850, 9),
+    B(2150, 10),
   ],
 
   // Background
