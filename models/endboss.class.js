@@ -4,7 +4,7 @@ class EndBoss extends MovableObject {
     y = 60;
     offset = { top: 40, bottom: 35, left: 25, right: 30 };
 
-    // Timing-Regler
+    // Timing / Verhalten
     ANIM_FPS = 9;
     ALERT_MS = 900;
     HURT_MS = 450;
@@ -70,19 +70,16 @@ class EndBoss extends MovableObject {
 
         this.x = 2500;
 
-        this.aiLoop = setInterval(() => this.updateAI(), 1000 / 20);
-        this.animLoop = setInterval(() => this.playStateAnimation(), 1000 / this.ANIM_FPS);
+        // Pausen-sichere Loops
+        this.aiLoop = setInterval(() => { if (!this.world?.isPaused) this.updateAI(); }, 1000 / 20);
+        this.animLoop = setInterval(() => { if (!this.world?.isPaused) this.playStateAnimation(); }, 1000 / this.ANIM_FPS);
     }
 
-    choose(frames, fallback = this.IMAGES_ALERT) {
-        return (frames && frames.length) ? frames : fallback;
-    }
+    // --- Helpers ---
+    choose(frames, fallback = this.IMAGES_ALERT) { return (frames && frames.length) ? frames : fallback; }
+    setState(s) { if (!this.dead && this.state !== s) this.state = s; }
 
-    setState(s) {
-        if (this.dead || this.state === s) return;
-        this.state = s;
-    }
-
+    // --- Animation ---
     playStateAnimation() {
         if (this.state === 'dead') { this.playAnimation(this.choose(this.IMAGES_DEAD)); return; }
         if (this.state === 'hurt') { this.playAnimation(this.choose(this.IMAGES_HURT)); return; }
@@ -91,17 +88,19 @@ class EndBoss extends MovableObject {
         this.playAnimation(this.choose(this.IMAGES_WALK)); // default
     }
 
+    // Boss wird erst aktiv, wenn im Viewport
     isInView() {
         if (!this.world) return false;
         const left = -this.world.camera_x;
         const right = left + this.world.canvas.width;
-        return this.x < right + 50 && this.x + this.width > left - 50;
+        return this.x < right + 50 && (this.x + this.width) > left - 50;
     }
 
+    // --- AI ---
     updateAI() {
         if (this.dead || this.deadPlaying) return;
 
-        // während garantierter Alert-Phase und während Hurt keine AI
+        // garantierte Alert-Phase und Hurt blockieren AI
         if (this.alertUntil && Date.now() < this.alertUntil) return;
         if (this.state === 'hurt') return;
 
@@ -129,15 +128,14 @@ class EndBoss extends MovableObject {
         else { this.otherDirection = true; this.moveRight(); }
     }
 
+    // --- Treffer / Speedup / Death ---
     takeHit(dmg = 25) {
         if (this.dead || this.deadPlaying) return;
         this.energy = Math.max(0, this.energy - dmg);
-        this.speed = Math.min(this.speed + 0.25, 3.0);
+        this.speed = Math.min(this.speed + 0.25, 3.0); // wird pro Hit schneller
         this.setState('hurt');
         this.world?.statusBarBoss?.setPercentage?.(this.energy);
-
         setTimeout(() => { if (!this.dead) this.setState('attack'); }, this.HURT_MS);
-
         if (this.energy === 0) this.die();
     }
 
@@ -151,7 +149,7 @@ class EndBoss extends MovableObject {
         this.playDeadOnce();
     }
 
-    // Dead einmal durchspielen, dann kurz stehen lassen & entfernen
+    // Dead-Animation einmal durchlaufen lassen — pausensicher
     playDeadOnce() {
         if (this.deadPlaying) return;
         this.deadPlaying = true;
@@ -164,6 +162,7 @@ class EndBoss extends MovableObject {
         const frameMs = this.DEAD_FRAME_MS;
 
         this._deadLoop = setInterval(() => {
+            if (this.world?.isPaused) return; // während Pause nicht weiterblättern
             this.img = this.imageCache[frames[i++]];
             if (i >= frames.length) {
                 clearInterval(this._deadLoop);

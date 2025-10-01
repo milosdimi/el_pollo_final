@@ -29,6 +29,12 @@ window.addEventListener("keydown", (e) => {
     if (e.keyCode == 77) {
         keyboard.M = true;
     }
+    if (e.keyCode == 80) {
+        keyboard.P = true;
+    }
+    if (e.keyCode == 27) {
+        keyboard.ESC == true;
+    }
 });
 
 window.addEventListener("keyup", (e) => {
@@ -52,5 +58,11 @@ window.addEventListener("keyup", (e) => {
     }
     if (e.keyCode == 77) {
         keyboard.M = false;
+    }
+    if (e.keyCode == 80) {
+        keyboard.P = false;
+    }
+    if (e.keyCode == 27) {
+        keyboard.ESC == false;
     }
 });

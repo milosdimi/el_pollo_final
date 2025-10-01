@@ -6,85 +6,74 @@ class MovableObject extends DrawableObject {
     energy = 100;
     lastHit = 0;
 
-
     applyGravity() {
         setInterval(() => {
-            const was = this.y;
+            if (this.world?.isPaused) return;
+
+            // Fallen / Steigen
             if (this.isAboveGround() || this.speedY > 0) {
-                this.prevY = was;
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
-            } else {
-                this.prevY = was;
+            }
+
+            // NICHT für fliegende/flüssige Objekte am Boden „festkleben“
+            if (!(this instanceof ThrowableObject)) {
+                const ground = this.world?.groundY ?? 390;
+                const botOff = this.offset?.bottom || 0;
+                const bottom = this.y + this.height - botOff;
+
+                if (bottom >= ground && this.speedY <= 0) {
+                    // sauber aufsetzen
+                    this.y = ground - (this.height - botOff);
+                    this.speedY = 0;
+                }
             }
         }, 1000 / 25);
     }
 
-
-
     isAboveGround() {
-        if (this instanceof ThrowableObject) {
-            return true;
-        } else {
-            return this.y < 180;
-        }
+        // Wurfobjekte sollen ihre eigene Logik (Splash etc.) triggern
+        if (this instanceof ThrowableObject) return true;
+
+        const ground = this.world?.groundY ?? 390;
+        const botOff = this.offset?.bottom || 0;
+        const bottom = this.y + this.height - botOff;
+        return bottom < ground - 1; // kleiner Puffer, damit nichts „klebt“
     }
 
-
-
+    // präzise AABB mit Offsets
     isColliding(mo) {
-        const a = this.getHitBox();
-        const b = (mo.getHitBox ? mo.getHitBox() : { x: mo.x, y: mo.y, w: mo.width, h: mo.height });
-        return a.x < b.x + b.w &&
-            a.x + a.w > b.x &&
-            a.y < b.y + b.h &&
-            a.y + a.h > b.y;
+        const a = this.getHitBox ? this.getHitBox() : { x: this.x, y: this.y, w: this.width, h: this.height };
+        const b = mo?.getHitBox ? mo.getHitBox() : { x: mo.x, y: mo.y, w: mo.width, h: mo.height };
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
     }
 
+    // leicht „magnetisch“ für Pickups
     isPickupColliding(mo, pad = 8) {
-        const a = this.getHitBox();
-        const b = mo.getHitBox ? mo.getHitBox() : { x: mo.x, y: mo.y, w: mo.width, h: mo.height };
+        const a = this.getHitBox ? this.getHitBox() : { x: this.x, y: this.y, w: this.width, h: this.height };
+        const b = mo?.getHitBox ? mo.getHitBox() : { x: mo.x, y: mo.y, w: mo.width, h: mo.height };
         return (a.x < b.x + b.w + pad) && (a.x + a.w + pad > b.x) &&
             (a.y < b.y + b.h + pad) && (a.y + a.h + pad > b.y);
     }
 
-
     hit() {
-        this.energy -= 5;
-        if (this.energy < 0) {
-            this.energy = 0;
-        } else {
-            this.lastHit = new Date().getTime();
-        }
+        this.energy = Math.max(0, this.energy - 5);
+        if (this.energy > 0) this.lastHit = Date.now();
     }
 
     isHurt() {
-        let t = (new Date().getTime() - this.lastHit) / 1000;
-        return t < 0.33;
+        return (Date.now() - this.lastHit) / 1000 < 0.33; // I-Frames ~330ms
     }
 
-
-    isDead() {
-        return this.energy == 0;
-    }
+    isDead() { return this.energy === 0; }
 
     playAnimation(images) {
-        let i = this.currentImage % images.length;
-        let path = images[i];
-        this.img = this.imageCache[path];
+        const i = this.currentImage % images.length;
+        this.img = this.imageCache[images[i]];
         this.currentImage++;
     }
 
-    moveRight() {
-        this.x += this.speed;
-    }
-
-    moveLeft() {
-        this.x -= this.speed;
-    }
-
-    jump() {
-        this.speedY = 30;
-    }
-
+    moveRight() { this.x += this.speed; }
+    moveLeft() { this.x -= this.speed; }
+    jump() { this.speedY = 30; }
 }

@@ -35,9 +35,9 @@ class World {
     winPlayed = false;
     gameOverPlayed = false;
 
-    // Mute
-    isMuted = false;
-    _muteHeld = false;
+    // Pause / Mute
+    isPaused = false; _pauseHeld = false;
+    isMuted = false; _muteHeld = false;
 
     // Screen shake
     _shakeStart = 0; _shakeEnd = 0; _shakeMagStart = 0;
@@ -60,7 +60,7 @@ class World {
         this.run();
     }
 
-    // ----------------- Audio Utils -----------------
+    /* ----------------- Audio ----------------- */
 
     applyAudioMix() {
         const walkVol = 0.10;
@@ -71,37 +71,31 @@ class World {
         const winVol = 0.75;
         const overVol = 0.75;
 
-        // Globale SFX
-        if (this.coinSfx) this.coinSfx.volume = sfxVol;
-        if (this.bottleSfx) this.bottleSfx.volume = sfxVol;
-        if (this.bossHitSfx) this.bossHitSfx.volume = bossVol;
+        this.coinSfx.volume = sfxVol;
+        this.bottleSfx.volume = sfxVol;
+        this.bossHitSfx.volume = bossVol;
 
-        // Player-SFX
-        if (this.walkSfx) this.walkSfx.volume = walkVol;
-        if (this.jumpSfx) this.jumpSfx.volume = jumpVol;
+        this.walkSfx.volume = walkVol;
+        this.jumpSfx.volume = jumpVol;
 
-        // Musik
-        if (this.music) this.music.volume = musicVol;
-        if (this.winSfx) this.winSfx.volume = winVol;
-        if (this.gameOverSfx) this.gameOverSfx.volume = overVol;
+        this.music.volume = musicVol;
+        this.winSfx.volume = winVol;
+        this.gameOverSfx.volume = overVol;
     }
 
     setMuted(flag) {
         this.isMuted = !!flag;
-        const all = [
+        [
             this.coinSfx, this.bottleSfx, this.bossHitSfx, this.music,
             this.walkSfx, this.jumpSfx, this.winSfx, this.gameOverSfx
-        ];
-        all.forEach(a => { if (a) a.muted = this.isMuted; });
+        ].forEach(a => a && (a.muted = this.isMuted));
     }
     toggleMute() { this.setMuted(!this.isMuted); }
 
     checkMuteToggle() {
         if (this.keyboard?.M) {
             if (!this._muteHeld) { this.toggleMute(); this._muteHeld = true; }
-        } else {
-            this._muteHeld = false;
-        }
+        } else this._muteHeld = false;
     }
 
     enableAudioOnFirstInput() {
@@ -114,8 +108,47 @@ class World {
         window.addEventListener('pointerdown', start, { once: true });
     }
 
+    onJump() { // Character aufrufen
+        try { this.jumpSfx.currentTime = 0; this.jumpSfx.play(); } catch { }
+    }
+
+    updateWalkSfx() {
+        const k = this.keyboard || {};
+        const moving = (k.LEFT || k.RIGHT);
+        const onGround = !this.character.isAboveGround();
+        const alive = !this.character.isDead?.();
+        const shouldPlay = moving && onGround && alive && !this.isPaused;
+
+        if (shouldPlay) {
+            if (this.walkSfx.paused) { this.walkSfx.currentTime = 0; this.walkSfx.play().catch(() => { }); }
+        } else {
+            if (!this.walkSfx.paused) this.walkSfx.pause();
+        }
+    }
+
+    /* ----------------- Pause ----------------- */
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
+
+        const pauseList = [this.music, this.walkSfx, this.jumpSfx];
+        if (this.isPaused) {
+            pauseList.forEach(a => a?.pause?.());
+        } else {
+            if (!this.isMuted) this.music?.play?.().catch(() => { });
+        }
+    }
+
+    checkPauseToggle() {
+        if (this.keyboard?.P || this.keyboard?.ESC) {
+            if (!this._pauseHeld) { this.togglePause(); this._pauseHeld = true; }
+        } else this._pauseHeld = false;
+    }
+
+    /* -------------- End States --------------- */
+
     checkEndStates() {
-        // Game Over (Spieler tot)
+        // Game Over
         if (!this.gameOverPlayed && this.character?.isDead?.()) {
             this.winSfx?.pause?.();
             this.music?.pause?.();
@@ -123,8 +156,7 @@ class World {
             try { this.gameOverSfx.currentTime = 0; this.gameOverSfx.play(); } catch { }
             this.gameOverPlayed = true;
         }
-
-        // Win (Boss tot)
+        // Win
         if (!this.winPlayed && this.endBoss && this.endBoss.dead) {
             this.gameOverSfx?.pause?.();
             this.music?.pause?.();
@@ -134,27 +166,7 @@ class World {
         }
     }
 
-
-    // Vom Character aufgerufen 
-    onJump() {
-        try { this.jumpSfx.currentTime = 0; this.jumpSfx.play(); } catch (e) { }
-    }
-
-    updateWalkSfx() {
-        const k = this.keyboard || {};
-        const moving = (k.LEFT || k.RIGHT);
-        const onGround = !this.character.isAboveGround();
-        const alive = !this.character.isDead?.();
-
-        const shouldPlay = moving && onGround && alive;
-        if (shouldPlay) {
-            if (this.walkSfx.paused) { this.walkSfx.currentTime = 0; this.walkSfx.play().catch(() => { }); }
-        } else {
-            if (!this.walkSfx.paused) this.walkSfx.pause();
-        }
-    }
-
-    // ----------------- Screen Shake -----------------
+    /* -------------- Screen Shake ------------- */
 
     triggerShake(ms = 220, mag = 10) {
         this._shakeStart = Date.now();
@@ -172,13 +184,17 @@ class World {
         this._shakeY = (Math.random() * 2 - 1) * (m * 0.6);
     }
 
-    // ----------------- Game Loop -----------------
+    /* ---------------- Game Loop --------------- */
 
     run() {
         setInterval(() => {
+            this.checkPauseToggle();
+            if (this.isPaused) return;
+
             this.checkMuteToggle();
             this.updateWalkSfx();
             this.checkEndStates();
+
             this.checkCollisions();
             this.checkThrowObjects();
             this.checkCoinPickup();
@@ -187,7 +203,7 @@ class World {
         }, 1000 / 25);
     }
 
-    // ----------------- Throwables -----------------
+    /* --------------- Throwables --------------- */
 
     checkThrowObjects() {
         const now = Date.now();
@@ -218,7 +234,7 @@ class World {
             this.lastThrowAt = now;
             this.throwHeld = true;
 
-            this.character.markActive?.(); // Long-Idle sofort abbrechen
+            this.character.markActive?.(); // Long-Idle abbrechen
         }
     }
 
@@ -244,7 +260,7 @@ class World {
             if (!(bossHit || enemyHit || groundHit)) return;
 
             if (bossHit) {
-                boss.takeHit?.(25);                // genau 1x Schaden
+                boss.takeHit?.(25);
                 this.triggerShake(220, 10);
                 if (this.bossHitSfx) { this.bossHitSfx.currentTime = 0; this.bossHitSfx.play(); }
             }
@@ -253,12 +269,11 @@ class World {
             b.splash();
         });
 
-        // Aufräumen
         this.level.enemies = enemies.filter(e => !e?.removeMe);
         this.throwableObjects = this.throwableObjects.filter(o => !o.removeMe);
     }
 
-    // ----------------- Collisions -----------------
+    /* ---------------- Collisions -------------- */
 
     checkCollisions() {
         const enemies = this.level.enemies || [];
@@ -287,7 +302,7 @@ class World {
         this.level.enemies = enemies.filter(e => !e.removeMe);
     }
 
-    // ----------------- Pickups -----------------
+    /* ----------------- Pickups ---------------- */
 
     checkCoinPickup() {
         if (!this.level?.coins || !this.character) return;
@@ -315,19 +330,16 @@ class World {
         });
     }
 
-    // ----------------- Draw -----------------
+    /* ------------------- Draw ----------------- */
 
     draw() {
-        // Canvas leeren
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Shake berechnen
+        // Shake berechnen & Welt verschieben
         this.computeShakeXY();
-
-        // Welt verschieben: Kamera + Shake
         this.ctx.translate(this.camera_x + this._shakeX, this._shakeY);
 
-        // Welt zeichnen
+        // Welt
         this.addObjectsToMap(this.level.backgroundObjects);
         this.addObjectsToMap(this.level.clouds);
         if (this.level.bottles) this.addObjectsToMap(this.level.bottles);
@@ -336,16 +348,28 @@ class World {
         this.addObjectsToMap(this.throwableObjects);
         this.addToMap(this.character);
 
-        // Welt-Translation rückgängig machen (inkl. Shake)
+        // zurück (inkl. Shake)
         this.ctx.translate(-(this.camera_x + this._shakeX), -this._shakeY);
 
-        // HUD 
+        // HUD
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoins);
         this.addToMap(this.statusBarBottles);
         this.addToMap(this.statusBarBoss);
 
-        // Nächstes Frame
+        // Pause-Overlay
+        if (this.isPaused) {
+            const ctx = this.ctx;
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 28px system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('PAUSED — press P or ESC', this.canvas.width / 2, this.canvas.height / 2);
+            ctx.restore();
+        }
+
         requestAnimationFrame(() => this.draw());
     }
 
@@ -361,7 +385,7 @@ class World {
     flipImage(mo) { this.ctx.save(); this.ctx.translate(mo.width, 0); this.ctx.scale(-1, 1); mo.x = mo.x * -1; }
     flipImageBack(mo) { this.ctx.restore(); mo.x = mo.x * -1; }
 
-    // ----------------- Wiring -----------------
+    /* ---------------- Wiring ------------------ */
 
     setWorld() {
         this.character.world = this;

@@ -22,16 +22,25 @@ class SmallChicken extends MovableObject {
     }
 
     animate() {
-        this._walk = setInterval(() => this.moveLeft(), 1000 / 60);
-        this._anim = setInterval(() => this.playAnimation(this.IMAGES_WALK), 160);
+        this._walk = setInterval(() => {
+            if (this.world?.isPaused || this.dead) return;
+            this.moveLeft();
+        }, 1000 / 60);
+
+        this._anim = setInterval(() => {
+            if (this.world?.isPaused || this.dead) return;
+            this.playAnimation(this.IMAGES_WALK);
+        }, 160);
     }
 
     die() {
         if (this.dead) return;
-        this.dead = true; this.harmful = false; this.speed = 0;
-        clearInterval(this._walk); clearInterval(this._anim);
+        this.dead = true;
+        this.harmful = false;
+        this.speed = 0;
+        clearInterval(this._walk);
+        clearInterval(this._anim);
         this.img = this.imageCache[this.IMAGES_DEAD[0]];
         setTimeout(() => this.removeMe = true, 350);
     }
 }
-

@@ -2,6 +2,7 @@ class Character extends MovableObject {
     height = 250;
     y = 80;
     speed = 10;
+
     lastActiveAt = Date.now();
     LONG_IDLE_AFTER_MS = 3000;
     stompLockUntil = 0;
@@ -84,49 +85,57 @@ class Character extends MovableObject {
     }
 
     moveCharacter() {
-        if (this.canMoveRight()) {
+        if (this.world?.isPaused || this.isDead()) return;
+
+        const kb = this.world?.keyboard || {};
+        if (kb.RIGHT && this.x < (this.world?.level?.level_end_x ?? 3000)) {
             this.moveRight();
             this.otherDirection = false;
             this.markActive();
         }
-        if (this.canMoveLeft()) {
+        if (kb.LEFT && this.x > 0) {
             this.moveLeft();
             this.otherDirection = true;
             this.markActive();
         }
-        if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+        if (kb.SPACE && !this.isAboveGround()) {
             this.jump();
-            this.world?.onJump?.(); 
+            this.world?.onJump?.();
             this.markActive();
         }
-        this.world.camera_x = -this.x + 100;
+
+        if (this.world) this.world.camera_x = -this.x + 100;
     }
 
     playCharacterAnimation() {
+        if (this.world?.isPaused) return;
+
         if (this.isDead()) { this.playAnimation(this.IMAGES_DEAD); return; }
         if (this.isHurt()) { this.playAnimation(this.IMAGES_HURT); return; }
         if (this.isAboveGround()) { this.playAnimation(this.IMAGES_JUMPING); this.markActive(); return; }
         if (this.isMovingKeyDown()) { this.playAnimation(this.IMAGES_WALKING); this.markActive(); return; }
 
-        const idleForMs = Date.now() - this.lastActiveAt;
-        if (idleForMs >= this.LONG_IDLE_AFTER_MS) this.playAnimation(this.IMAGES_LONG_IDLE);
-        else this.playAnimation(this.IMAGES_IDLE);
+        const idleFor = Date.now() - this.lastActiveAt;
+        (idleFor >= this.LONG_IDLE_AFTER_MS)
+            ? this.playAnimation(this.IMAGES_LONG_IDLE)
+            : this.playAnimation(this.IMAGES_IDLE);
     }
 
-    canMoveRight() { return this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x; }
-    canMoveLeft() { return this.world.keyboard.LEFT && this.x > 0; }
+    isMovingKeyDown() {
+        const kb = this.world?.keyboard;
+        return !!(kb && (kb.RIGHT || kb.LEFT));
+    }
+
     markActive() { this.lastActiveAt = Date.now(); }
-    isMovingKeyDown() { return !!(this.world && this.world.keyboard && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)); }
 
     // ---- Stomp / Knockback ----
-
     isStomping(enemy) {
         if (!enemy || this.isHurt()) return false;
         if (Date.now() < (this.stompLockUntil || 0)) return false;
-        if (this.speedY >= 0) return false;
+        if (this.speedY >= 0) return false; // nur fallend
 
-        const a = this.getHitBox?.() ?? this.getHitBox?.() ?? { x: this.x, y: this.y, w: this.width, h: this.height };
-        const b = enemy.getHitBox?.() ?? enemy.getHitBox?.() ?? { x: enemy.x, y: enemy.y, w: enemy.width, h: enemy.height };
+        const a = this.getHitBox ? this.getHitBox() : { x: this.x, y: this.y, w: this.width, h: this.height };
+        const b = enemy.getHitBox ? enemy.getHitBox() : { x: enemy.x, y: enemy.y, w: enemy.width, h: enemy.height };
 
         const feet = a.y + a.h, top = b.y;
         if (feet < top - 4) return false;
@@ -140,9 +149,9 @@ class Character extends MovableObject {
     bounce() { this.speedY = 8; }
 
     applyKnockBack(fromX) {
-        const dir = this.x < fromX ? -1 : 1;
+        const dir = this.x < fromX ? -1 : 1; // Gegner rechts? dir = -1 (nach links)
         this.x += dir * 35;
         this.speedY = 14;
-        this.stompLockUntil = Date.now() + 350;
+        this.stompLockUntil = Date.now() + 350; // kurz Stomp sperren
     }
 }
