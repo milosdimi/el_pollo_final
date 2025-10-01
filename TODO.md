@@ -38,13 +38,13 @@
 - [*] **Enemy speeds & counts**
   - [*] `speed`/Anzahl für Chicken/SmallChicken/Endboss feinjustieren
   - [*] Schwierigkeit kurvig statt spiky
-- [ ] **Coins & Bottles placements**
+- [*] **Coins & Bottles placements**
   - [*] Positionen/Mengen so setzen, dass vor dem Boss genug Flaschen da sind
 
 ## P2 — UX & Quality
 
 - [ ] **Audio polish**
-  - [ ] SFX-Lautstärke balancieren; Mute-Toggle (Taste `M`)
+  - [*] SFX-Lautstärke balancieren; Mute-Toggle (Taste `M`)
 - [ ] **Pause/Resume**
   - [ ] Taste `P`: Loops/Timer pausieren/fortsetzen ohne Reload
 - [ ] **Clouds parallax**

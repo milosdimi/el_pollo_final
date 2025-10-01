@@ -53,7 +53,6 @@ class Character extends MovableObject {
         'img/2_character_pepe/1_idle/idle/I-9.png',
         'img/2_character_pepe/1_idle/idle/I-10.png',
     ];
-
     IMAGES_LONG_IDLE = [
         'img/2_character_pepe/1_idle/long_idle/I-11.png',
         'img/2_character_pepe/1_idle/long_idle/I-12.png',
@@ -66,9 +65,6 @@ class Character extends MovableObject {
         'img/2_character_pepe/1_idle/long_idle/I-19.png',
         'img/2_character_pepe/1_idle/long_idle/I-20.png',
     ];
-    world;
-    walking_sound = new Audio('audio/walkEffect.mp3');
-    jump_sound = new Audio('audio/jump.mp3');
 
     constructor() {
         super().loadImage('img/2_character_pepe/2_walk/W-21.png');
@@ -88,83 +84,57 @@ class Character extends MovableObject {
     }
 
     moveCharacter() {
-        this.walking_sound.pause();
         if (this.canMoveRight()) {
             this.moveRight();
             this.otherDirection = false;
-            this.walking_sound.play();
             this.markActive();
         }
         if (this.canMoveLeft()) {
             this.moveLeft();
             this.otherDirection = true;
-            this.walking_sound.play();
             this.markActive();
         }
         if (this.world.keyboard.SPACE && !this.isAboveGround()) {
             this.jump();
-            //this.jump_sound.play();
+            this.world?.onJump?.(); 
             this.markActive();
         }
         this.world.camera_x = -this.x + 100;
     }
 
     playCharacterAnimation() {
-        if (this.isDead()) {
-            this.playAnimation(this.IMAGES_DEAD);
-            return;
-        }
-        if (this.isHurt()) {
-            this.playAnimation(this.IMAGES_HURT);
-            return;
-        }
-        if (this.isAboveGround()) {
-            this.playAnimation(this.IMAGES_JUMPING);
-            this.markActive();
-            return;
-        }
-        if (this.isMovingKeyDown()) {
-            this.playAnimation(this.IMAGES_WALKING);
-            this.markActive();
-            return;
-        }
+        if (this.isDead()) { this.playAnimation(this.IMAGES_DEAD); return; }
+        if (this.isHurt()) { this.playAnimation(this.IMAGES_HURT); return; }
+        if (this.isAboveGround()) { this.playAnimation(this.IMAGES_JUMPING); this.markActive(); return; }
+        if (this.isMovingKeyDown()) { this.playAnimation(this.IMAGES_WALKING); this.markActive(); return; }
+
         const idleForMs = Date.now() - this.lastActiveAt;
-        if (idleForMs >= this.LONG_IDLE_AFTER_MS) {
-            this.playAnimation(this.IMAGES_LONG_IDLE);
-        } else {
-            this.playAnimation(this.IMAGES_IDLE);
-        }
+        if (idleForMs >= this.LONG_IDLE_AFTER_MS) this.playAnimation(this.IMAGES_LONG_IDLE);
+        else this.playAnimation(this.IMAGES_IDLE);
     }
 
-    canMoveRight() {
-        return this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x;
-    }
-
-    canMoveLeft() {
-        return this.world.keyboard.LEFT && this.x > 0;
-    }
-
+    canMoveRight() { return this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x; }
+    canMoveLeft() { return this.world.keyboard.LEFT && this.x > 0; }
     markActive() { this.lastActiveAt = Date.now(); }
+    isMovingKeyDown() { return !!(this.world && this.world.keyboard && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT)); }
 
-    isMovingKeyDown() {
-        return !!(this.world && this.world.keyboard && (this.world.keyboard.RIGHT || this.world.keyboard.LEFT));
-    }
+    // ---- Stomp / Knockback ----
 
     isStomping(enemy) {
-        if (!enemy || this.isHurt()) return false;                     // keine Stomps während I-Frames
-        if (Date.now() < (this.stompLockUntil || 0)) return false;     // Lock nach Knockback
-        if (this.speedY >= 0) return false;                            // nur fallend
+        if (!enemy || this.isHurt()) return false;
+        if (Date.now() < (this.stompLockUntil || 0)) return false;
+        if (this.speedY >= 0) return false;
 
         const a = this.getHitBox?.() ?? this.getHitBox?.() ?? { x: this.x, y: this.y, w: this.width, h: this.height };
         const b = enemy.getHitBox?.() ?? enemy.getHitBox?.() ?? { x: enemy.x, y: enemy.y, w: enemy.width, h: enemy.height };
 
         const feet = a.y + a.h, top = b.y;
-        if (feet < top - 4) return false;                              // noch klar über dem Kopf
+        if (feet < top - 4) return false;
 
-        const windowPx = (enemy.height && enemy.height < 60) ? 26 : 24;// small etwas großzügiger
+        const windowPx = (enemy.height && enemy.height < 60) ? 26 : 24;
         const horizOk = (a.x + a.w * 0.35) < (b.x + b.w) && (a.x + a.w * 0.65) > b.x;
 
-        return horizOk && feet <= top + windowPx;                      // im „Kopf-Fenster“ gelandet
+        return horizOk && feet <= top + windowPx;
     }
 
     bounce() { this.speedY = 8; }
@@ -175,5 +145,4 @@ class Character extends MovableObject {
         this.speedY = 14;
         this.stompLockUntil = Date.now() + 350;
     }
-
 }
