@@ -20,6 +20,13 @@ class World {
     // SFX
     coinSfx = new Audio('audio/coinRecievedEffect.mp3');
     bottleSfx = new Audio('audio/bottleCollectedEffect.mp3');
+    bossHitSfx = new Audio('audio/bossHit.mp3');
+
+    _shakeStart = 0;
+    _shakeEnd = 0;
+    _shakeMagStart = 0;
+    _shakeX = 0;
+    _shakeY = 0;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -28,10 +35,27 @@ class World {
 
         this.coinSfx.volume = 0.6;
         this.bottleSfx.volume = 0.6;
+        this.bossHitSfx.volume = 0.8;
 
         this.draw();
         this.setWorld();
         this.run();
+    }
+
+    triggerShake(ms = 220, mag = 10) {
+        this._shakeStart = Date.now();
+        this._shakeEnd = this._shakeStart + ms;
+        this._shakeMagStart = mag;
+    }
+
+    computeShakeXY() {
+        const now = Date.now();
+        if (now >= this._shakeEnd) { this._shakeX = 0; this._shakeY = 0; return; }
+        const dur = Math.max(this._shakeEnd - this._shakeStart, 1);
+        const p = (this._shakeEnd - now) / dur;        // 1 → 0
+        const m = this._shakeMagStart * p * p;         // ease-out
+        this._shakeX = (Math.random() * 2 - 1) * m;
+        this._shakeY = (Math.random() * 2 - 1) * (m * 0.6);
     }
 
     run() {
@@ -101,8 +125,13 @@ class World {
 
             if (!(bossHit || enemyHit || groundHit)) return;
 
-            if (bossHit) boss.takeHit?.(25);
+            if (bossHit) boss.takeHit?.(10);
             if (enemyHit) enemyHit.die?.();
+            if (bossHit) {
+                boss.takeHit?.(10);
+                this.triggerShake(220, 10);
+                if (this.bossHitSfx) { this.bossHitSfx.currentTime = 0; this.bossHitSfx.play(); } // <-- NEU: SFX
+            }
 
             b.splash();
         });
@@ -167,9 +196,16 @@ class World {
 
     // — Draw —
     draw() {
+        // Canvas leeren
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.translate(this.camera_x, 0);
 
+        // Shake berechnen (setzt this._shakeX / this._shakeY)
+        this.computeShakeXY();
+
+        // Welt verschieben: Kamera + Shake
+        this.ctx.translate(this.camera_x + this._shakeX, this._shakeY);
+
+        // Welt zeichnen
         this.addObjectsToMap(this.level.backgroundObjects);
         this.addObjectsToMap(this.level.clouds);
         if (this.level.bottles) this.addObjectsToMap(this.level.bottles);
@@ -178,14 +214,19 @@ class World {
         this.addObjectsToMap(this.throwableObjects);
         this.addToMap(this.character);
 
-        this.ctx.translate(-this.camera_x, 0);
+        // Welt-Translation rückgängig machen (inkl. Shake)
+        this.ctx.translate(-(this.camera_x + this._shakeX), -this._shakeY);
+
+        // HUD (fix, ohne Wackeln)
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoins);
         this.addToMap(this.statusBarBottles);
         this.addToMap(this.statusBarBoss);
 
+        // Nächstes Frame
         requestAnimationFrame(() => this.draw());
     }
+
 
     addObjectsToMap(objects) { (objects || []).forEach(o => this.addToMap(o)); }
 

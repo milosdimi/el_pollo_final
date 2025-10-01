@@ -35,7 +35,7 @@
 - [*] **SmallChicken enemy**
   - [*] Neue Klasse `SmallChicken` (kleiner, schneller, weniger HP)
   - [*] Spawn-Mix in `level1.js` ergänzen
-- [ ] **Enemy speeds & counts**
+- [*] **Enemy speeds & counts**
   - [*] `speed`/Anzahl für Chicken/SmallChicken/Endboss feinjustieren
   - [*] Schwierigkeit kurvig statt spiky
 - [ ] **Coins & Bottles placements**
