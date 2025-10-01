@@ -15,7 +15,7 @@ class World {
     // Gameplay
     throwableObjects = [];
     bottlesCount = 0;
-    groundY = 420;
+    groundY = 400;
 
     // Throw debounce
     THROW_COOLDOWN_MS = 350;
@@ -363,8 +363,8 @@ class World {
             ctx.save();
             ctx.fillStyle = 'rgba(0,0,0,0.35)';
             ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 28px system-ui, sans-serif';
+            ctx.fillStyle = '#fdcacaff';
+            ctx.font = 'bold 28px WildMexico, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('PAUSED — press P or ESC', this.canvas.width / 2, this.canvas.height / 2);
             ctx.restore();

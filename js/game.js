@@ -33,7 +33,7 @@ window.addEventListener("keydown", (e) => {
         keyboard.P = true;
     }
     if (e.keyCode == 27) {
-        keyboard.ESC == true;
+        keyboard.ESC = true;
     }
 });
 
@@ -63,6 +63,6 @@ window.addEventListener("keyup", (e) => {
         keyboard.P = false;
     }
     if (e.keyCode == 27) {
-        keyboard.ESC == false;
+        keyboard.ESC = false;
     }
 });
