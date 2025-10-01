@@ -29,6 +29,11 @@ class World {
     music = new Audio('audio/background-music.mp3');
     walkSfx = new Audio('audio/walkEffect.mp3');
     jumpSfx = new Audio('audio/jump.mp3');
+    winSfx = new Audio('audio/win.mp3');
+    gameOverSfx = new Audio('audio/game_over.mp3');
+
+    winPlayed = false;
+    gameOverPlayed = false;
 
     // Mute
     isMuted = false;
@@ -63,6 +68,8 @@ class World {
         const sfxVol = 0.60;
         const bossVol = 0.80;
         const musicVol = 0.28;
+        const winVol = 0.75;
+        const overVol = 0.75;
 
         // Globale SFX
         if (this.coinSfx) this.coinSfx.volume = sfxVol;
@@ -75,13 +82,15 @@ class World {
 
         // Musik
         if (this.music) this.music.volume = musicVol;
+        if (this.winSfx) this.winSfx.volume = winVol;
+        if (this.gameOverSfx) this.gameOverSfx.volume = overVol;
     }
 
     setMuted(flag) {
         this.isMuted = !!flag;
         const all = [
             this.coinSfx, this.bottleSfx, this.bossHitSfx, this.music,
-            this.walkSfx, this.jumpSfx
+            this.walkSfx, this.jumpSfx, this.winSfx, this.gameOverSfx
         ];
         all.forEach(a => { if (a) a.muted = this.isMuted; });
     }
@@ -104,6 +113,27 @@ class World {
         window.addEventListener('keydown', start, { once: true });
         window.addEventListener('pointerdown', start, { once: true });
     }
+
+    checkEndStates() {
+        // Game Over (Spieler tot)
+        if (!this.gameOverPlayed && this.character?.isDead?.()) {
+            this.winSfx?.pause?.();
+            this.music?.pause?.();
+            this.walkSfx?.pause?.();
+            try { this.gameOverSfx.currentTime = 0; this.gameOverSfx.play(); } catch { }
+            this.gameOverPlayed = true;
+        }
+
+        // Win (Boss tot)
+        if (!this.winPlayed && this.endBoss && this.endBoss.dead) {
+            this.gameOverSfx?.pause?.();
+            this.music?.pause?.();
+            this.walkSfx?.pause?.();
+            try { this.winSfx.currentTime = 0; this.winSfx.play(); } catch { }
+            this.winPlayed = true;
+        }
+    }
+
 
     // Vom Character aufgerufen 
     onJump() {
@@ -148,7 +178,7 @@ class World {
         setInterval(() => {
             this.checkMuteToggle();
             this.updateWalkSfx();
-
+            this.checkEndStates();
             this.checkCollisions();
             this.checkThrowObjects();
             this.checkCoinPickup();

@@ -47,7 +47,7 @@
   - [*] SFX-Lautstärke balancieren; Mute-Toggle (Taste `M`)
 - [ ] **Pause/Resume**
   - [ ] Taste `P`: Loops/Timer pausieren/fortsetzen ohne Reload
-- [ ] **Clouds parallax**
+- [*] **Clouds parallax**
   - [ ] Leicht unterschiedliche `speed` pro Wolke (Parallax-Gefühl)
 - [ ] **Camera clamp**
   - [ ] Scrollen auf Levelgrenzen begrenzen
