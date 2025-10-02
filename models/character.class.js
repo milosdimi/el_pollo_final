@@ -128,30 +128,32 @@ class Character extends MovableObject {
 
     markActive() { this.lastActiveAt = Date.now(); }
 
-    // ---- Stomp / Knockback ----
     isStomping(enemy) {
-        if (!enemy || this.isHurt()) return false;
-        if (Date.now() < (this.stompLockUntil || 0)) return false;
-        if (this.speedY >= 0) return false; // nur fallend
-
+        if (!enemy || enemy.dead) return false;
+        if (this.isHurt()) return false;
         const a = this.getHitBox ? this.getHitBox() : { x: this.x, y: this.y, w: this.width, h: this.height };
         const b = enemy.getHitBox ? enemy.getHitBox() : { x: enemy.x, y: enemy.y, w: enemy.width, h: enemy.height };
-
-        const feet = a.y + a.h, top = b.y;
-        if (feet < top - 4) return false;
-
-        const windowPx = (enemy.height && enemy.height < 60) ? 26 : 24;
-        const horizOk = (a.x + a.w * 0.35) < (b.x + b.w) && (a.x + a.w * 0.65) > b.x;
-
-        return horizOk && feet <= top + windowPx;
+        const offB = this.offset?.bottom || 0;
+        const prevBottom = (this.prevY ?? this.y) + (this.height - offB);
+        const nowBottom = a.y + a.h;
+        const top = b.y;
+        const crossedTop = prevBottom <= top && nowBottom >= top;
+        const withinWindow = (nowBottom >= top && nowBottom <= top + 20 && this.speedY < 0);
+        if (!(crossedTop || withinWindow)) return false;
+        const overlap = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+        const minOverlap = Math.min(a.w, b.w) * 0.12;
+        return overlap >= minOverlap;
     }
 
-    bounce() { this.speedY = 8; }
+    bounce() {
+        this.speedY = 12;
+        this.stompLockUntil = Date.now() + 250;
+    }
 
     applyKnockBack(fromX) {
-        const dir = this.x < fromX ? -1 : 1; // Gegner rechts? dir = -1 (nach links)
+        const dir = this.x < fromX ? -1 : 1;
         this.x += dir * 35;
         this.speedY = 14;
-        this.stompLockUntil = Date.now() + 350; // kurz Stomp sperren
+        this.stompLockUntil = Date.now() + 500;
     }
 }

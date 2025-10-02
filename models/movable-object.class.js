@@ -10,29 +10,28 @@ class MovableObject extends DrawableObject {
         setInterval(() => {
             if (this.world?.isPaused) return;
 
-            // Fallen / Steigen
+            const was = this.y;          
+
             if (this.isAboveGround() || this.speedY > 0) {
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
             }
 
-            // NICHT für fliegende/flüssige Objekte am Boden „festkleben“
             if (!(this instanceof ThrowableObject)) {
                 const ground = this.world?.groundY ?? 390;
                 const botOff = this.offset?.bottom || 0;
                 const bottom = this.y + this.height - botOff;
-
                 if (bottom >= ground && this.speedY <= 0) {
-                    // sauber aufsetzen
                     this.y = ground - (this.height - botOff);
                     this.speedY = 0;
                 }
             }
+
+            this.prevY = was;            
         }, 1000 / 25);
     }
 
     isAboveGround() {
-        // Wurfobjekte sollen ihre eigene Logik (Splash etc.) triggern
         if (this instanceof ThrowableObject) return true;
 
         const ground = this.world?.groundY ?? 390;
@@ -62,10 +61,10 @@ class MovableObject extends DrawableObject {
     }
 
     isHurt() {
-        return (Date.now() - this.lastHit) / 1000 < 0.33; // I-Frames ~330ms
+        return (Date.now() - this.lastHit) < 450;
     }
 
-    isDead() { return this.energy === 0; }
+    isDead() { return this.energy <= 0; }
 
     playAnimation(images) {
         const i = this.currentImage % images.length;

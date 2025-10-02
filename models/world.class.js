@@ -22,7 +22,7 @@ class World {
     lastThrowAt = 0;
     throwHeld = false;
 
-    // Audio (zentral)
+    // Audio
     coinSfx = new Audio('audio/coinRecievedEffect.mp3');
     bottleSfx = new Audio('audio/bottleCollectedEffect.mp3');
     bossHitSfx = new Audio('audio/bossHit.mp3');
@@ -226,7 +226,7 @@ class World {
             if (spawnY > maxY) spawnY = maxY;
 
             const b = new ThrowableObject(spawnX, spawnY, dir, this);
-            b.bornAt = Date.now(); // kurze Gnadenzeit gegen Sofort-Splash
+            b.bornAt = Date.now(); 
             this.throwableObjects.push(b);
 
             this.bottlesCount--;
@@ -234,7 +234,7 @@ class World {
             this.lastThrowAt = now;
             this.throwHeld = true;
 
-            this.character.markActive?.(); // Long-Idle abbrechen
+            this.character.markActive?.(); 
         }
     }
 
@@ -274,36 +274,30 @@ class World {
     }
 
     /* ---------------- Collisions -------------- */
-
     checkCollisions() {
         const enemies = this.level.enemies || [];
+        const colliders = enemies.filter(en => !en.dead && this.character.isColliding(en));
 
-        for (const enemy of enemies) {
-            if (enemy.dead) continue;
-            if (!this.character.isColliding(enemy)) continue;
+        if (!colliders.length) return;
+        const stompables = colliders.filter(en => this.character.isStomping(en));
 
-            // Stomp (fallend, oben drauf)
-            if (this.character.isStomping(enemy)) {
-                enemy.die?.();
-                this.character.bounce();
-                this.character.y -= 6; // entklemmen
-                break;
-            }
-
-            // Seiten-/Frontal-Treffer (mit I-Frames)
-            if (enemy.harmful !== false && !this.character.isHurt()) {
-                this.character.hit();
-                this.statusBarHealth.setPercentage(this.character.energy);
-                this.character.applyKnockBack?.(enemy.x);
-                break;
-            }
+        if (stompables.length) {
+            stompables.forEach(en => en.die?.());
+            this.character.bounce();
+            this.character.y -= 6;
+            this.level.enemies = enemies.filter(e => !e.removeMe);
+            return;
+        }
+        const hitter = colliders.find(en => en.harmful !== false);
+        if (hitter && !this.character.isHurt()) {
+            this.character.hit();
+            this.statusBarHealth.setPercentage(this.character.energy);
+            this.character.applyKnockBack?.(hitter.x);
         }
 
         this.level.enemies = enemies.filter(e => !e.removeMe);
     }
-
     /* ----------------- Pickups ---------------- */
-
     checkCoinPickup() {
         if (!this.level?.coins || !this.character) return;
         this.level.coins = this.level.coins.filter(c => {
@@ -334,11 +328,8 @@ class World {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Shake berechnen & Welt verschieben
         this.computeShakeXY();
         this.ctx.translate(this.camera_x + this._shakeX, this._shakeY);
-
         // Welt
         this.addObjectsToMap(this.level.backgroundObjects);
         this.addObjectsToMap(this.level.clouds);
@@ -347,10 +338,8 @@ class World {
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.throwableObjects);
         this.addToMap(this.character);
-
         // zurück (inkl. Shake)
         this.ctx.translate(-(this.camera_x + this._shakeX), -this._shakeY);
-
         // HUD
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoins);

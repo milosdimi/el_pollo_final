@@ -46,15 +46,15 @@
 - [ ] **Audio polish**
   - [*] SFX-Lautstärke balancieren; Mute-Toggle (Taste `M`)
 - [ ] **Pause/Resume**
-  - [ ] Taste `P`: Loops/Timer pausieren/fortsetzen ohne Reload
+  - [*] Taste `P`: Loops/Timer pausieren/fortsetzen ohne Reload
 - [*] **Clouds parallax**
-  - [ ] Leicht unterschiedliche `speed` pro Wolke (Parallax-Gefühl)
+  - [*] Leicht unterschiedliche `speed` pro Wolke (Parallax-Gefühl)
 - [ ] **Camera clamp**
   - [ ] Scrollen auf Levelgrenzen begrenzen
 - [ ] **Performance**
   - [ ] Wo sinnvoll: von `setInterval` auf `requestAnimationFrame` takten
 - [ ] **Asset preload**
-  - [ ] Frames für Bottle/Coin/Boss vorladen (Image-Cache)
+  - [*] Frames für Bottle/Coin/Boss vorladen (Image-Cache)
 
 ---
 
