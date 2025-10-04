@@ -43,9 +43,9 @@
 
 ## P2 — UX & Quality
 
-- [ ] **Audio polish**
+- [*] **Audio polish**
   - [*] SFX-Lautstärke balancieren; Mute-Toggle (Taste `M`)
-- [ ] **Pause/Resume**
+- [*] **Pause/Resume**
   - [*] Taste `P`: Loops/Timer pausieren/fortsetzen ohne Reload
 - [*] **Clouds parallax**
   - [*] Leicht unterschiedliche `speed` pro Wolke (Parallax-Gefühl)
