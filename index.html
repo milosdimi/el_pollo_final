@@ -31,10 +31,12 @@
 
 </head>
 
-<body onload="initGame()">
+<body onload="setupMenu()">
     <h1 id="title">El Pollo Loco</h1>
     <section class="stage" id="stage">
+        <!-- Canva -->
         <canvas id="canvas" width="720" height="480" tabindex="0" aria-label="Spielfeld"></canvas>
+        <!-- Tool-Bar -->
         <div class="toolbar">
             <button id="btnPause" class="btn" aria-label="Pause/Resume" title="Pause/Resume (P / ESC)">
                 ⏯
@@ -49,6 +51,20 @@
                 ↻
             </button>
         </div>
+        <!-- Start-Overlay -->
+        <div id="menuOverlay" class="overlay">
+            <img id="menuImg" alt="Start Screen" src="img/9_intro_outro_screens/start/startscreen_2.png">
+            <button id="btnPlay" class="btn primary" aria-label="Play">▶ Play</button>
+        </div>
+        <!-- End-Overlay (Win/Lose) -->
+        <div id="endOverlay" class="overlay hidden">
+            <img id="endImg" alt="Game Result">
+            <div class="overlay-actions">
+                <button id="btnBack" class="btn" aria-label="Back to start">↩ Back</button>
+                <button id="btnRestart" class="btn" aria-label="Restart">⟲ Restart</button>
+            </div>
+        </div>
+
     </section>
 
 </body>

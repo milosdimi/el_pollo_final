@@ -76,7 +76,7 @@ class World {
         const winVol = 0.75;
         const overVol = 0.75;
         const chickenVol = 0.55;
-        const hurtVol = 0.70;
+        const hurtVol = 0.45;
         const snorkVol = 0.22;
         const alertVol = 0.75;
 
@@ -200,6 +200,9 @@ class World {
             this.walkSfx?.pause?.();
             try { this.gameOverSfx.currentTime = 0; this.gameOverSfx.play(); } catch { }
             this.gameOverPlayed = true;
+            this.isPaused = true;
+            try { window.showEndOverlay && window.showEndOverlay('lose'); } catch { }
+
         }
         if (!this.winPlayed && this.endBoss && this.endBoss.dead) {
             this.gameOverSfx?.pause?.();
@@ -207,6 +210,8 @@ class World {
             this.walkSfx?.pause?.();
             try { this.winSfx.currentTime = 0; this.winSfx.play(); } catch { }
             this.winPlayed = true;
+            this.isPaused = true;
+            try { window.showEndOverlay && window.showEndOverlay('win'); } catch { }
         }
     }
 
