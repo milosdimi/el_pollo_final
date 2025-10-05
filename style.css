@@ -53,7 +53,7 @@ canvas {
     z-index: 5;
 }
 
-.toolbar .btn {
+.toolbar .btns {
     appearance: none;
     border: none;
     border-radius: 10px;
@@ -68,16 +68,16 @@ canvas {
     transition: transform .08s ease, background .15s ease, opacity .15s ease;
 }
 
-.toolbar .btn:hover {
+.toolbar .btns:hover {
     background: rgba(255, 255, 255, 0.22);
 }
 
-.toolbar .btn:active {
+.toolbar .btns:active {
     transform: translateY(1px) scale(0.98);
 }
 
 
-.toolbar .btn.is-active {
+.toolbar .btns.is-active {
     background: rgba(255, 255, 255, 0.32);
 }
 
@@ -91,7 +91,7 @@ canvas {
     gap: 16px;
     background: rgba(0, 0, 0, 0.35);
     z-index: 5;
-    
+
 }
 
 .overlay.hidden {
@@ -109,7 +109,7 @@ canvas {
 .btn {
     font-family: 'WildMexico', Arial, sans-serif;
     font-size: 20px;
-    padding: 10px 16px;
+
     border-radius: 10px;
     border: none;
     cursor: pointer;
@@ -139,10 +139,8 @@ canvas {
     }
 
     .toolbar {
-        top: auto;
-        bottom: 10px;
-        right: 50%;
-        transform: translateX(50%);
+        top: 8px;
+        left: 33%;
     }
 }
 
