@@ -194,26 +194,33 @@ class World {
 
     /* -------------- End States --------------- */
     checkEndStates() {
+        // Lose
         if (!this.gameOverPlayed && this.character?.isDead?.()) {
             this.winSfx?.pause?.();
             this.music?.pause?.();
             this.walkSfx?.pause?.();
+            this.snorkSfx?.pause?.();
+            this.bossHitSfx?.pause?.();
             try { this.gameOverSfx.currentTime = 0; this.gameOverSfx.play(); } catch { }
             this.gameOverPlayed = true;
             this.isPaused = true;
             try { window.showEndOverlay && window.showEndOverlay('lose'); } catch { }
-
         }
+
+        // Win
         if (!this.winPlayed && this.endBoss && this.endBoss.dead) {
             this.gameOverSfx?.pause?.();
             this.music?.pause?.();
             this.walkSfx?.pause?.();
+            this.snorkSfx?.pause?.();
+            this.bossHitSfx?.pause?.();
             try { this.winSfx.currentTime = 0; this.winSfx.play(); } catch { }
             this.winPlayed = true;
             this.isPaused = true;
             try { window.showEndOverlay && window.showEndOverlay('win'); } catch { }
         }
     }
+
 
     /* -------------- Screen Shake ------------- */
     triggerShake(ms = 220, mag = 10) {
