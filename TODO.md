@@ -49,11 +49,11 @@
   - [*] Taste `P`: Loops/Timer pausieren/fortsetzen ohne Reload
 - [*] **Clouds parallax**
   - [*] Leicht unterschiedliche `speed` pro Wolke (Parallax-Gefühl)
-- [ ] **Camera clamp**
+- [*] **Camera clamp**
   - [ ] Scrollen auf Levelgrenzen begrenzen
-- [ ] **Performance**
-  - [ ] Wo sinnvoll: von `setInterval` auf `requestAnimationFrame` takten
-- [ ] **Asset preload**
+- [*] **Performance**
+  - [*] Wo sinnvoll: von `setInterval` auf `requestAnimationFrame` takten
+- [*] **Asset preload**
   - [*] Frames für Bottle/Coin/Boss vorladen (Image-Cache)
 
 ---

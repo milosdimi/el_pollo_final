@@ -2,15 +2,17 @@ class EndBoss extends MovableObject {
     height = 400;
     width = 250;
     y = 60;
+    speed = 10;
     offset = { top: 40, bottom: 35, left: 25, right: 30 };
 
     // Timing / Verhalten
     ANIM_FPS = 9;
-    ALERT_MS = 900;
+    ALERT_MS = 1600;
     HURT_MS = 450;
     DEAD_FRAME_MS = 140;
     DEAD_HOLD_MS = 800;
-    NEAR_RANGE = 120;
+
+    ATTACK_DIST = 60;
 
     IMAGES_ALERT = [
         'img/4_enemie_boss_chicken/2_alert/G5.png',
@@ -51,8 +53,12 @@ class EndBoss extends MovableObject {
 
     state = 'idle';
     energy = 100;
-    baseSpeed = 0.45;
-    speed = 0.45;
+
+    // Boss Speed
+    baseSpeed = 10;
+    SPEED_HIT_BOOST = 10;
+    MAX_SPEED = 15;
+
     activated = false;
     harmful = true;
 
@@ -69,17 +75,16 @@ class EndBoss extends MovableObject {
         this.loadImages(this.IMAGES_DEAD);
 
         this.x = 2500;
+        this.speed = this.baseSpeed;
 
         // Pausen-sichere Loops
         this.aiLoop = setInterval(() => { if (!this.world?.isPaused) this.updateAI(); }, 1000 / 20);
         this.animLoop = setInterval(() => { if (!this.world?.isPaused) this.playStateAnimation(); }, 1000 / this.ANIM_FPS);
     }
 
-    // --- Helpers ---
     choose(frames, fallback = this.IMAGES_ALERT) { return (frames && frames.length) ? frames : fallback; }
     setState(s) { if (!this.dead && this.state !== s) this.state = s; }
 
-    // --- Animation ---
     playStateAnimation() {
         if (this.state === 'dead') { this.playAnimation(this.choose(this.IMAGES_DEAD)); return; }
         if (this.state === 'hurt') { this.playAnimation(this.choose(this.IMAGES_HURT)); return; }
@@ -88,7 +93,6 @@ class EndBoss extends MovableObject {
         this.playAnimation(this.choose(this.IMAGES_WALK)); // default
     }
 
-    // Boss wird erst aktiv, wenn im Viewport
     isInView() {
         if (!this.world) return false;
         const left = -this.world.camera_x;
@@ -96,7 +100,6 @@ class EndBoss extends MovableObject {
         return this.x < right + 50 && (this.x + this.width) > left - 50;
     }
 
-    // --- AI ---
     updateAI() {
         if (this.dead || this.deadPlaying) return;
 
@@ -104,6 +107,7 @@ class EndBoss extends MovableObject {
         if (this.alertUntil && Date.now() < this.alertUntil) return;
         if (this.state === 'hurt') return;
 
+        // Aktivierung beim ersten Sichtkontakt
         if (!this.activated) {
             if (this.isInView()) {
                 this.activated = true;
@@ -117,24 +121,27 @@ class EndBoss extends MovableObject {
             return;
         }
 
+        // Ziel verfolgen
         const cx = this.world?.character?.x ?? this.x;
         const dx = cx - this.x;
-        const near = Math.abs(dx) < this.NEAR_RANGE;
+        const absDx = Math.abs(dx);
 
-        if (near) { this.setState('attack'); return; }
+        // Attack-Animation nur als Signal, Bewegung geht weiter
+        if (absDx <= this.ATTACK_DIST) this.setState('attack');
+        else this.setState('walk');
 
-        this.setState('walk');
         if (dx < 0) { this.otherDirection = false; this.moveLeft(); }
         else { this.otherDirection = true; this.moveRight(); }
     }
 
-    // --- Treffer / Speedup / Death ---
     takeHit(dmg = 25) {
         if (this.dead || this.deadPlaying) return;
         this.energy = Math.max(0, this.energy - dmg);
-        this.speed = Math.min(this.speed + 0.25, 3.0); // wird pro Hit schneller
+        // wird pro Hit schneller
+        this.speed = Math.min(this.speed + this.SPEED_HIT_BOOST, this.MAX_SPEED);
         this.setState('hurt');
         this.world?.statusBarBoss?.setPercentage?.(this.energy);
+
         setTimeout(() => { if (!this.dead) this.setState('attack'); }, this.HURT_MS);
         if (this.energy === 0) this.die();
     }
@@ -149,7 +156,6 @@ class EndBoss extends MovableObject {
         this.playDeadOnce();
     }
 
-    // Dead-Animation einmal durchlaufen lassen — pausensicher
     playDeadOnce() {
         if (this.deadPlaying) return;
         this.deadPlaying = true;
@@ -162,7 +168,7 @@ class EndBoss extends MovableObject {
         const frameMs = this.DEAD_FRAME_MS;
 
         this._deadLoop = setInterval(() => {
-            if (this.world?.isPaused) return; // während Pause nicht weiterblättern
+            if (this.world?.isPaused) return;
             this.img = this.imageCache[frames[i++]];
             if (i >= frames.length) {
                 clearInterval(this._deadLoop);
