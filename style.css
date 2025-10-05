@@ -32,10 +32,64 @@ canvas {
     top: 124px;
 }
 
+.stage {
+    position: relative;
+    display: inline-block;
+}
+
+.toolbar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.35);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.toolbar .btn {
+    appearance: none;
+    border: none;
+    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+    line-height: 42px;
+    text-align: center;
+    cursor: pointer;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    transition: transform .08s ease, background .15s ease, opacity .15s ease;
+}
+
+.toolbar .btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.toolbar .btn:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+
+.toolbar .btn.is-active {
+    background: rgba(255, 255, 255, 0.32);
+}
+
 @media only screen and (max-width: 760px) {
     canvas {
         width: 100%;
         height: auto;
+    }
+
+    .toolbar {
+        top: auto;
+        bottom: 10px;
+        right: 50%;
+        transform: translateX(50%);
     }
 }
 
@@ -43,6 +97,7 @@ canvas {
     canvas {
         height: 100vh;
     }
+
     #title {
         display: none;
     }
