@@ -32,6 +32,7 @@ class World {
     chickenSfx = new Audio('audio/chicken-noise-196746.mp3');
     hurtSfx = new Audio('audio/auah.mp3');
     snorkSfx = new Audio('audio/snorking.mp3');
+    bossAlertSfx = new Audio('audio/watch-out.mp3');
     winSfx = new Audio('audio/win.mp3');
     gameOverSfx = new Audio('audio/game_over.mp3');
 
@@ -77,6 +78,7 @@ class World {
         const chickenVol = 0.55;
         const hurtVol = 0.70;
         const snorkVol = 0.22;
+        const alertVol = 0.75;
 
         this.coinSfx.volume = sfxVol;
         this.bottleSfx.volume = sfxVol;
@@ -87,6 +89,7 @@ class World {
         this.jumpSfx.volume = jumpVol;
         this.chickenSfx.volume = chickenVol;
         this.music.volume = musicVol;
+        this.bossAlertSfx.volume = alertVol;
         this.winSfx.volume = winVol;
         this.gameOverSfx.volume = overVol;
     }
@@ -110,7 +113,7 @@ class World {
         [
             this.coinSfx, this.bottleSfx, this.bossHitSfx, this.music,
             this.walkSfx, this.jumpSfx, this.winSfx, this.gameOverSfx,
-            this.chickenSfx, this.hurtSfx, this.snorkSfx
+            this.chickenSfx, this.hurtSfx, this.snorkSfx, this.bossAlertSfx
         ].forEach(a => a && (a.muted = this.isMuted));
     }
     toggleMute() { this.setMuted(!this.isMuted); }

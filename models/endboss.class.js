@@ -112,6 +112,10 @@ class EndBoss extends MovableObject {
             if (this.isInView()) {
                 this.activated = true;
                 this.setState('alert');
+                try {
+                    const s = this.world?.bossAlertSfx;
+                    if (s) { s.currentTime = 0; s.play(); }
+                } catch { }
                 this.alertUntil = Date.now() + this.ALERT_MS;
                 setTimeout(() => {
                     if (!this.dead && this.state === 'alert') this.setState('walk');
