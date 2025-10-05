@@ -2,63 +2,59 @@ let canvas;
 let world;
 let keyboard = new Keyboard();
 
+function initGame() {
+    canvas = document.getElementById('canvas');
+    world = new World(canvas, keyboard);
+    wireToolbar();
+}
+
 function wireToolbar() {
     const $ = (id) => document.getElementById(id);
+    const stage = $('stage');
     const btnPause = $('btnPause');
     const btnMute = $('btnMute');
     const btnFS = $('btnFS');
     const btnReload = $('btnReload');
-    const stage = $('stage');
 
-    btnPause?.addEventListener('click', () => {
-        if (window.world) world.togglePause();
-        updateToolbarState();
-    });
-
-    btnMute?.addEventListener('click', () => {
-        if (window.world) world.toggleMute();
-        updateToolbarState();
-    });
-
-    btnFS?.addEventListener('click', async () => {
+    const toggleFS = async () => {
         try {
             if (!document.fullscreenElement) {
                 await stage.requestFullscreen?.();
             } else {
                 await document.exitFullscreen?.();
             }
-        } catch (e) { }
+        } catch { }
         updateToolbarState();
-    });
+    };
 
+    btnPause?.addEventListener('click', () => { world?.togglePause(); updateToolbarState(); });
+    btnMute?.addEventListener('click', () => { world?.toggleMute(); updateToolbarState(); });
+    btnFS?.addEventListener('click', toggleFS);
     btnReload?.addEventListener('click', () => location.reload());
 
     function updateToolbarState() {
-        const paused = !!window.world?.isPaused;
-        const muted = !!window.world?.isMuted;
-        btnPause?.classList.toggle('is-active', paused);
+        const paused = !!world?.isPaused;
+        const muted = !!world?.isMuted;
         btnPause && (btnPause.textContent = paused ? '▶' : '⏯');
-
-        btnMute?.classList.toggle('is-active', muted);
+        btnPause?.classList.toggle('is-active', paused);
         btnMute && (btnMute.textContent = muted ? '🔇' : '🔊');
-
-        const fs = !!document.fullscreenElement;
-        btnFS && (btnFS.textContent = fs ? '🡼' : '⛶');
+        btnMute?.classList.toggle('is-active', muted);
+        btnFS && (btnFS.textContent = document.fullscreenElement ? '🡼' : '⛶');
     }
 
     window.addEventListener('keydown', () => setTimeout(updateToolbarState, 0));
     document.addEventListener('fullscreenchange', updateToolbarState);
-
+    setInterval(updateToolbarState, 300);
     updateToolbarState();
 
-    setInterval(updateToolbarState, 300);
+    window.addEventListener('keydown', (e) => {
+        if (e.repeat) return;
+        if (e.code === 'KeyF' || e.keyCode === 70) toggleFS();
+        if (e.code === 'KeyR' || e.keyCode === 82) location.reload();
+    });
 }
 
-function initGame() {
-    canvas = document.getElementById('canvas');
-    world = new World(canvas, keyboard);
-    wireToolbar();
-}
+
 
 
 window.addEventListener("keydown", (e) => {

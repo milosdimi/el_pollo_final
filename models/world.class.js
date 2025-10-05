@@ -69,7 +69,7 @@ class World {
     /* ----------------- Audio ----------------- */
     applyAudioMix() {
         const walkVol = 0.10;
-        const jumpVol = 0.10;
+        const jumpVol = 0.05;
         const sfxVol = 0.10;
         const bossVol = 0.80;
         const musicVol = 0.28;
