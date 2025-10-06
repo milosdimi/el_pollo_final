@@ -14,52 +14,63 @@
   - [*] (Optional) Bodenaufprall splasht (wenn `y` Boden erreicht)
 - [*] **Stomp kill on chickens**
   - [*] Downward-Kontakt (fallend) ⇒ Chicken stirbt (Dead-Sprite/Remove)
-  - [*] Charakter bounct leicht hoch (`speedY` z. B. 15)
+  - [*] Charakter bounct leicht hoch
   - [*] Seitenkollisionen verletzen weiterhin den Spieler
 - [*] **Player hurt knockback**
-  - [*] Bei `isHurt()`: kurzer horizontaler Rückstoß + Mini-Hop
-  - [*] I-Frames (~0.2 s) bleiben aktiv
+  - [*] Rückstoß + I-Frames (~0.2–0.5 s)
 - [*] **Endboss AI + damage**
-  - [*] Aktiviert bei Sichtkontakt/Viewport
-  - [*] `moveLeft()` Richtung Spieler; Speed steigt pro Treffer
-  - [*] Flaschen-Treffer reduzieren Boss-Energie (3–4 Hits total)
-  - [*] `StatusbarBoss` bei Treffern updaten
-  - [*] (Optional) Boss-Kontakt = sofortiger Tod
+  - [*] Aktiviert bei Sichtkontakt/Viewport (Alert)
+  - [*] Jagd den Spieler; Speed steigt pro Treffer
+  - [*] Flaschen-Treffer reduzieren Boss-Energie
+  - [*] `StatusbarBoss` updaten
 - [*] **Bottle throw rules**
   - [*] Wurf nur bei `bottlesCount > 0`
-  - [*] Wurf-Cooldown (z. B. 300–500 ms)
-  - [*] Count verringern + Bottle-Leiste aktualisieren
+  - [*] Cooldown
+  - [*] Count verringern + Leiste aktualisieren
 
 ## P1 — Content & Balancing
 
-- [*] **SmallChicken enemy**
-  - [*] Neue Klasse `SmallChicken` (kleiner, schneller, weniger HP)
-  - [*] Spawn-Mix in `level1.js` ergänzen
-- [*] **Enemy speeds & counts**
-  - [*] `speed`/Anzahl für Chicken/SmallChicken/Endboss feinjustieren
-  - [*] Schwierigkeit kurvig statt spiky
-- [*] **Coins & Bottles placements**
-  - [*] Positionen/Mengen so setzen, dass vor dem Boss genug Flaschen da sind
+- [*] **SmallChicken enemy** (kleiner, schneller)
+- [*] **Enemy speeds & counts** (feinjustiert)
+- [*] **Coins & Bottles placements** (genug Flaschen vor Boss)
+- [*] **Boss-Alert-Sound** (watch-out) beim ersten Sichtkontakt
 
 ## P2 — UX & Quality
 
 - [*] **Audio polish**
-  - [*] SFX-Lautstärke balancieren; Mute-Toggle (Taste `M`)
+  - [*] Lautstärken balanciert
+  - [ ] **Start-Delay der SFX beheben** (SFX ohne ⏱ Verzögerung direkt nach Spielstart)
+  - [ ] **Mute-Status in `localStorage` persistieren** (wird beim Start übernommen)
 - [*] **Pause/Resume**
-  - [*] Taste `P`: Loops/Timer pausieren/fortsetzen ohne Reload
+  - [*] Taste `P`/`ESC` + Toolbar-Button
 - [*] **Clouds parallax**
-  - [*] Leicht unterschiedliche `speed` pro Wolke (Parallax-Gefühl)
-- [*] **Camera clamp**
-  - [ ] Scrollen auf Levelgrenzen begrenzen
 - [*] **Performance**
   - [*] Wo sinnvoll: von `setInterval` auf `requestAnimationFrame` takten
 - [*] **Asset preload**
-  - [*] Frames für Bottle/Coin/Boss vorladen (Image-Cache)
+  - [*] Frames für Bottle/Coin/Boss im Image-Cache
+- [ ] **Camera clamp**
+  - [ ] Scrollen auf Levelgrenzen begrenzen
+- [*] **Start-/End-Overlays**
+  - [*] Startscreen (Play)
+  - [*] Win/Lose-Bild + Aktionen
+- [*] **Toolbar**
+  - [*] Buttons (Pause/Mute/FS/Reload)
+  - [*] **Kein Fokusklau** (Space toggelt nicht mehr Buttons)
+  - [ ] **Soft-Reload** (nur Spiel neu starten, **ohne** Page-Refresh/Startscreen)
+- [ ] **Controls/Info**
+  - [ ] **Controls-Overlay** (Tasten/Touch-Controls anzeigen)
+  - [ ] **Info-Popup** (kurze Hinweise)
+  - [ ] **Kurzgeschichte/Story-Popup**
+- [ ] **Responsive & Mobile**
+  - [ ] **Mobile Steuerungs-Overlays** (Control-Images/Buttons)
+  - [ ] **Responsive Optimierung** (Toolbar/Overlays/Canvas auf kleinen Screens)
+- [ ] **Footer/Legal**
+  - [ ] Footer mit **Impressum**, **Datenschutz**, optional **Cookie-Hinweis**
 
 ---
 
 ## Nice-to-have / Später
 
-- [ ] Level 2 vorbereiten (neue Enemy-Mischung, Boss-Variante)
+- [ ] **Level-Auswahl** (Startscreen) + **Level 2**
 - [ ] Partikel/Hit-FX (Staub beim Landen, Treffer-Funken)
-- [ ] Win/Lose-Screens (Restart ohne Reload)
+- [ ] Win/Lose-Screens mit Restart **ohne** Reload (Soft-Restart)

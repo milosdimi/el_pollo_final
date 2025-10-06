@@ -5,6 +5,8 @@ class World {
     ctx;
     keyboard;
     camera_x = 0;
+    alive = true;
+    loopId = null;
 
     // HUD
     statusBarHealth = new StatusbarHealth();
@@ -240,15 +242,13 @@ class World {
 
     /* ---------------- Game Loop --------------- */
     run() {
-        setInterval(() => {
+        this.loopId = setInterval(() => {
             this.checkPauseToggle();
             if (this.isPaused) return;
-
             this.checkMuteToggle();
             this.updateWalkSfx();
             this.updateLongIdleSfx();
             this.checkEndStates();
-
             this.checkCollisions();
             this.checkThrowObjects();
             this.checkCoinPickup();
@@ -385,6 +385,7 @@ class World {
 
     /* ------------------- Draw ----------------- */
     draw() {
+        if (!this.alive) return;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.computeShakeXY();
         this.ctx.translate(this.camera_x + this._shakeX, this._shakeY);
@@ -419,8 +420,25 @@ class World {
             ctx.restore();
         }
 
-        requestAnimationFrame(() => this.draw());
+        if (this.alive) requestAnimationFrame(() => this.draw());
     }
+
+    dispose() {
+        this.alive = false;
+        if (this.loopId) { clearInterval(this.loopId); this.loopId = null; }
+
+        const audios = [
+            this.music, this.walkSfx, this.jumpSfx, this.snorkSfx,
+            this.coinSfx, this.bottleSfx, this.bossHitSfx,
+            this.chickenSfx, this.hurtSfx, this.winSfx, this.gameOverSfx, this.bossAlertSfx
+        ];
+        audios.forEach(a => {
+            try { a && a.pause && a.pause(); } catch { }
+            try { if (a) a.currentTime = 0; } catch { }
+        });
+    }
+
+
 
     addObjectsToMap(objects) { (objects || []).forEach(o => this.addToMap(o)); }
 
