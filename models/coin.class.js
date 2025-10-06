@@ -10,14 +10,14 @@ class Coin extends MovableObject {
     ];
 
     constructor(x, y) {
-        super().loadImage(this.IMAGES_COIN[0]);
-        this.x = x;
-        this.y = y;
+        super();
+        this.loadImage(this.IMAGES_COIN[0]);
         this.loadImages(this.IMAGES_COIN);
-        
-        this.x += (Math.random() * 10) - 1;
-        this.y += (Math.random() * 24) - 100;
+        this.x = x + (Math.random() * 10) - 5;
+        this.y = y + (Math.random() * 24) - 12;
 
-        setInterval(() => this.playAnimation(this.IMAGES_COIN), 1000 / 3);
+        this._anim = setInterval(() => {
+            this.playAnimation(this.IMAGES_COIN);
+        }, 1000 / 3);
     }
 }

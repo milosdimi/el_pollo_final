@@ -68,7 +68,8 @@ class Character extends MovableObject {
     ];
 
     constructor() {
-        super().loadImage('img/2_character_pepe/2_walk/W-21.png');
+        super();
+        this.loadImage('img/2_character_pepe/2_walk/W-21.png');
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_JUMPING);
         this.loadImages(this.IMAGES_DEAD);
@@ -79,16 +80,31 @@ class Character extends MovableObject {
         this.animate();
     }
 
+    // State-to-Images Map
+    getStateImages() {
+        const states = {
+            dead: this.IMAGES_DEAD,
+            hurt: this.IMAGES_HURT,
+            jumping: this.IMAGES_JUMPING,
+            walking: this.IMAGES_WALKING,
+            longIdle: this.IMAGES_LONG_IDLE,
+            idle: this.IMAGES_IDLE
+        };
+        return states[this.state] || states.idle;
+    }
+
     animate() {
-        setInterval(() => this.moveCharacter(), 1000 / 60);
-        setInterval(() => this.playCharacterAnimation(), 100);
+        this._move = setInterval(() => this.moveCharacter(), 1000 / 60);
+        this._anim = setInterval(() => this.playCharacterAnimation(), 100);
     }
 
     moveCharacter() {
         if (this.world?.isPaused || this.isDead()) return;
 
         const kb = this.world?.keyboard || {};
-        if (kb.RIGHT && this.x < (this.world?.level?.level_end_x ?? 3000)) {
+        const levelEnd = this.world?.level?.level_end_x ?? 3000;
+
+        if (kb.RIGHT && this.x < levelEnd) {
             this.moveRight();
             this.otherDirection = false;
             this.markActive();
@@ -100,7 +116,6 @@ class Character extends MovableObject {
         }
         if (kb.SPACE && !this.isAboveGround()) {
             this.jump();
-            this.world?.onJump?.();
             this.markActive();
         }
 
@@ -110,15 +125,28 @@ class Character extends MovableObject {
     playCharacterAnimation() {
         if (this.world?.isPaused) return;
 
-        if (this.isDead()) { this.playAnimation(this.IMAGES_DEAD); return; }
-        if (this.isHurt()) { this.playAnimation(this.IMAGES_HURT); return; }
-        if (this.isAboveGround()) { this.playAnimation(this.IMAGES_JUMPING); this.markActive(); return; }
-        if (this.isMovingKeyDown()) { this.playAnimation(this.IMAGES_WALKING); this.markActive(); return; }
+        if (this.isDead()) {
+            this.playAnimation(this.IMAGES_DEAD);
+            return;
+        }
+        if (this.isHurt()) {
+            this.playAnimation(this.IMAGES_HURT);
+            return;
+        }
+        if (this.isAboveGround()) {
+            this.playAnimation(this.IMAGES_JUMPING);
+            this.markActive();
+            return;
+        }
+        if (this.isMovingKeyDown()) {
+            this.playAnimation(this.IMAGES_WALKING);
+            this.markActive();
+            return;
+        }
 
         const idleFor = Date.now() - this.lastActiveAt;
-        (idleFor >= this.LONG_IDLE_AFTER_MS)
-            ? this.playAnimation(this.IMAGES_LONG_IDLE)
-            : this.playAnimation(this.IMAGES_IDLE);
+        const images = (idleFor >= this.LONG_IDLE_AFTER_MS) ? this.IMAGES_LONG_IDLE : this.IMAGES_IDLE;
+        this.playAnimation(images);
     }
 
     isMovingKeyDown() {
@@ -126,22 +154,26 @@ class Character extends MovableObject {
         return !!(kb && (kb.RIGHT || kb.LEFT));
     }
 
-    markActive() { this.lastActiveAt = Date.now(); }
+    markActive() {
+        this.lastActiveAt = Date.now();
+    }
 
     isStomping(enemy) {
-        if (!enemy || enemy.dead) return false;
-        if (this.isHurt()) return false;
-        const a = this.getHitBox ? this.getHitBox() : { x: this.x, y: this.y, w: this.width, h: this.height };
-        const b = enemy.getHitBox ? enemy.getHitBox() : { x: enemy.x, y: enemy.y, w: enemy.width, h: enemy.height };
+        if (!enemy || enemy.dead || this.isHurt()) return false;
+
+        const a = this._getBox(this);
+        const b = this._getBox(enemy);
         const offB = this.offset?.bottom || 0;
         const prevBottom = (this.prevY ?? this.y) + (this.height - offB);
         const nowBottom = a.y + a.h;
         const top = b.y;
         const crossedTop = prevBottom <= top && nowBottom >= top;
         const withinWindow = (nowBottom >= top && nowBottom <= top + 20 && this.speedY < 0);
+
         if (!(crossedTop || withinWindow)) return false;
+
         const overlap = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-        const minOverlap = Math.min(a.w, b.w) * 0.12;
+        const minOverlap = Math.min(a.w, b.w) * 0.15; // Von 0.12 auf 0.15 (tight-er)
         return overlap >= minOverlap;
     }
 

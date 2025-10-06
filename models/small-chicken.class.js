@@ -11,13 +11,14 @@ class SmallChicken extends MovableObject {
     ];
     IMAGES_DEAD = ['img/3_enemies_chicken/chicken_small/2_dead/dead.png'];
 
-    constructor(x = 300 + Math.random() * 2500,
-        speed = 0.6 + Math.random() * 0.8) {
-        super().loadImage(this.IMAGES_WALK[0]);
+    constructor(x = 300 + Math.random() * 2500, speed = 0.6 + Math.random() * 0.8) {
+        super();
+        this.loadImage(this.IMAGES_WALK[0]);
         this.loadImages(this.IMAGES_WALK);
         this.loadImages(this.IMAGES_DEAD);
         this.x = x;
         this.speed = speed;
+        this.harmful = true;
         this.animate();
     }
 
@@ -41,6 +42,6 @@ class SmallChicken extends MovableObject {
         clearInterval(this._walk);
         clearInterval(this._anim);
         this.img = this.imageCache[this.IMAGES_DEAD[0]];
-        setTimeout(() => this.removeMe = true, 350);
+        setTimeout(() => { this.removeMe = true; }, 350);
     }
 }

@@ -40,25 +40,18 @@ class DrawableObject {
         };
     }
 
+    // Hilfs-Check für Debug-Relevanz
+    _isDebugRelevant() {
+        const name = this.constructor?.name;
+        return ['Character', 'Chicken', 'SmallChicken', 'EndBoss', 'Coin', 'Bottle', 'ThrowableObject'].includes(name);
+    }
+
     // Debug-Rahmen (no-op, wenn Flag aus)
     drawFrame(ctx) {
-        // Globales Flag (z. B. in game.js: window.DEBUG_HITBOX = false;)
         const globalFlag = (typeof window !== 'undefined') && window.DEBUG_HITBOX;
         const worldFlag = this.world && this.world.debugHitboxes;
         const enabled = this.debug || globalFlag || worldFlag;
-        if (!enabled) return;
-
-        // Nur für relevante Klassen zeichnen
-        const isInteresting =
-            this.constructor?.name === 'Character' ||
-            this.constructor?.name === 'Chicken' ||
-            this.constructor?.name === 'SmallChicken' ||
-            this.constructor?.name === 'EndBoss' ||
-            this.constructor?.name === 'Coin' ||
-            this.constructor?.name === 'Bottle' ||
-            this.constructor?.name === 'ThrowableObject';
-
-        if (!isInteresting) return;
+        if (!enabled || !this._isDebugRelevant()) return;
 
         ctx.save();
 
@@ -76,5 +69,5 @@ class DrawableObject {
         ctx.strokeRect(hb.x, hb.y, hb.w, hb.h);
 
         ctx.restore();
-    } // Am Projektende einfach Flag aus 
+    }
 }

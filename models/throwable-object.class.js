@@ -19,7 +19,8 @@ class ThrowableObject extends MovableObject {
     ];
 
     constructor(x, y, dir = 1, world) {
-        super().loadImage(this.IMAGES_ROTATE[0]);
+        super();
+        this.loadImage(this.IMAGES_ROTATE[0]);
         this.loadImages(this.IMAGES_ROTATE);
         this.loadImages(this.IMAGES_SPLASH);
 
@@ -27,46 +28,55 @@ class ThrowableObject extends MovableObject {
         this.x = x;
         this.y = y;
         this.bornAt = Date.now();
+        this.splashed = false;
 
-        this.throwVx = (dir >= 0 ? 1 : -1) * 8; // horizontal speed
-        this.speedY = 20;                      // initial "jump"
+        this.throwVx = (dir >= 0 ? 1 : -1) * 8;
+        this.speedY = 20;
 
-        this.applyGravity(); 
+        this.applyGravity();
         this.start();
     }
 
     start() {
-        this._fly = setInterval(() => { if (!this.world?.isPaused) this.x += this.throwVx; }, 1000 / 60);
-        this._spin = setInterval(() => { if (!this.world?.isPaused) this.playAnimation(this.IMAGES_ROTATE); }, 1000 / 20);
+        this._fly = setInterval(() => {
+            if (!this.world?.isPaused) this.x += this.throwVx;
+        }, 1000 / 60);
+
+        this._spin = setInterval(() => {
+            if (!this.world?.isPaused) this.playAnimation(this.IMAGES_ROTATE);
+        }, 1000 / 20);
     }
 
     splash() {
         if (this.splashed) return;
         this.splashed = true;
 
-        // Flug stoppen
         this.throwVx = 0;
         this.speedY = 0;
         clearInterval(this._fly);
         clearInterval(this._spin);
 
         const frames = this.IMAGES_SPLASH;
-        if (!frames?.length) { this.removeMe = true; return; }
+        if (!frames?.length) {
+            this.removeMe = true;
+            return;
+        }
 
         let i = 0;
         this._splash = setInterval(() => {
-            if (this.world?.isPaused) return;               // Splash-Frames bei Pause einfrieren
+            if (this.world?.isPaused) return;
             const path = frames[i++];
             const img = this.imageCache?.[path];
             if (img) this.img = img;
-            if (i >= frames.length) { clearInterval(this._splash); this.removeMe = true; }
+            if (i >= frames.length) {
+                clearInterval(this._splash);
+                this.removeMe = true;
+            }
         }, 1000 / 14);
     }
 
-    // Bodenprüfung relativ zur Welt-Bodenlinie
     isAboveGround() {
         if (this.splashed) return false;
-        const g = this.world?.groundY ?? 380;
-        return this.y < g - this.height || this.speedY > 0;
+        return this.getBottomY() < this.getGroundLevel() || this.speedY > 0;
     }
 }

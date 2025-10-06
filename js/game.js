@@ -33,10 +33,7 @@ function setupMenu() {
 
   // End-Overlay Buttons
   btnRestart && (btnRestart.onclick = () => location.reload());
-  btnBack && (btnBack.onclick = () => {
-    // Zurück zum Startscreen 
-    location.reload();
-  });
+  btnBack && (btnBack.onclick = () => location.reload());
 
   // Globale Hook-Funktion, die World bei Win/Lose aufruft
   window.showEndOverlay = (type) => {
@@ -53,7 +50,6 @@ function startGame() {
   if (menuOverlay) menuOverlay.classList.add('hidden');
   initGame();
   canvas?.focus?.();
-  try { world?.music?.play?.(); } catch { }
 }
 
 /* =========================
@@ -65,9 +61,9 @@ function initGame() {
   wireToolbar();
 
   if (!window.showEndOverlay) {
+    const endOverlay = document.getElementById('endOverlay');
+    const endImg = document.getElementById('endImg');
     window.showEndOverlay = (type) => {
-      const endOverlay = document.getElementById('endOverlay');
-      const endImg = document.getElementById('endImg');
       if (!endOverlay || !endImg) return;
       endImg.src = (type === 'win')
         ? 'img/You won, you lost/You Won B.png'
@@ -78,13 +74,12 @@ function initGame() {
 }
 
 /* =========================
-   Toolbar (Pause/Mute/FS/Reload) + Hotkeys F/R
+   Toolbar (Pause/FS/Reload) + Hotkeys F/R
    ========================= */
 function wireToolbar() {
   const $ = (id) => document.getElementById(id);
   const stage = $('stage');
   const btnPause = $('btnPause');
-  const btnMute = $('btnMute');
   const btnFS = $('btnFS');
   const btnReload = $('btnReload');
 
@@ -100,21 +95,15 @@ function wireToolbar() {
   };
 
   btnPause?.addEventListener('click', () => { world?.togglePause(); updateToolbarState(); });
-  btnMute?.addEventListener('click', () => { world?.toggleMute(); updateToolbarState(); });
   btnFS?.addEventListener('click', toggleFS);
   btnReload?.addEventListener('click', () => location.reload());
 
   function updateToolbarState() {
     const paused = !!world?.isPaused;
-    const muted = !!world?.isMuted;
 
     if (btnPause) {
       btnPause.textContent = paused ? '▶' : '⏯';
       btnPause.classList.toggle('is-active', paused);
-    }
-    if (btnMute) {
-      btnMute.textContent = muted ? '🔇' : '🔊';
-      btnMute.classList.toggle('is-active', muted);
     }
     if (btnFS) {
       btnFS.textContent = document.fullscreenElement ? '🡼' : '⛶';
@@ -134,7 +123,7 @@ function wireToolbar() {
 }
 
 /* =========================
-   Keyboard (Pfeile/Space/D/M/P/ESC)
+   Keyboard (Pfeile/Space/D/P/ESC)
    ========================= */
 window.addEventListener("keydown", (e) => {
   switch (e.keyCode) {
@@ -144,7 +133,6 @@ window.addEventListener("keydown", (e) => {
     case 40: keyboard.DOWN = true; break;
     case 32: keyboard.SPACE = true; break;
     case 68: keyboard.D = true; break; // Throw
-    case 77: keyboard.M = true; break; // Mute
     case 80: keyboard.P = true; break; // Pause
     case 27: keyboard.ESC = true; break; // Pause
   }
@@ -158,7 +146,6 @@ window.addEventListener("keyup", (e) => {
     case 40: keyboard.DOWN = false; break;
     case 32: keyboard.SPACE = false; break;
     case 68: keyboard.D = false; break;
-    case 77: keyboard.M = false; break;
     case 80: keyboard.P = false; break;
     case 27: keyboard.ESC = false; break;
   }

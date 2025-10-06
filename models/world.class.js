@@ -17,6 +17,7 @@ class World {
     // Gameplay
     throwableObjects = [];
     bottlesCount = 0;
+    coinsCount = 0;
     groundY = 400;
 
     // Throw debounce
@@ -24,205 +25,57 @@ class World {
     lastThrowAt = 0;
     throwHeld = false;
 
-    // Audio
-    coinSfx = new Audio('audio/coinRecievedEffect.mp3');
-    bottleSfx = new Audio('audio/bottleCollectedEffect.mp3');
-    bossHitSfx = new Audio('audio/bossHit.mp3');
-    music = new Audio('audio/background-music.mp3');
-    walkSfx = new Audio('audio/walkEffect.mp3');
-    jumpSfx = new Audio('audio/jump.mp3');
-    chickenSfx = new Audio('audio/chicken-noise-196746.mp3');
-    hurtSfx = new Audio('audio/auah.mp3');
-    snorkSfx = new Audio('audio/snorking.mp3');
-    bossAlertSfx = new Audio('audio/watch-out.mp3');
-    winSfx = new Audio('audio/win.mp3');
-    gameOverSfx = new Audio('audio/game_over.mp3');
-
-    winPlayed = false;
-    gameOverPlayed = false;
-
-    // Pause / Mute
-    isPaused = false; _pauseHeld = false;
-    isMuted = false; _muteHeld = false;
+    // Pause
+    isPaused = false;
+    _pauseHeld = false;
 
     // Screen shake
-    _shakeStart = 0; _shakeEnd = 0; _shakeMagStart = 0;
-    _shakeX = 0; _shakeY = 0;
+    _shakeStart = 0;
+    _shakeEnd = 0;
+    _shakeMagStart = 0;
+    _shakeX = 0;
+    _shakeY = 0;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
-
-        // Grundkonfig
-        this.music.loop = true;
-        this.walkSfx.loop = true;
-        this.snorkSfx.loop = true;
-
-        this.applyAudioMix();
-        this.preloadSfx();
-        this.enableAudioOnFirstInput();
-
-        this.draw();
         this.setWorld();
+        this.draw();
         this.run();
-    }
-
-    /* ----------------- Audio ----------------- */
-    applyAudioMix() {
-        const walkVol = 0.10;
-        const jumpVol = 0.05;
-        const sfxVol = 0.10;
-        const bossVol = 0.80;
-        const musicVol = 0.28;
-        const winVol = 0.75;
-        const overVol = 0.75;
-        const chickenVol = 0.55;
-        const hurtVol = 0.45;
-        const snorkVol = 0.22;
-        const alertVol = 0.75;
-
-        this.coinSfx.volume = sfxVol;
-        this.bottleSfx.volume = sfxVol;
-        this.bossHitSfx.volume = bossVol;
-        this.hurtSfx.volume = hurtVol;
-        this.snorkSfx.volume = snorkVol;
-        this.walkSfx.volume = walkVol;
-        this.jumpSfx.volume = jumpVol;
-        this.chickenSfx.volume = chickenVol;
-        this.music.volume = musicVol;
-        this.bossAlertSfx.volume = alertVol;
-        this.winSfx.volume = winVol;
-        this.gameOverSfx.volume = overVol;
-    }
-
-    preloadSfx() {
-        const toLoad = [
-            this.walkSfx, this.jumpSfx, this.coinSfx, this.bottleSfx,
-            this.bossHitSfx, this.chickenSfx, this.hurtSfx, this.snorkSfx,
-            this.winSfx, this.gameOverSfx
-        ].filter(Boolean);
-
-        toLoad.forEach(a => {
-            try { a.preload = 'auto'; a.load(); } catch { }
-        });
-        this.music.preload = 'auto';
-        try { this.music.load(); } catch { }
-    }
-
-    setMuted(flag) {
-        this.isMuted = !!flag;
-        [
-            this.coinSfx, this.bottleSfx, this.bossHitSfx, this.music,
-            this.walkSfx, this.jumpSfx, this.winSfx, this.gameOverSfx,
-            this.chickenSfx, this.hurtSfx, this.snorkSfx, this.bossAlertSfx
-        ].forEach(a => a && (a.muted = this.isMuted));
-    }
-    toggleMute() { this.setMuted(!this.isMuted); }
-
-    checkMuteToggle() {
-        if (this.keyboard?.M) {
-            if (!this._muteHeld) { this.toggleMute(); this._muteHeld = true; }
-        } else this._muteHeld = false;
-    }
-
-    enableAudioOnFirstInput() {
-        const start = () => {
-            this.music?.play?.().catch(() => { });
-            window.removeEventListener('keydown', start);
-            window.removeEventListener('pointerdown', start);
-        };
-        window.addEventListener('keydown', start, { once: true });
-        window.addEventListener('pointerdown', start, { once: true });
-    }
-
-    onJump() {
-        try { this.jumpSfx.currentTime = 0; this.jumpSfx.play(); } catch { }
-    }
-
-    updateWalkSfx() {
-        const k = this.keyboard || {};
-        const moving = (k.LEFT || k.RIGHT);
-        const onGround = !this.character.isAboveGround();
-        const alive = !this.character.isDead?.();
-        const shouldPlay = moving && onGround && alive && !this.isPaused;
-
-        if (shouldPlay) {
-            if (this.walkSfx.paused) { this.walkSfx.currentTime = 0; this.walkSfx.play().catch(() => { }); }
-        } else {
-            if (!this.walkSfx.paused) this.walkSfx.pause();
-        }
-    }
-
-    updateLongIdleSfx() {
-        const c = this.character;
-        if (!c) return;
-
-        const idleFor = Date.now() - c.lastActiveAt;
-        const want =
-            !this.isPaused &&
-            !c.isDead?.() &&
-            !c.isHurt?.() &&
-            !c.isAboveGround?.() &&
-            !c.isMovingKeyDown?.() &&
-            idleFor >= (c.LONG_IDLE_AFTER_MS || 3000);
-
-        if (want) {
-            if (this.snorkSfx?.paused) {
-                try { this.snorkSfx.currentTime = 0; this.snorkSfx.play(); } catch { }
-            }
-        } else {
-            if (this.snorkSfx && !this.snorkSfx.paused) this.snorkSfx.pause();
-        }
     }
 
     /* ----------------- Pause ----------------- */
     togglePause() {
         this.isPaused = !this.isPaused;
-        const pauseList = [this.music, this.walkSfx, this.jumpSfx, this.snorkSfx];
-        if (this.isPaused) {
-            pauseList.forEach(a => a?.pause?.());
-        } else {
-            if (!this.isMuted) this.music?.play?.().catch(() => { });
-            this.updateLongIdleSfx();
-        }
     }
 
     checkPauseToggle() {
         if (this.keyboard?.P || this.keyboard?.ESC) {
-            if (!this._pauseHeld) { this.togglePause(); this._pauseHeld = true; }
-        } else this._pauseHeld = false;
+            if (!this._pauseHeld) {
+                this.togglePause();
+                this._pauseHeld = true;
+            }
+        } else {
+            this._pauseHeld = false;
+        }
     }
 
     /* -------------- End States --------------- */
     checkEndStates() {
         // Lose
-        if (!this.gameOverPlayed && this.character?.isDead?.()) {
-            this.winSfx?.pause?.();
-            this.music?.pause?.();
-            this.walkSfx?.pause?.();
-            this.snorkSfx?.pause?.();
-            this.bossHitSfx?.pause?.();
-            try { this.gameOverSfx.currentTime = 0; this.gameOverSfx.play(); } catch { }
-            this.gameOverPlayed = true;
+        if (this.character?.isDead?.()) {
             this.isPaused = true;
             try { window.showEndOverlay && window.showEndOverlay('lose'); } catch { }
+            return;
         }
 
         // Win
-        if (!this.winPlayed && this.endBoss && this.endBoss.dead) {
-            this.gameOverSfx?.pause?.();
-            this.music?.pause?.();
-            this.walkSfx?.pause?.();
-            this.snorkSfx?.pause?.();
-            this.bossHitSfx?.pause?.();
-            try { this.winSfx.currentTime = 0; this.winSfx.play(); } catch { }
-            this.winPlayed = true;
+        if (this.endBoss && this.endBoss.dead) {
             this.isPaused = true;
             try { window.showEndOverlay && window.showEndOverlay('win'); } catch { }
         }
     }
-
 
     /* -------------- Screen Shake ------------- */
     triggerShake(ms = 220, mag = 10) {
@@ -230,9 +83,14 @@ class World {
         this._shakeEnd = this._shakeStart + ms;
         this._shakeMagStart = mag;
     }
+
     computeShakeXY() {
         const now = Date.now();
-        if (now >= this._shakeEnd) { this._shakeX = 0; this._shakeY = 0; return; }
+        if (now >= this._shakeEnd) {
+            this._shakeX = 0;
+            this._shakeY = 0;
+            return;
+        }
         const dur = Math.max(this._shakeEnd - this._shakeStart, 1);
         const p = (this._shakeEnd - now) / dur;
         const m = this._shakeMagStart * p * p;
@@ -245,9 +103,6 @@ class World {
         this.loopId = setInterval(() => {
             this.checkPauseToggle();
             if (this.isPaused) return;
-            this.checkMuteToggle();
-            this.updateWalkSfx();
-            this.updateLongIdleSfx();
             this.checkEndStates();
             this.checkCollisions();
             this.checkThrowObjects();
@@ -260,7 +115,10 @@ class World {
     /* --------------- Throwables --------------- */
     checkThrowObjects() {
         const now = Date.now();
-        if (!this.keyboard.D) { this.throwHeld = false; return; }
+        if (!this.keyboard.D) {
+            this.throwHeld = false;
+            return;
+        }
 
         if (!this.throwHeld && this.bottlesCount > 0 &&
             (now - this.lastThrowAt) >= this.THROW_COOLDOWN_MS) {
@@ -271,9 +129,7 @@ class World {
                 : { x: this.character.x, y: this.character.y, w: this.character.width, h: this.character.height };
 
             const W = 60, H = 60, PAD_X = 16, PAD_GND = 8;
-
             const spawnX = (dir > 0) ? (hb.x + hb.w + PAD_X) : (hb.x - PAD_X - W);
-
             let spawnY = hb.y + Math.min(Math.max(36, hb.h * 0.45), hb.h - H - 6);
             const maxY = this.groundY - H - PAD_GND;
             if (spawnY > maxY) spawnY = maxY;
@@ -286,7 +142,6 @@ class World {
             this.statusBarBottles?.add?.(-20);
             this.lastThrowAt = now;
             this.throwHeld = true;
-
             this.character.markActive?.();
         }
     }
@@ -304,7 +159,10 @@ class World {
             let enemyHit = null;
             for (const e of enemies) {
                 if (!e || e === boss || e.isBoss || e instanceof EndBoss) continue;
-                if (b.isColliding(e)) { enemyHit = e; break; }
+                if (b.isColliding(e)) {
+                    enemyHit = e;
+                    break;
+                }
             }
 
             const justSpawned = (Date.now() - (b.bornAt || 0)) < 120;
@@ -315,11 +173,9 @@ class World {
             if (bossHit) {
                 boss.takeHit?.(25);
                 this.triggerShake(220, 10);
-                if (this.bossHitSfx) { this.bossHitSfx.currentTime = 0; this.bossHitSfx.play(); }
             }
             if (enemyHit) {
                 enemyHit.die?.();
-                if (this.chickenSfx) { this.chickenSfx.currentTime = 0; this.chickenSfx.play(); }
             }
 
             b.splash();
@@ -339,7 +195,6 @@ class World {
         if (stompables.length) {
             stompables.forEach(en => en.die?.());
             this.character.bounce();
-            this.chickenSfx && (this.chickenSfx.currentTime = 0, this.chickenSfx.play());
             this.character.y -= 6;
             this.level.enemies = enemies.filter(e => !e.removeMe);
             return;
@@ -349,7 +204,6 @@ class World {
         if (hitter && !this.character.isHurt()) {
             this.character.hit();
             this.statusBarHealth.setPercentage(this.character.energy);
-            if (this.hurtSfx) { this.hurtSfx.currentTime = 0; this.hurtSfx.play(); }
             this.character.applyKnockBack?.(hitter.x);
         }
 
@@ -363,7 +217,6 @@ class World {
             if (this.character.isPickupColliding(c, 8)) {
                 this.coinsCount = (this.coinsCount || 0) + 1;
                 this.statusBarCoins?.add?.(10);
-                if (this.coinSfx) { this.coinSfx.currentTime = 0; this.coinSfx.play(); }
                 return false;
             }
             return true;
@@ -376,7 +229,6 @@ class World {
             if (this.character.isPickupColliding(b, 8)) {
                 this.bottlesCount++;
                 this.statusBarBottles?.add?.(10);
-                if (this.bottleSfx) { this.bottleSfx.currentTime = 0; this.bottleSfx.play(); }
                 return false;
             }
             return true;
@@ -425,22 +277,15 @@ class World {
 
     dispose() {
         this.alive = false;
-        if (this.loopId) { clearInterval(this.loopId); this.loopId = null; }
-
-        const audios = [
-            this.music, this.walkSfx, this.jumpSfx, this.snorkSfx,
-            this.coinSfx, this.bottleSfx, this.bossHitSfx,
-            this.chickenSfx, this.hurtSfx, this.winSfx, this.gameOverSfx, this.bossAlertSfx
-        ];
-        audios.forEach(a => {
-            try { a && a.pause && a.pause(); } catch { }
-            try { if (a) a.currentTime = 0; } catch { }
-        });
+        if (this.loopId) {
+            clearInterval(this.loopId);
+            this.loopId = null;
+        }
     }
 
-
-
-    addObjectsToMap(objects) { (objects || []).forEach(o => this.addToMap(o)); }
+    addObjectsToMap(objects) {
+        (objects || []).forEach(o => this.addToMap(o));
+    }
 
     addToMap(mo) {
         if (mo.otherDirection) this.flipImage(mo);
@@ -449,8 +294,17 @@ class World {
         if (mo.otherDirection) this.flipImageBack(mo);
     }
 
-    flipImage(mo) { this.ctx.save(); this.ctx.translate(mo.width, 0); this.ctx.scale(-1, 1); mo.x = mo.x * -1; }
-    flipImageBack(mo) { this.ctx.restore(); mo.x = mo.x * -1; }
+    flipImage(mo) {
+        this.ctx.save();
+        this.ctx.translate(mo.width, 0);
+        this.ctx.scale(-1, 1);
+        mo.x = mo.x * -1;
+    }
+
+    flipImageBack(mo) {
+        this.ctx.restore();
+        mo.x = mo.x * -1;
+    }
 
     /* ---------------- Wiring ------------------ */
     setWorld() {
