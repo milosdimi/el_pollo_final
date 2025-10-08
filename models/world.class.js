@@ -227,6 +227,22 @@ class World {
         this.statusBarHealth.setPercentage(this.character.energy);
         this.character.applyKnockBack?.(enemy.x);
     }
+    setCameraX(x) {
+        if (this._minCamX == null) this._minCamX = this._computeMinCameraX();
+        this.camera_x = Math.max(this._minCamX, Math.min(0, x));
+    }
+
+    _computeMinCameraX() {
+        const bg = this.level?.backgroundObjects || [];
+        let right = 0;
+        for (let i = 0; i < bg.length; i++) {
+            const r = (bg[i].x || 0) + (bg[i].width || 0);
+            if (r > right) right = r;
+        }
+        const total = right || (this.level?.level_end_x || 0) + (this.canvas?.width || 0);
+        return -(total - (this.canvas?.width || 0));
+    }
+
 
     /* -------------- Pickups -------------- */
     checkCoinPickup() {
@@ -334,6 +350,7 @@ class World {
     /* --------------- Wiring --------------- */
     setWorld() {
         this.character.world = this;
+        this._minCamX = this._computeMinCameraX();
         const setW = arr => (arr || []).forEach(o => o.world = this);
         setW(this.level?.clouds);
         setW(this.level?.enemies);

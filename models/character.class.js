@@ -98,7 +98,7 @@ class Character extends MovableObject {
         if (kb.LEFT && this.x > 0) { this.moveLeft(); this.otherDirection = true; this.markActive(); }
         if (kb.SPACE && !this.isAboveGround()) { this.jump(); this.markActive(); }
 
-        if (this.world) this.world.camera_x = Math.min(-this.x + 100, 0);
+        if (this.world) this.world.setCameraX(-this.x + 100);
     }
 
     _animStep() {
