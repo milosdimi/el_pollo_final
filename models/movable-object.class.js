@@ -9,7 +9,7 @@ class MovableObject extends DrawableObject {
     prevY = 0;
 
     getHitBox() {
-        return { x: this.x, y: this.y, w: this.width, h: this.height };
+        return super.getHitBox();
     }
 
     _getBox(obj) {

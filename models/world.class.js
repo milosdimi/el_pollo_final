@@ -168,15 +168,47 @@ class World {
     /* ------------ Collisions ------------ */
     checkCollisions() {
         const enemies = this.level?.enemies || [];
-        const hits = enemies.filter(e => !e?.dead && this.character.isColliding(e));
+        const hits = this._getHits(enemies);
         if (!hits.length) return;
 
-        const stomped = hits.filter(e => this.character.isStomping(e));
-        if (stomped.length) { stomped.forEach(e => e.die?.()); this._afterStomp(); return; }
+        const a = this.character.getHitBox();
+        const charBottom = a.y + a.h;
 
+        const stomped = this._getStomped(hits, a, charBottom);
+        if (stomped.length) { this._handleStomp(stomped, enemies); return; }
+
+        this._applyHurt(hits, enemies);
+    }
+
+    /* --- helpers --- */
+    _getHits(enemies) {
+        return enemies.filter(e => !e?.dead && this.character.isColliding(e));
+    }
+
+    _getStomped(hits, a, charBottom) {
+        return hits.filter(e => {
+            if (e.isBoss) return false;
+            const b = e.getHitBox();
+            const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+            const inTop = charBottom <= b.y + b.h * 0.8 + 6; 
+            return overlapX > 2 && inTop;
+        });
+    }
+
+    _handleStomp(stomped, enemies) {
+        stomped.forEach(e => e.die?.());
+        this.character.bounce();
+        this.character.y -= 6;
+        this.level.enemies = enemies.filter(e => !e.removeMe);
+    }
+
+    _applyHurt(hits, enemies) {
         const hitter = hits.find(e => e.harmful !== false);
-        if (hitter && !this.character.isHurt()) this._applyHitFrom(hitter);
-
+        if (hitter && !this.character.isHurt()) {
+            this.character.hit();
+            this.statusBarHealth.setPercentage(this.character.energy);
+            this.character.applyKnockBack?.(hitter.x);
+        }
         this.level.enemies = enemies.filter(e => !e.removeMe);
     }
 

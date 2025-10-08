@@ -98,7 +98,7 @@ class Character extends MovableObject {
         if (kb.LEFT && this.x > 0) { this.moveLeft(); this.otherDirection = true; this.markActive(); }
         if (kb.SPACE && !this.isAboveGround()) { this.jump(); this.markActive(); }
 
-        if (this.world) this.world.camera_x = -this.x + 100;
+        if (this.world) this.world.camera_x = Math.min(-this.x + 100, 0);
     }
 
     _animStep() {
@@ -123,22 +123,18 @@ class Character extends MovableObject {
     }
 
     isStomping(enemy) {
-        if (!enemy || enemy.dead || this.isHurt()) return false;
-        if (Date.now() < this.stompLockUntil) return false;
+        if (!enemy || enemy.dead || enemy.isBoss) return false;
+        if (!this.isColliding(enemy)) return false;
 
-        const a = this._getBox(this);
-        const b = this._getBox(enemy);
+        const b = enemy.getHitBox();
+        const botPrev = (this.prevY ?? this.y) + this.height - (this.offset?.bottom || 0);
+        const botNow = this.y + this.height - (this.offset?.bottom || 0);
 
-        const prevBottom = (this.prevY ?? this.y) + (this.height - (this.offset?.bottom || 0));
-        const nowBottom = a.y + a.h;
-        const crossedTop = prevBottom <= b.y && nowBottom >= b.y;
-        const goingDown = this.speedY < 0;
-
-        if (!(crossedTop && goingDown)) return false;
-
-        const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-        return overlapX >= Math.min(a.w, b.w) * 0.15;
+        return this.speedY < 0 && botPrev <= b.y && botNow >= b.y;
     }
+
+
+
 
     bounce() {
         this.speedY = 12;
@@ -150,7 +146,9 @@ class Character extends MovableObject {
         this.x += dir * 35;
         this.speedY = 14;
         this.stompLockUntil = Date.now() + 500;
+        this.x = Math.max(0, this.x);  
     }
+
 
     destroy() {
         if (this._moveLoop) clearInterval(this._moveLoop);
