@@ -1,81 +1,73 @@
 let canvas;
 let world;
-let keyboard = new Keyboard();
+const keyboard = new Keyboard();
 
-/* =========================
-   Boot: Startmenü
-   ========================= */
+/* Boot */
+function boot() {
+  keyboard.bind();
+  setupMenu();
+}
+window.addEventListener('DOMContentLoaded', boot);
+
+/* Startmenü */
 function setupMenu() {
-  const menuOverlay = document.getElementById('menuOverlay');
-  if (!menuOverlay) {
-    initGame();
-    return;
-  }
+  const menu = document.getElementById('menuOverlay');
+  if (!menu) { initGame(); return; }
 
   const btnPlay = document.getElementById('btnPlay');
-  const endOverlay = document.getElementById('endOverlay');
-  const endImg = document.getElementById('endImg');
-  const btnBack = document.getElementById('btnBack');
-  const btnRestart = document.getElementById('btnRestart');
-
-  // Startscreen sichtbar
-  menuOverlay.classList.remove('hidden');
-  if (endOverlay) endOverlay.classList.add('hidden');
-
-  // Play-Button
   btnPlay && (btnPlay.onclick = startGame);
 
-  // Enter/Space starten auch (nur wenn Menü sichtbar)
+  bindMenuKeys(menu);
+  setupEndButtons();
+  ensureEndOverlay();
+  menu.classList.remove('hidden');
+}
+
+function bindMenuKeys(menu) {
   window.addEventListener('keydown', (e) => {
-    if (menuOverlay.classList.contains('hidden')) return;
+    if (menu.classList.contains('hidden')) return;
     if (e.code === 'Enter' || e.code === 'Space') startGame();
   });
+}
 
-  // End-Overlay Buttons
-  btnRestart && (btnRestart.onclick = () => location.reload());
+function setupEndButtons() {
+  const end = document.getElementById('endOverlay');
+  const btnBack = document.getElementById('btnBack');
+  const btnRestart = document.getElementById('btnRestart');
   btnBack && (btnBack.onclick = () => location.reload());
+  btnRestart && (btnRestart.onclick = () => location.reload());
+}
 
-  // Globale Hook-Funktion, die World bei Win/Lose aufruft
+function ensureEndOverlay() {
+  if (window.showEndOverlay) return;
+  const end = document.getElementById('endOverlay');
+  const img = document.getElementById('endImg');
   window.showEndOverlay = (type) => {
-    if (!endOverlay || !endImg) return;
-    endImg.src = (type === 'win')
+    if (!end || !img) return;
+    img.src = type === 'win'
       ? 'img/You won, you lost/You Won B.png'
       : 'img/You won, you lost/You lost.png';
-    endOverlay.classList.remove('hidden');
+    end.classList.remove('hidden');
   };
 }
 
+/* Start & Init */
 function startGame() {
-  const menuOverlay = document.getElementById('menuOverlay');
-  if (menuOverlay) menuOverlay.classList.add('hidden');
+  const menu = document.getElementById('menuOverlay');
+  if (menu) menu.classList.add('hidden');
   initGame();
   canvas?.focus?.();
 }
 
-/* =========================
-   Spiel initialisieren
-   ========================= */
 function initGame() {
   canvas = document.getElementById('canvas');
+  if (world) world.dispose();
   world = new World(canvas, keyboard);
   wireToolbar();
-
-  if (!window.showEndOverlay) {
-    const endOverlay = document.getElementById('endOverlay');
-    const endImg = document.getElementById('endImg');
-    window.showEndOverlay = (type) => {
-      if (!endOverlay || !endImg) return;
-      endImg.src = (type === 'win')
-        ? 'img/You won, you lost/You Won B.png'
-        : 'img/You won, you lost/You lost.png';
-      endOverlay.classList.remove('hidden');
-    };
-  }
+  ensureEndOverlay();
 }
 
-/* =========================
-   Toolbar (Pause/FS/Reload) + Hotkeys F/R
-   ========================= */
+/* Toolbar (Pause/FS/Reload) */
 function wireToolbar() {
   const $ = (id) => document.getElementById(id);
   const stage = $('stage');
@@ -83,16 +75,13 @@ function wireToolbar() {
   const btnFS = $('btnFS');
   const btnReload = $('btnReload');
 
-  const toggleFS = async () => {
+  function toggleFS() {
     try {
-      if (!document.fullscreenElement) {
-        await stage?.requestFullscreen?.();
-      } else {
-        await document.exitFullscreen?.();
-      }
-    } catch { }
+      if (!document.fullscreenElement) { stage?.requestFullscreen?.(); }
+      else { document.exitFullscreen?.(); }
+    } catch (e) { }
     updateToolbarState();
-  };
+  }
 
   btnPause?.addEventListener('click', () => { world?.togglePause(); updateToolbarState(); });
   btnFS?.addEventListener('click', toggleFS);
@@ -100,14 +89,11 @@ function wireToolbar() {
 
   function updateToolbarState() {
     const paused = !!world?.isPaused;
-
     if (btnPause) {
       btnPause.textContent = paused ? '▶' : '⏯';
       btnPause.classList.toggle('is-active', paused);
     }
-    if (btnFS) {
-      btnFS.textContent = document.fullscreenElement ? '🡼' : '⛶';
-    }
+    if (btnFS) btnFS.textContent = document.fullscreenElement ? '🡼' : '⛶';
   }
 
   window.addEventListener('keydown', () => setTimeout(updateToolbarState, 0));
@@ -121,32 +107,3 @@ function wireToolbar() {
     if (e.code === 'KeyR' || e.keyCode === 82) location.reload();
   });
 }
-
-/* =========================
-   Keyboard (Pfeile/Space/D/P/ESC)
-   ========================= */
-window.addEventListener("keydown", (e) => {
-  switch (e.keyCode) {
-    case 37: keyboard.LEFT = true; break;
-    case 39: keyboard.RIGHT = true; break;
-    case 38: keyboard.UP = true; break;
-    case 40: keyboard.DOWN = true; break;
-    case 32: keyboard.SPACE = true; break;
-    case 68: keyboard.D = true; break; // Throw
-    case 80: keyboard.P = true; break; // Pause
-    case 27: keyboard.ESC = true; break; // Pause
-  }
-});
-
-window.addEventListener("keyup", (e) => {
-  switch (e.keyCode) {
-    case 37: keyboard.LEFT = false; break;
-    case 39: keyboard.RIGHT = false; break;
-    case 38: keyboard.UP = false; break;
-    case 40: keyboard.DOWN = false; break;
-    case 32: keyboard.SPACE = false; break;
-    case 68: keyboard.D = false; break;
-    case 80: keyboard.P = false; break;
-    case 27: keyboard.ESC = false; break;
-  }
-});

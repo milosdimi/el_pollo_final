@@ -11,30 +11,28 @@ class StatusbarCoins extends DrawableObject {
 
     constructor() {
         super();
+        this.x = 20; this.y = 42;
+        this.width = 120; this.height = 40;
+        this.loadImage(this.IMAGES_COINS[0]);
         this.loadImages(this.IMAGES_COINS);
-        this.x = 20;
-        this.y = 42;
-        this.width = 120;
-        this.height = 40;
         this.setPercentage(0);
     }
 
-    setPercentage(percentage) {
-        // clamp 0..100
-        this.percentage = Math.max(0, Math.min(100, percentage));
+    setPercentage(p) {
+        this.percentage = Math.max(0, Math.min(100, Math.round(p)));
         const path = this.IMAGES_COINS[this.resolveImageIndex()];
-        this.img = this.imageCache[path];
+        const img = this.imageCache[path];
+        if (img) this.img = img;
     }
 
-    add(delta) { this.setPercentage(this.percentage + delta); } // was ist das?
+    add(delta) { this.setPercentage(this.percentage + delta); }
 
     resolveImageIndex() {
         if (this.percentage === 100) return 5;
-        else if (this.percentage > 80) return 4;
-        else if (this.percentage > 60) return 3;
-        else if (this.percentage > 40) return 2;
-        else if (this.percentage > 20) return 1;
-        else return 0;
+        if (this.percentage > 80) return 4;
+        if (this.percentage > 60) return 3;
+        if (this.percentage > 40) return 2;
+        if (this.percentage > 20) return 1;
+        return 0;
     }
-
 }

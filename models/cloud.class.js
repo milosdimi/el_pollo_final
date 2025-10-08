@@ -11,23 +11,31 @@ class Cloud extends MovableObject {
 
     constructor() {
         super();
-        this.loadImages(this.IMAGES_CLOUDS);
-
-        this.x = Math.random() * 2000;
-        this.y = 10 + Math.random() * 120;
-        this.speed = 0.06 + Math.random() * 0.10;
-
+        this._loadSprites();
+        this._randomizeStart();
         this.setRandomCloudImage();
         this.startFloating();
     }
 
+    _loadSprites() {
+        this.loadImage(this.IMAGES_CLOUDS[0]);
+        this.loadImages(this.IMAGES_CLOUDS);
+    }
+
+    _randomizeStart() {
+        this.x = Math.random() * 2000;
+        this.y = 10 + Math.random() * 120;
+        this.speed = 0.06 + Math.random() * 0.10;
+    }
+
     setRandomCloudImage() {
         const i = Math.floor(Math.random() * this.IMAGES_CLOUDS.length);
-        this.img = this.imageCache[this.IMAGES_CLOUDS[i]];
+        const img = this.imageCache[this.IMAGES_CLOUDS[i]];
+        if (img) this.img = img;
     }
 
     startFloating() {
-        this._float = setInterval(() => {
+        this._floatLoop = setInterval(() => {
             if (this.world?.isPaused) return;
             this.moveLeft();
             this.repositionIfOffscreen();
@@ -36,15 +44,17 @@ class Cloud extends MovableObject {
 
     repositionIfOffscreen() {
         if (!this.world) return;
-
-        const leftEdge = -this.world.camera_x;
-        const rightEdge = leftEdge + this.world.canvas.width;
-
-        if (this.x + this.width < leftEdge) {
-            this.x = rightEdge + Math.random() * 300;
+        const left = -this.world.camera_x;
+        const right = left + this.world.canvas.width;
+        if (this.x + this.width < left) {
+            this.x = right + Math.random() * 300;
             this.y = 10 + Math.random() * 120;
-            this.setRandomCloudImage();
             this.speed = 0.06 + Math.random() * 0.10;
+            this.setRandomCloudImage();
         }
+    }
+
+    destroy() {
+        if (this._floatLoop) clearInterval(this._floatLoop);
     }
 }

@@ -5,7 +5,7 @@ class EndBoss extends MovableObject {
     speed = 10;
     offset = { top: 40, bottom: 35, left: 25, right: 30 };
 
-    // Timing / Verhalten
+    // Verhalten / Zeiten
     ANIM_FPS = 9;
     ALERT_MS = 1600;
     HURT_MS = 450;
@@ -54,7 +54,6 @@ class EndBoss extends MovableObject {
     state = 'idle';
     energy = 100;
 
-    // Boss Speed
     baseSpeed = 10;
     SPEED_HIT_BOOST = 10;
     MAX_SPEED = 15;
@@ -67,115 +66,103 @@ class EndBoss extends MovableObject {
 
     constructor() {
         super();
+        this._loadSprites();
+        this.x = 2500;
+        this.speed = this.baseSpeed;
+        this._startLoops();
+    }
+
+    /* ---------- Setup / Cleanup ---------- */
+    _loadSprites() {
         this.loadImage(this.IMAGES_ALERT[0]);
         this.loadImages(this.IMAGES_ALERT);
         this.loadImages(this.IMAGES_WALK);
         this.loadImages(this.IMAGES_ATTACK);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_DEAD);
-
-        this.x = 2500;
-        this.speed = this.baseSpeed;
-
-        this.aiLoop = setInterval(() => {
-            if (!this.world?.isPaused) this.updateAI();
-        }, 1000 / 20);
-
-        this.animLoop = setInterval(() => {
-            if (!this.world?.isPaused) this.playStateAnimation();
-        }, 1000 / this.ANIM_FPS);
     }
 
-    choose(frames, fallback = this.IMAGES_ALERT) {
-        return (frames && frames.length) ? frames : fallback;
+    _startLoops() {
+        this.aiLoop = setInterval(() => { if (!this.world?.isPaused) this.updateAI(); }, 1000 / 20);
+        this.animLoop = setInterval(() => { if (!this.world?.isPaused) this._animStep(); }, 1000 / this.ANIM_FPS);
     }
 
-    setState(s) {
-        if (!this.dead && this.state !== s) this.state = s;
+    _stopLoops() {
+        if (this.aiLoop) clearInterval(this.aiLoop);
+        if (this.animLoop) clearInterval(this.animLoop);
+        if (this._deadLoop) clearInterval(this._deadLoop);
     }
 
-    // State-to-Images Map
-    getStateImages() {
-        const states = {
-            dead: this.IMAGES_DEAD,
-            hurt: this.IMAGES_HURT,
-            attack: this.IMAGES_ATTACK,
-            alert: this.IMAGES_ALERT,
-            walk: this.IMAGES_WALK
-        };
-        return states[this.state] || states.walk;
+    destroy() { this._stopLoops(); }
+
+    /* --------------- State --------------- */
+    setState(s) { if (!this.dead && this.state !== s) this.state = s; }
+
+    _animStep() {
+        const imgs = this._stateImages();
+        if (this.state === 'dead') return this.playAnimation(this._choose(imgs));
+        this.playAnimation(imgs);
     }
 
-    playStateAnimation() {
-        const images = this.getStateImages();
-        if (this.state === 'dead') {
-            this.playAnimation(this.choose(images));
-            return;
-        }
-        this.playAnimation(images);
+    _stateImages() {
+        if (this.state === 'dead') return this.IMAGES_DEAD;
+        if (this.state === 'hurt') return this.IMAGES_HURT;
+        if (this.state === 'attack') return this.IMAGES_ATTACK;
+        if (this.state === 'alert') return this.IMAGES_ALERT;
+        return this.IMAGES_WALK;
     }
 
+    _choose(frames, fallback = this.IMAGES_ALERT) {
+        return frames && frames.length ? frames : fallback;
+    }
+
+    /* --------------- Sicht --------------- */
     isInView() {
         if (!this.world) return false;
         const left = -this.world.camera_x;
         const right = left + this.world.canvas.width;
-        return this.x < right + 50 && (this.x + this.width) > left - 50;
+        return this.x < right + 50 && this.x + this.width > left - 50;
     }
 
-    _handleActivation() {
-        if (this.activated) return;
-
-        if (this.isInView()) {
-            this.activated = true;
-            this.setState('alert');
-            this.alertUntil = Date.now() + this.ALERT_MS;
-            setTimeout(() => {
-                if (!this.dead && this.state === 'alert') this.setState('walk');
-                this.alertUntil = null;
-            }, this.ALERT_MS + 20);
-        }
-    }
-
-    _handleChase() {
-        const cx = this.world?.character?.x ?? this.x;
-        const dx = cx - this.x;
-        const absDx = Math.abs(dx);
-
-        if (absDx <= this.ATTACK_DIST) this.setState('attack');
-        else this.setState('walk');
-
-        if (dx < 0) {
-            this.otherDirection = false;
-            this.moveLeft();
-        } else {
-            this.otherDirection = true;
-            this.moveRight();
-        }
-    }
-
+    /* ----------------- AI ---------------- */
     updateAI() {
         if (this.dead || this.deadPlaying) return;
-
         if (this.alertUntil && Date.now() < this.alertUntil) return;
         if (this.state === 'hurt') return;
 
         this._handleActivation();
         if (!this.activated) return;
-
         this._handleChase();
     }
 
+    _handleActivation() {
+        if (this.activated || !this.isInView()) return;
+        this.activated = true;
+        this.setState('alert');
+        this.alertUntil = Date.now() + this.ALERT_MS;
+        setTimeout(() => { if (!this.dead && this.state === 'alert') this.setState('walk'); this.alertUntil = null; }, this.ALERT_MS + 20);
+    }
+
+    _handleChase() {
+        const cx = this.world?.character?.x ?? this.x;
+        const dx = cx - this.x;
+        const adx = Math.abs(dx);
+
+        if (adx <= this.ATTACK_DIST) this.setState('attack'); else this.setState('walk');
+
+        // Behalte deine Blick-Logik bei (wie in deinem Original):
+        if (dx < 0) { this.otherDirection = false; this.moveLeft(); }
+        else { this.otherDirection = true; this.moveRight(); }
+    }
+
+    /* -------------- Treffer -------------- */
     takeHit(dmg = 25) {
         if (this.dead || this.deadPlaying) return;
         this.energy = Math.max(0, this.energy - dmg);
         this.speed = Math.min(this.speed + this.SPEED_HIT_BOOST, this.MAX_SPEED);
         this.setState('hurt');
         this.world?.statusBarBoss?.setPercentage?.(this.energy);
-
-        setTimeout(() => {
-            if (!this.dead) this.setState('attack');
-        }, this.HURT_MS);
-
+        setTimeout(() => { if (!this.dead) this.setState('attack'); }, this.HURT_MS);
         if (this.energy === 0) this.die();
     }
 
@@ -184,27 +171,25 @@ class EndBoss extends MovableObject {
         this.dead = true;
         this.harmful = false;
         this.speed = 0;
-        clearInterval(this.aiLoop);
-        this.playDeadOnce();
+        this._stopLoops();
+        this._playDeadOnce();
     }
 
-    playDeadOnce() {
+    _playDeadOnce() {
         if (this.deadPlaying) return;
         this.deadPlaying = true;
         this.setState('dead');
-        clearInterval(this.animLoop);
 
-        const frames = this.choose(this.IMAGES_DEAD);
+        const frames = this._choose(this.IMAGES_DEAD);
         let i = 0;
-        const frameMs = this.DEAD_FRAME_MS;
-
         this._deadLoop = setInterval(() => {
             if (this.world?.isPaused) return;
-            this.img = this.imageCache[frames[i++]];
+            const img = this.imageCache[frames[i++]];
+            if (img) this.img = img;
             if (i >= frames.length) {
                 clearInterval(this._deadLoop);
                 setTimeout(() => { this.removeMe = true; }, this.DEAD_HOLD_MS);
             }
-        }, frameMs);
+        }, this.DEAD_FRAME_MS);
     }
 }

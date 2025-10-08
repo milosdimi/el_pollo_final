@@ -52,7 +52,7 @@ class Character extends MovableObject {
         'img/2_character_pepe/1_idle/idle/I-7.png',
         'img/2_character_pepe/1_idle/idle/I-8.png',
         'img/2_character_pepe/1_idle/idle/I-9.png',
-        'img/2_character_pepe/1_idle/idle/I-10.png',
+        'img/2_character_pepe/1_idle/idle/I-10.png'
     ];
     IMAGES_LONG_IDLE = [
         'img/2_character_pepe/1_idle/long_idle/I-11.png',
@@ -64,89 +64,53 @@ class Character extends MovableObject {
         'img/2_character_pepe/1_idle/long_idle/I-17.png',
         'img/2_character_pepe/1_idle/long_idle/I-18.png',
         'img/2_character_pepe/1_idle/long_idle/I-19.png',
-        'img/2_character_pepe/1_idle/long_idle/I-20.png',
+        'img/2_character_pepe/1_idle/long_idle/I-20.png'
     ];
 
     constructor() {
         super();
-        this.loadImage('img/2_character_pepe/2_walk/W-21.png');
+        this._loadSprites();
+        this.applyGravity();
+        this.animate();
+    }
+
+    _loadSprites() {
+        this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_JUMPING);
         this.loadImages(this.IMAGES_DEAD);
         this.loadImages(this.IMAGES_HURT);
         this.loadImages(this.IMAGES_IDLE);
         this.loadImages(this.IMAGES_LONG_IDLE);
-        this.applyGravity();
-        this.animate();
-    }
-
-    // State-to-Images Map
-    getStateImages() {
-        const states = {
-            dead: this.IMAGES_DEAD,
-            hurt: this.IMAGES_HURT,
-            jumping: this.IMAGES_JUMPING,
-            walking: this.IMAGES_WALKING,
-            longIdle: this.IMAGES_LONG_IDLE,
-            idle: this.IMAGES_IDLE
-        };
-        return states[this.state] || states.idle;
     }
 
     animate() {
-        this._move = setInterval(() => this.moveCharacter(), 1000 / 60);
-        this._anim = setInterval(() => this.playCharacterAnimation(), 100);
+        this._moveLoop = setInterval(() => this._moveStep(), 1000 / 60);
+        this._animLoop = setInterval(() => this._animStep(), 100);
     }
 
-    moveCharacter() {
+    _moveStep() {
         if (this.world?.isPaused || this.isDead()) return;
-
         const kb = this.world?.keyboard || {};
-        const levelEnd = this.world?.level?.level_end_x ?? 3000;
+        const endX = this.world?.level?.level_end_x ?? 3000;
 
-        if (kb.RIGHT && this.x < levelEnd) {
-            this.moveRight();
-            this.otherDirection = false;
-            this.markActive();
-        }
-        if (kb.LEFT && this.x > 0) {
-            this.moveLeft();
-            this.otherDirection = true;
-            this.markActive();
-        }
-        if (kb.SPACE && !this.isAboveGround()) {
-            this.jump();
-            this.markActive();
-        }
+        if (kb.RIGHT && this.x < endX) { this.moveRight(); this.otherDirection = false; this.markActive(); }
+        if (kb.LEFT && this.x > 0) { this.moveLeft(); this.otherDirection = true; this.markActive(); }
+        if (kb.SPACE && !this.isAboveGround()) { this.jump(); this.markActive(); }
 
         if (this.world) this.world.camera_x = -this.x + 100;
     }
 
-    playCharacterAnimation() {
+    _animStep() {
         if (this.world?.isPaused) return;
-
-        if (this.isDead()) {
-            this.playAnimation(this.IMAGES_DEAD);
-            return;
-        }
-        if (this.isHurt()) {
-            this.playAnimation(this.IMAGES_HURT);
-            return;
-        }
-        if (this.isAboveGround()) {
-            this.playAnimation(this.IMAGES_JUMPING);
-            this.markActive();
-            return;
-        }
-        if (this.isMovingKeyDown()) {
-            this.playAnimation(this.IMAGES_WALKING);
-            this.markActive();
-            return;
-        }
+        if (this.isDead()) return this.playAnimation(this.IMAGES_DEAD);
+        if (this.isHurt()) return this.playAnimation(this.IMAGES_HURT);
+        if (this.isAboveGround()) return this.playAnimation(this.IMAGES_JUMPING);
+        if (this.isMovingKeyDown()) return this.playAnimation(this.IMAGES_WALKING);
 
         const idleFor = Date.now() - this.lastActiveAt;
-        const images = (idleFor >= this.LONG_IDLE_AFTER_MS) ? this.IMAGES_LONG_IDLE : this.IMAGES_IDLE;
-        this.playAnimation(images);
+        const imgs = idleFor >= this.LONG_IDLE_AFTER_MS ? this.IMAGES_LONG_IDLE : this.IMAGES_IDLE;
+        this.playAnimation(imgs);
     }
 
     isMovingKeyDown() {
@@ -160,21 +124,20 @@ class Character extends MovableObject {
 
     isStomping(enemy) {
         if (!enemy || enemy.dead || this.isHurt()) return false;
+        if (Date.now() < this.stompLockUntil) return false;
 
         const a = this._getBox(this);
         const b = this._getBox(enemy);
-        const offB = this.offset?.bottom || 0;
-        const prevBottom = (this.prevY ?? this.y) + (this.height - offB);
+
+        const prevBottom = (this.prevY ?? this.y) + (this.height - (this.offset?.bottom || 0));
         const nowBottom = a.y + a.h;
-        const top = b.y;
-        const crossedTop = prevBottom <= top && nowBottom >= top;
-        const withinWindow = (nowBottom >= top && nowBottom <= top + 20 && this.speedY < 0);
+        const crossedTop = prevBottom <= b.y && nowBottom >= b.y;
+        const goingDown = this.speedY < 0;
 
-        if (!(crossedTop || withinWindow)) return false;
+        if (!(crossedTop && goingDown)) return false;
 
-        const overlap = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-        const minOverlap = Math.min(a.w, b.w) * 0.15; // Von 0.12 auf 0.15 (tight-er)
-        return overlap >= minOverlap;
+        const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+        return overlapX >= Math.min(a.w, b.w) * 0.15;
     }
 
     bounce() {
@@ -187,5 +150,10 @@ class Character extends MovableObject {
         this.x += dir * 35;
         this.speedY = 14;
         this.stompLockUntil = Date.now() + 500;
+    }
+
+    destroy() {
+        if (this._moveLoop) clearInterval(this._moveLoop);
+        if (this._animLoop) clearInterval(this._animLoop);
     }
 }

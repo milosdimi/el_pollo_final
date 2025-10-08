@@ -12,27 +12,36 @@ class StatusbarBoss extends DrawableObject {
 
   constructor() {
     super();
+    this.x = 590; this.y = 5;
+    this.width = 120; this.height = 40;
+    this.loadImage(this.IMAGES_BOSS[5]);   // Startbild (100%)
     this.loadImages(this.IMAGES_BOSS);
-    this.x = 590;
-    this.y = 5;          
-    this.width = 120;
-    this.height = 40;
     this.setPercentage(100);
   }
 
   setPercentage(p) {
-    this.percentage = Math.max(0, Math.min(100, p));
-    const path = this.IMAGES_BOSS[this.resolveImageIndex()];
-    this.img = this.imageCache[path];
+    this.percentage = Math.max(0, Math.min(100, Math.round(p)));
+    const idx = this._resolveIndex(this.percentage);
+    const img = this.imageCache[this.IMAGES_BOSS[idx]];
+    if (img) this.img = img;               // Guard, falls noch nicht im Cache
   }
 
-  resolveImageIndex() {
-    if (this.percentage === 100) return 5;
-    if (this.percentage > 80) return 4;
-    if (this.percentage > 60) return 3;
-    if (this.percentage > 40) return 2;
-    if (this.percentage > 20) return 1;
+  add(delta) {
+    this.setPercentage(this.percentage + delta);
+  }
+
+  // optional: bequem Boss-Energie setzen
+  setEnergy(current, max = 100) {
+    const p = max > 0 ? (current / max) * 100 : 0;
+    this.setPercentage(p);
+  }
+
+  _resolveIndex(p) {
+    if (p === 100) return 5;
+    if (p >= 80) return 4;
+    if (p >= 60) return 3;
+    if (p >= 40) return 2;
+    if (p >= 20) return 1;
     return 0;
   }
-
 }

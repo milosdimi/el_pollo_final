@@ -20,10 +20,7 @@ class ThrowableObject extends MovableObject {
 
     constructor(x, y, dir = 1, world) {
         super();
-        this.loadImage(this.IMAGES_ROTATE[0]);
-        this.loadImages(this.IMAGES_ROTATE);
-        this.loadImages(this.IMAGES_SPLASH);
-
+        this._loadSprites();
         this.world = world;
         this.x = x;
         this.y = y;
@@ -34,15 +31,21 @@ class ThrowableObject extends MovableObject {
         this.speedY = 20;
 
         this.applyGravity();
-        this.start();
+        this._startLoops();
     }
 
-    start() {
-        this._fly = setInterval(() => {
+    _loadSprites() {
+        this.loadImage(this.IMAGES_ROTATE[0]);
+        this.loadImages(this.IMAGES_ROTATE);
+        this.loadImages(this.IMAGES_SPLASH);
+    }
+
+    _startLoops() {
+        this._flyLoop = setInterval(() => {
             if (!this.world?.isPaused) this.x += this.throwVx;
         }, 1000 / 60);
 
-        this._spin = setInterval(() => {
+        this._spinLoop = setInterval(() => {
             if (!this.world?.isPaused) this.playAnimation(this.IMAGES_ROTATE);
         }, 1000 / 20);
     }
@@ -50,33 +53,35 @@ class ThrowableObject extends MovableObject {
     splash() {
         if (this.splashed) return;
         this.splashed = true;
-
         this.throwVx = 0;
         this.speedY = 0;
-        clearInterval(this._fly);
-        clearInterval(this._spin);
+        this._stopLoops();
 
         const frames = this.IMAGES_SPLASH;
-        if (!frames?.length) {
-            this.removeMe = true;
-            return;
-        }
+        if (!frames?.length) { this.removeMe = true; return; }
 
         let i = 0;
-        this._splash = setInterval(() => {
+        this._splashLoop = setInterval(() => {
             if (this.world?.isPaused) return;
             const path = frames[i++];
             const img = this.imageCache?.[path];
             if (img) this.img = img;
-            if (i >= frames.length) {
-                clearInterval(this._splash);
-                this.removeMe = true;
-            }
+            if (i >= frames.length) { clearInterval(this._splashLoop); this.removeMe = true; }
         }, 1000 / 14);
     }
 
     isAboveGround() {
         if (this.splashed) return false;
         return this.getBottomY() < this.getGroundLevel() || this.speedY > 0;
+    }
+
+    _stopLoops() {
+        if (this._flyLoop) clearInterval(this._flyLoop);
+        if (this._spinLoop) clearInterval(this._spinLoop);
+    }
+
+    destroy() {
+        this._stopLoops();
+        if (this._splashLoop) clearInterval(this._splashLoop);
     }
 }

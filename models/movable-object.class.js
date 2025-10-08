@@ -8,68 +8,70 @@ class MovableObject extends DrawableObject {
     currentImage = 0;
     prevY = 0;
 
-    // Standard-Hitbox (überschreibbar in Subklassen)
     getHitBox() {
         return { x: this.x, y: this.y, w: this.width, h: this.height };
     }
 
-    // Hilfsfunktion für Box-Berechnung (vermeidet Duplikation)
     _getBox(obj) {
         return obj?.getHitBox?.() || { x: obj.x, y: obj.y, w: obj.width, h: obj.height };
     }
 
-    // Hilfsfunktion für Boden-Position
     getBottomY() {
-        const botOff = this.offset?.bottom || 0;
-        return this.y + this.height - botOff;
+        const bot = this.offset?.bottom || 0;
+        return this.y + this.height - bot;
     }
 
     getGroundLevel() {
         return this.world?.groundY ?? 390;
     }
 
+    _isThrowable() {
+        return typeof ThrowableObject !== 'undefined' && this instanceof ThrowableObject;
+    }
+
     applyGravity() {
         setInterval(() => {
             if (this.world?.isPaused) return;
-
-            const was = this.y;
-
-            if (this.isAboveGround() || this.speedY > 0) {
-                this.y -= this.speedY;
-                this.speedY -= this.acceleration;
-            }
-
-            if (!(this instanceof ThrowableObject)) {
-                const ground = this.getGroundLevel();
-                const bottom = this.getBottomY();
-                if (bottom >= ground && this.speedY <= 0) {
-                    this.y = ground - (this.height - (this.offset?.bottom || 0));
-                    this.speedY = 0;
-                }
-            }
-
-            this.prevY = was;
+            this.prevY = this.y;
+            this._verticalStep();
+            if (!this._isThrowable()) this._landOnGround();
         }, 1000 / 25);
     }
 
+    _verticalStep() {
+        if (this.isAboveGround() || this.speedY > 0) {
+            this.y -= this.speedY;
+            this.speedY -= this.acceleration;
+        }
+    }
+
+    _landOnGround() {
+        const ground = this.getGroundLevel();
+        if (this.getBottomY() >= ground && this.speedY <= 0) {
+            const bottom = this.offset?.bottom || 0;
+            this.y = ground - (this.height - bottom);
+            this.speedY = 0;
+        }
+    }
+
     isAboveGround() {
-        if (this instanceof ThrowableObject) return true;
+        if (this._isThrowable()) return true;
         return this.getBottomY() < this.getGroundLevel() - 1;
     }
 
     isColliding(mo) {
         const a = this._getBox(this);
         const b = this._getBox(mo);
-        const pad = 0; 
-        return a.x < b.x + b.w + pad && a.x + a.w - pad > b.x &&
-            a.y < b.y + b.h + pad && a.y + a.h - pad > b.y;
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
     }
 
-    isPickupColliding(mo, pad = 0) { 
+    isPickupColliding(mo, pad = 0) {
         const a = this._getBox(this);
         const b = this._getBox(mo);
-        return (a.x < b.x + b.w + pad) && (a.x + a.w + pad > b.x) &&
-            (a.y < b.y + b.h + pad) && (a.y + a.h + pad > b.y);
+        return a.x < b.x + b.w + pad &&
+            a.x + a.w + pad > b.x &&
+            a.y < b.y + b.h + pad &&
+            a.y + a.h + pad > b.y;
     }
 
     hit() {
@@ -78,7 +80,7 @@ class MovableObject extends DrawableObject {
     }
 
     isHurt() {
-        return (Date.now() - this.lastHit) < 450;
+        return Date.now() - this.lastHit < 450;
     }
 
     isDead() {
@@ -86,8 +88,10 @@ class MovableObject extends DrawableObject {
     }
 
     playAnimation(images) {
+        if (!images?.length) return;
         const i = this.currentImage % images.length;
-        this.img = this.imageCache[images[i]];
+        const key = images[i];
+        if (this.imageCache[key]) this.img = this.imageCache[key];
         this.currentImage++;
     }
 
@@ -100,6 +104,6 @@ class MovableObject extends DrawableObject {
     }
 
     jump() {
-        this.speedY = 30;
+        if (!this.isAboveGround()) this.speedY = 30;
     }
 }

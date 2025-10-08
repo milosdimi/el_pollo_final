@@ -1,7 +1,8 @@
 class Level {
-    level_end_x = 719 * 3; // 4 Bildschirme lang
+    // ca. 4 Bildschirme
+    level_end_x = 719 * 3;
 
-    constructor(enemies, clouds, coins, bottles, backgroundObjects) {
+    constructor(enemies = [], clouds = [], coins = [], bottles = [], backgroundObjects = []) {
         this.enemies = enemies;
         this.clouds = clouds;
         this.coins = coins;
