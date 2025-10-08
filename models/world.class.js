@@ -56,16 +56,20 @@ class World {
 
     /* ----------- End States ------------ */
     checkEndStates() {
+        // Lose
         if (this.character?.isDead?.()) {
             this.isPaused = true;
             try { window.showEndOverlay && window.showEndOverlay('lose'); } catch { }
             return;
         }
-        if (this.endBoss && this.endBoss.dead) {
+
+        // Win NACH der Dead-Animation (+ Hold): erst wenn removeMe true ist
+        if (this.endBoss && this.endBoss.dead && this.endBoss.removeMe) {
             this.isPaused = true;
             try { window.showEndOverlay && window.showEndOverlay('win'); } catch { }
         }
     }
+
 
     /* ---------- Screen Shake ----------- */
     triggerShake(ms = 220, mag = 10) {
@@ -190,7 +194,7 @@ class World {
             if (e.isBoss) return false;
             const b = e.getHitBox();
             const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-            const inTop = charBottom <= b.y + b.h * 0.8 + 6; 
+            const inTop = charBottom <= b.y + b.h * 0.8 + 6;
             return overlapX > 2 && inTop;
         });
     }
@@ -231,11 +235,13 @@ class World {
             if (this.character.isPickupColliding(c, 8)) {
                 this.coinsCount = (this.coinsCount || 0) + 1;
                 this.statusBarCoins?.add?.(10);
+                c.destroy?.();
                 return false;
             }
             return true;
         });
     }
+
 
     checkBottlePickup() {
         if (!this.level?.bottles || !this.character) return;
@@ -290,7 +296,18 @@ class World {
     dispose() {
         this.alive = false;
         if (this.loopId) { clearInterval(this.loopId); this.loopId = null; }
+        this._destroyAll();
     }
+
+    _destroyAll() {
+        const kill = a => (a || []).forEach(o => o?.destroy?.());
+        kill(this.level?.clouds);
+        kill(this.level?.coins);
+        kill(this.level?.enemies);
+        kill(this.level?.bottles);
+        kill(this.throwableObjects);
+    }
+
 
     addObjectsToMap(objects) { (objects || []).forEach(o => this.addToMap(o)); }
 

@@ -7,7 +7,7 @@ class EndBoss extends MovableObject {
 
     // Verhalten / Zeiten
     ANIM_FPS = 9;
-    ALERT_MS = 1600;
+    ALERT_MS = 2000;
     HURT_MS = 450;
     DEAD_FRAME_MS = 140;
     DEAD_HOLD_MS = 800;
@@ -96,7 +96,16 @@ class EndBoss extends MovableObject {
     destroy() { this._stopLoops(); }
 
     /* --------------- State --------------- */
-    setState(s) { if (!this.dead && this.state !== s) this.state = s; }
+    setState(s) {
+        if (this.dead || this.state === s) return;
+        this.state = s;
+
+        this.currentImage = 0;
+        const first = (this._stateImages?.() || [])[0];
+        const img = first ? this.imageCache[first] : null;
+        if (img) this.img = img;
+    }
+
 
     _animStep() {
         const imgs = this._stateImages();
@@ -121,19 +130,25 @@ class EndBoss extends MovableObject {
         if (!this.world) return false;
         const left = -this.world.camera_x;
         const right = left + this.world.canvas.width;
-        return this.x < right + 50 && this.x + this.width > left - 50;
+        const PAD = 8;
+        return this.x < right + PAD && (this.x + this.width) > left - PAD;
     }
 
     /* ----------------- AI ---------------- */
     updateAI() {
         if (this.dead || this.deadPlaying) return;
-        if (this.alertUntil && Date.now() < this.alertUntil) return;
         if (this.state === 'hurt') return;
 
+        // WICHTIG: zuerst aktivieren...
         this._handleActivation();
+
+        // ...und DANN die Alert-Phase respektieren (sofort zurück)
+        if (this.alertUntil && Date.now() < this.alertUntil) return;
+
         if (!this.activated) return;
         this._handleChase();
     }
+
 
     _handleActivation() {
         if (this.activated || !this.isInView()) return;
