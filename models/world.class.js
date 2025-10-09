@@ -1,6 +1,6 @@
 class World {
     character = new Character();
-    level = level1;
+    level = (typeof buildLevel1 === 'function') ? buildLevel1() : level1;
 
     canvas; ctx; keyboard;
     camera_x = 0;
@@ -56,14 +56,12 @@ class World {
 
     /* ----------- End States ------------ */
     checkEndStates() {
-        // Lose
         if (this.character?.isDead?.()) {
             this.isPaused = true;
             try { window.showEndOverlay && window.showEndOverlay('lose'); } catch { }
             return;
         }
 
-        // Win NACH der Dead-Animation (+ Hold): erst wenn removeMe true ist
         if (this.endBoss && this.endBoss.dead && this.endBoss.removeMe) {
             this.isPaused = true;
             try { window.showEndOverlay && window.showEndOverlay('win'); } catch { }
@@ -316,14 +314,23 @@ class World {
     }
 
     _destroyAll() {
+        this.character?.destroy?.();
+
         const kill = a => (a || []).forEach(o => o?.destroy?.());
         kill(this.level?.clouds);
         kill(this.level?.coins);
         kill(this.level?.enemies);
         kill(this.level?.bottles);
         kill(this.throwableObjects);
-    }
 
+        if (this.level) {
+            this.level.clouds = [];
+            this.level.coins = [];
+            this.level.enemies = [];
+            this.level.bottles = [];
+        }
+        this.throwableObjects = [];
+    }
 
     addObjectsToMap(objects) { (objects || []).forEach(o => this.addToMap(o)); }
 

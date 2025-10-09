@@ -1,6 +1,7 @@
 let canvas;
 let world;
 const keyboard = new Keyboard();
+let _toolbarWired = false;
 
 /* Boot */
 function boot() {
@@ -67,6 +68,16 @@ function initGame() {
   ensureEndOverlay();
 }
 
+function restartGame() {
+  if (world) world.dispose();
+  const end = document.getElementById('endOverlay');
+  end?.classList.add('hidden');
+
+  world = new World(canvas, keyboard);
+  wireToolbar();
+  canvas?.focus?.();
+}
+
 /* Toolbar (Pause/FS/Reload) */
 function wireToolbar() {
   const $ = (id) => document.getElementById(id);
@@ -74,6 +85,18 @@ function wireToolbar() {
   const btnPause = $('btnPause');
   const btnFS = $('btnFS');
   const btnReload = $('btnReload');
+
+  function updateToolbarState() {
+    const paused = !!world?.isPaused;
+    if (btnPause) {
+      btnPause.textContent = paused ? '▶' : '⏯';
+      btnPause.classList.toggle('is-active', paused);
+    }
+    if (btnFS) btnFS.textContent = document.fullscreenElement ? '🡼' : '⛶';
+  }
+
+  if (_toolbarWired) { updateToolbarState(); return; }
+  _toolbarWired = true;
 
   function toggleFS() {
     try {
@@ -85,16 +108,7 @@ function wireToolbar() {
 
   btnPause?.addEventListener('click', () => { world?.togglePause(); updateToolbarState(); });
   btnFS?.addEventListener('click', toggleFS);
-  btnReload?.addEventListener('click', () => location.reload());
-
-  function updateToolbarState() {
-    const paused = !!world?.isPaused;
-    if (btnPause) {
-      btnPause.textContent = paused ? '▶' : '⏯';
-      btnPause.classList.toggle('is-active', paused);
-    }
-    if (btnFS) btnFS.textContent = document.fullscreenElement ? '🡼' : '⛶';
-  }
+  btnReload?.addEventListener('click', () => restartGame());   
 
   window.addEventListener('keydown', () => setTimeout(updateToolbarState, 0));
   document.addEventListener('fullscreenchange', updateToolbarState);
@@ -104,6 +118,6 @@ function wireToolbar() {
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     if (e.code === 'KeyF' || e.keyCode === 70) toggleFS();
-    if (e.code === 'KeyR' || e.keyCode === 82) location.reload();
+    if (e.code === 'KeyR' || e.keyCode === 82) restartGame();  
   });
 }

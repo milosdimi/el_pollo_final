@@ -55,10 +55,15 @@ function makeBackground() {
   return arr;
 }
 
-const level1 = new Level(
-  makeEnemies(),
-  makeClouds(),
-  makeCoins(),
-  makeBottles(),
-  makeBackground()
-);
+function buildLevel1() {
+  return new Level(
+    makeEnemies(),
+    makeClouds(),
+    makeCoins(),
+    makeBottles(),
+    makeBackground()
+  );
+}
+
+const level1 = buildLevel1(); // erste Runde
+
