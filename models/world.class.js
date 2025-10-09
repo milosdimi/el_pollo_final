@@ -18,6 +18,11 @@ class World {
     bottlesCount = 0;
     coinsCount = 0;
     groundY = 400;
+    // Stomp-Tuning
+    STOMP_TOP_FACTOR = 0.8;   // Anteil der Gegnerhöhe (0.8 = großzügig)
+    STOMP_Y_PAD = 6;          // px Toleranz nach unten
+    STOMP_X_MIN = 2;          // minimale horizontale Überlappung in px
+
 
     // Throw debounce
     THROW_COOLDOWN_MS = 350;
@@ -192,10 +197,11 @@ class World {
             if (e.isBoss) return false;
             const b = e.getHitBox();
             const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-            const inTop = charBottom <= b.y + b.h * 0.8 + 6;
-            return overlapX > 2 && inTop;
+            const inTop = charBottom <= b.y + b.h * this.STOMP_TOP_FACTOR + this.STOMP_Y_PAD;
+            return overlapX > this.STOMP_X_MIN && inTop;
         });
     }
+
 
     _handleStomp(stomped, enemies) {
         stomped.forEach(e => e.die?.());
