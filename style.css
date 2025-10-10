@@ -41,11 +41,7 @@ canvas {
 
 .stage {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 720px;
-    max-width: 100%;
+    display: inline-block;
     overflow: hidden;
 }
 
@@ -59,11 +55,8 @@ canvas {
     padding: 8px;
     border-radius: 12px;
     background: rgba(0, 0, 0, 0.35);
-
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
     z-index: 5;
-
-
 }
 
 .toolbar .btns {
@@ -300,7 +293,6 @@ canvas {
     color: #fff;
     opacity: 0.9;
     font-size: 12px;
-    /* Kleinere Schrift für Mobile */
 }
 
 .footer-inner {
@@ -328,114 +320,97 @@ canvas {
     text-decoration: underline;
 }
 
-/* Media Queries für Mobile */
-@media only screen and (max-width: 760px) {
+/* MOBILE */
+@media (max-width: 760px),
+(max-height: 480px) {
 
-    /* kein Scroll */
     body {
         overflow: hidden;
     }
 
-    /* Bühne & Canvas vollflächig */
+    #title,
+    .help,
+    .site-footer {
+        display: none;
+    }
+
     .stage {
-        width: 100vw;
-        height: 100dvh;
-        /* dynamische Höhe (besser als 100vh auf Mobile) */
-        max-width: 100vw;
+        display: block;
+        margin: 0 auto;
     }
 
     canvas {
-        width: 100vw;
-        height: 100dvh;
-        max-width: none;
-        max-height: none;
+        width: min(720px, 100vw, calc(100dvh * 1.5));
+        height: auto;
+        max-height: 100dvh;
+        display: block;
     }
 
-    /* Toolbar oben, auto-breit */
     .toolbar {
         top: 8px;
         left: 50%;
         transform: translateX(-50%);
         width: auto;
-        /* wichtig */
         z-index: 6;
     }
 
-    /* Legende, Titel, Footer verstecken */
-    .help {
-        display: none;
-    }
-
-    #title {
-        display: none;
-    }
-
-    .site-footer {
-        display: none;
-    }
-
-    /* Mobile-Pad als Overlay über dem Canvas */
     .mobile-pad {
         display: block;
         position: absolute;
         inset: 0;
-        /* füllt die Bühne */
         pointer-events: none;
-        /* Container klickt nicht */
         z-index: 6;
     }
 
     .mobile-pad .pad {
         position: absolute;
         pointer-events: auto;
-        /* nur die Buttons sind klickbar */
         width: 68px;
         height: 68px;
         font-size: 20px;
         border-radius: 16px;
-        margin: 0;
+        background: rgba(255, 255, 255, .12);
+        border: 1px solid rgba(255, 255, 255, .2);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
+        transition: transform .08s ease, background .15s ease;
     }
 
-    /* Links unten: ← → */
-    .pad-left {
-        left: 14px;
-        bottom: 18px;
+    .mobile-pad .pad:hover {
+        background: rgba(255, 255, 255, .18);
     }
 
-    .pad-right {
-        left: 96px;
-        bottom: 18px;
-    }
-
-    /* Rechts unten: ⤒ (Jump), 🍾 (Throw) */
-    .pad-jump {
-        right: 96px;
-        bottom: 18px;
-    }
-
-    .pad-throw {
-        right: 14px;
-        bottom: 18px;
-    }
-
-    /* Pause etwas darüber rechts */
-    .pad-pause {
-        right: 14px;
-        bottom: 102px;
-        width: 56px;
-        height: 56px;
-        display: none;
-    }
-
-    /* leichte Transparenz beim Drücken */
     .mobile-pad .pad:active {
         transform: translateY(1px) scale(.98);
     }
-}
 
+    :root {
+        --pad: max(14px, env(safe-area-inset-left));
+        --padR: max(14px, env(safe-area-inset-right));
+        --padB: max(18px, env(safe-area-inset-bottom));
+    }
 
-@media only screen and (max-height: 480px) {
-    .toolbar {
-        top: 5px;
+    /* Positionen */
+    .pad-left {
+        left: var(--pad);
+        bottom: var(--padB);
+    }
+
+    .pad-right {
+        left: calc(var(--pad) + 82px);
+        bottom: var(--padB);
+    }
+
+    .pad-jump {
+        right: calc(var(--padR) + 82px);
+        bottom: var(--padB);
+    }
+
+    .pad-throw {
+        right: var(--padR);
+        bottom: var(--padB);
+    }
+
+    .pad-pause {
+        display: none;
     }
 }
