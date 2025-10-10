@@ -24,6 +24,7 @@ function _getLevelBuilder() {
 function boot() {
   keyboard.bind();
   setupMenu();
+  wireMobileControls();
 }
 window.addEventListener('DOMContentLoaded', boot);
 
@@ -39,20 +40,35 @@ function setupMenu() {
   setupEndButtons();
   ensureEndOverlay();
   wireLevelPicker();
+  wireInfoPopup();
   menu.classList.remove('hidden');
 }
+
+function wireInfoPopup() {
+  const btn = document.getElementById('btnInfo');
+  const overlay = document.getElementById('infoOverlay');
+  const close = document.getElementById('btnInfoClose');
+  if (!btn || !overlay) return;
+
+  const open = () => overlay.classList.remove('hidden');
+  const hide = () => overlay.classList.add('hidden');
+
+  btn.addEventListener('click', open);
+  close?.addEventListener('click', hide);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) hide(); });
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); });
+}
+
 
 function setLevel(n) {
   if (n !== '1' && n !== '2') return;
   _selectedLevel = n;
   localStorage.setItem('lvl', n);
 
-  // URL aktualisieren (ohne Reload), damit Leiste stimmt
   const u = new URL(location.href);
   u.searchParams.set('lvl', n);
   history.replaceState(null, '', u.toString());
 
-  // Buttons optisch updaten
   const box = document.getElementById('levelPicker');
   if (!box) return;
   box.querySelectorAll('[data-lvl]').forEach(b => {
@@ -66,7 +82,7 @@ function wireLevelPicker() {
   box.querySelectorAll('[data-lvl]').forEach(b => {
     b.addEventListener('click', () => setLevel(b.getAttribute('data-lvl')));
   });
-  setLevel(_selectedLevel); // initial sync
+  setLevel(_selectedLevel);
 }
 
 
@@ -124,7 +140,7 @@ function initGame() {
   const make = _getLevelBuilder();
   const lvl = make ? make() : null;
 
-  world = new World(canvas, keyboard, lvl);   // <— Level direkt mitgeben
+  world = new World(canvas, keyboard, lvl);
   wireToolbar();
   wireAutoPause();
   ensureEndOverlay();
@@ -141,7 +157,7 @@ function restartGame() {
   const make = _getLevelBuilder();
   const lvl = make ? make() : null;
 
-  world = new World(canvas, keyboard, lvl);   // <— Level direkt mitgeben
+  world = new World(canvas, keyboard, lvl);
   wireToolbar();
   canvas?.focus?.();
 
@@ -216,3 +232,26 @@ function wireToolbar() {
     if (e.code === 'KeyM' || e.keyCode === 77) { sfx?.toggleMute?.(); updateToolbarState(); }
   });
 }
+
+function wireMobileControls() {
+  const pad = document.getElementById('mobilePad');
+  if (!pad) return;
+
+  const press = (k) => { if (!keyboard) return; keyboard[k] = true; };
+  const release = (k) => { if (!keyboard) return; keyboard[k] = false; };
+
+  const down = (k) => (e) => { e.preventDefault(); press(k); };
+  const up = (k) => (e) => { e.preventDefault(); release(k); };
+
+  pad.querySelectorAll('[data-k]').forEach(btn => {
+    const key = btn.getAttribute('data-k');
+    btn.addEventListener('touchstart', down(key), { passive: false });
+    btn.addEventListener('touchend', up(key));
+    btn.addEventListener('touchcancel', up(key));
+    btn.addEventListener('mousedown', down(key));
+    btn.addEventListener('mouseup', up(key));
+    btn.addEventListener('mouseleave', up(key));
+  });
+}
+
+

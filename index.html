@@ -40,27 +40,50 @@
 
 <body>
     <h1 id="title">El Pollo Loco</h1>
+
     <section class="stage" id="stage">
         <!-- Canvas -->
         <canvas id="canvas" width="720" height="480" tabindex="0" aria-label="Spielfeld"></canvas>
+
         <!-- Toolbar -->
         <div class="toolbar">
             <button id="btnPause" class="btns" aria-label="Pause/Resume" title="Pause/Resume (P / ESC)">⏯</button>
             <button id="btnMute" class="btns" aria-label="Mute/Unmute" title="Mute (M)">🔊</button>
+            <button id="btnInfo" class="btns" aria-label="Info & Controls" title="Info (ℹ)">ℹ</button> <!-- NEU -->
             <button id="btnFS" class="btns" aria-label="Fullscreen umschalten" title="Fullscreen (F)">⛶</button>
             <button id="btnReload" class="btns" aria-label="Neu starten" title="Neu laden (R)">↻</button>
         </div>
+
+        <!-- Mini-Controls-Legende (unter Canvas) -->
+        <div id="controlsHelp" class="help">
+            <span>←/→: Laufen</span>
+            <span>SPACE: Springen</span>
+            <span>D: Flasche werfen</span>
+            <span>P/ESC: Pause</span>
+            <span>M: Mute</span>
+            <span>R: Restart</span>
+        </div>
+
+        <!-- Mobile-Controls -->
+        <div id="mobilePad" class="mobile-pad">
+            <button class="pad pad-left" data-k="LEFT" aria-label="Links">◀</button>
+            <button class="pad pad-right" data-k="RIGHT" aria-label="Rechts">▶</button>
+            <button class="pad pad-jump" data-k="SPACE" aria-label="Springen">⤒</button>
+            <button class="pad pad-throw" data-k="D" aria-label="Werfen">🍾</button>
+            <button class="pad pad-pause" data-k="P" aria-label="Pause">⏯</button>
+        </div>
+
         <!-- Start-Overlay -->
         <div id="menuOverlay" class="overlay">
             <img id="menuImg" alt="Start Screen" src="img/9_intro_outro_screens/start/startscreen_2.png" />
             <button id="btnPlay" class="btn primary" aria-label="Play">▶ Play</button>
+
             <div id="levelPicker" class="levels">
                 <button class="btn lvl" data-lvl="1">Level 1</button>
                 <button class="btn lvl" data-lvl="2">Level 2</button>
             </div>
-
-
         </div>
+
         <!-- End-Overlay (Win/Lose) -->
         <div id="endOverlay" class="overlay hidden">
             <img id="endImg" alt="Game Result" />
@@ -69,7 +92,42 @@
                 <button id="btnRestart" class="btn" aria-label="Restart">⟲ Restart</button>
             </div>
         </div>
+
+        <!-- Info-Overlay -->
+        <div id="infoOverlay" class="overlay hidden">
+            <div class="info-card">
+                <h2>El Pollo Loco — Info</h2>
+                <p>
+                    Sammle Münzen und Flaschen. Weiche Hühnern aus oder spring ihnen auf den Kopf.
+                    Triff den Endboss mit Flaschen, um zu gewinnen.
+                </p>
+                <h3>Steuerung</h3>
+                <ul>
+                    <li>← / →: Laufen</li>
+                    <li>SPACE: Springen</li>
+                    <li>D: Flasche werfen</li>
+                    <li>P oder ESC: Pause</li>
+                    <li>M: Mute</li>
+                    <li>R: Restart</li>
+                </ul>
+                <div class="actions">
+                    <button id="btnInfoClose" class="btn">Schließen</button>
+                </div>
+            </div>
+        </div>
     </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <span>© 2025 El Pollo Loco</span>
+            <nav class="footer-links">
+                <a href="datenschutz.html">Datenschutz</a>
+                <span>·</span>
+                <a href="impressum.html">Impressum</a>
+            </nav>
+        </div>
+    </footer>
 </body>
 
 </html>
