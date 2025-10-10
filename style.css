@@ -320,45 +320,62 @@ canvas {
     text-decoration: underline;
 }
 
-/* MOBILE */
+/* MOBILE: greift bei schmal ODER niedriger Höhe */
 @media (max-width: 760px),
 (max-height: 480px) {
 
+    /* Bühne/Canvas-Breite + freie Ränder berechnen */
+    :root {
+        --stageW: min(720px, 100vw, calc(100dvh * 1.5));
+        --gutL: calc((100vw - var(--stageW)) / 2);
+        --gutR: var(--gutL);
+        --safeL: env(safe-area-inset-left, 0px);
+        --safeR: env(safe-area-inset-right, 0px);
+        --safeB: env(safe-area-inset-bottom, 0px);
+        --edgeBias: -0.5;
+        --padBase: 8px;
+    }
+
+    /* kein Scroll auf Mobile */
     body {
         overflow: hidden;
     }
 
+    /* Canvas mittig, Breite wie --stageW */
+    .stage {
+        margin: 0 auto;
+    }
+
+    canvas {
+        width: var(--stageW);
+        height: auto;
+        max-height: 100dvh;
+        display: block;
+    }
+
+    /* Toolbar zentriert oben */
+    .toolbar {
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto;
+        z-index: 7;
+    }
+
+    /* Titel/Legende/Footer verbergen */
     #title,
     .help,
     .site-footer {
         display: none;
     }
 
-    .stage {
-        display: block;
-        margin: 0 auto;
-    }
-
-    canvas {
-        width: min(720px, 100vw, calc(100dvh * 1.5));
-        height: auto;
-        max-height: 100dvh;
-        display: block;
-    }
-
-    .toolbar {
-        top: 8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: auto;
-        z-index: 6;
-    }
-
+    /* Mobile-Pad fullscreen-Overlay, Buttons in die freien Seitenränder */
     .mobile-pad {
         display: block;
-        position: absolute;
+        position: fixed;
         inset: 0;
         pointer-events: none;
+        /* nur Buttons klickbar */
         z-index: 6;
     }
 
@@ -372,44 +389,31 @@ canvas {
         background: rgba(255, 255, 255, .12);
         border: 1px solid rgba(255, 255, 255, .2);
         box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
-        transition: transform .08s ease, background .15s ease;
     }
 
-    .mobile-pad .pad:hover {
-        background: rgba(255, 255, 255, .18);
-    }
-
-    .mobile-pad .pad:active {
-        transform: translateY(1px) scale(.98);
-    }
-
-    :root {
-        --pad: max(14px, env(safe-area-inset-left));
-        --padR: max(14px, env(safe-area-inset-right));
-        --padB: max(18px, env(safe-area-inset-bottom));
-    }
-
-    /* Positionen */
+    /* Left cluster (← →) — slide into the left gutter */
     .pad-left {
-        left: var(--pad);
-        bottom: var(--padB);
+        left: calc(max(var(--padBase), env(safe-area-inset-left, 0px)) + var(--gutL) * var(--edgeBias));
+        bottom: calc(var(--padBase) + env(safe-area-inset-bottom, 0px));
     }
 
     .pad-right {
-        left: calc(var(--pad) + 82px);
-        bottom: var(--padB);
+        left: calc(max(var(--padBase), env(safe-area-inset-left, 0px)) + var(--gutL) * var(--edgeBias) + 82px);
+        bottom: calc(var(--padBase) + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Right cluster (Throw / Jump) — slide into the right gutter */
+    .pad-throw {
+        right: calc(max(var(--padBase), env(safe-area-inset-right, 0px)) + var(--gutR) * var(--edgeBias));
+        bottom: calc(var(--padBase) + env(safe-area-inset-bottom, 0px));
     }
 
     .pad-jump {
-        right: calc(var(--padR) + 82px);
-        bottom: var(--padB);
+        right: calc(max(var(--padBase), env(safe-area-inset-right, 0px)) + var(--gutR) * var(--edgeBias) + 82px);
+        bottom: calc(var(--padBase) + env(safe-area-inset-bottom, 0px));
     }
 
-    .pad-throw {
-        right: var(--padR);
-        bottom: var(--padB);
-    }
-
+    /* Pause a bit higher on the right edge */
     .pad-pause {
         display: none;
     }
