@@ -16,9 +16,9 @@ class World {
     coinsCount = 0;
     groundY = 400;
     // Stomp per "messline"
-    STOMP_FEET_OFFSET = 30;     
-    STOMP_ENEMY_TOP_PAD = -2;   
-    STOMP_MIN_FALL = -2;        
+    STOMP_FEET_OFFSET = 30;
+    STOMP_ENEMY_TOP_PAD = -2;
+    STOMP_MIN_FALL = -2;
     // Throw debounce
     THROW_COOLDOWN_MS = 350;
     lastThrowAt = 0;
@@ -43,7 +43,17 @@ class World {
     }
 
     /* -------------- Pause -------------- */
-    togglePause() { this.isPaused = !this.isPaused; }
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        if (this.isPaused) {
+            sfx?.pauseMusic?.();
+            sfx?.stopWalk?.();
+        } else {
+            sfx?.startMusic?.();
+        }
+    }
+
+
 
     checkPauseToggle() {
         const k = this.keyboard || {};
@@ -56,15 +66,20 @@ class World {
     checkEndStates() {
         if (this.character?.isDead?.()) {
             this.isPaused = true;
+            sfx?.gameOver();
+            sfx?.pauseMusic?.();
             try { window.showEndOverlay && window.showEndOverlay('lose'); } catch { }
             return;
         }
 
         if (this.endBoss && this.endBoss.dead && this.endBoss.removeMe) {
             this.isPaused = true;
+            sfx?.win();
+            sfx?.pauseMusic?.();
             try { window.showEndOverlay && window.showEndOverlay('win'); } catch { }
         }
     }
+
 
     /* ---------- Screen Shake ----------- */
     triggerShake(ms = 220, mag = 10) {
@@ -215,6 +230,7 @@ class World {
         const hitter = hits.find(e => e.harmful !== false);
         if (hitter && !this.character.isHurt()) {
             this.character.hit();
+            sfx?.hurt();
             this.statusBarHealth.setPercentage(this.character.energy);
             this.character.applyKnockBack?.(hitter.x);
         }
@@ -255,6 +271,7 @@ class World {
             if (this.character.isPickupColliding(c, 8)) {
                 this.coinsCount = (this.coinsCount || 0) + 1;
                 this.statusBarCoins?.add?.(10);
+                sfx?.coin();
                 c.destroy?.();
                 return false;
             }
@@ -268,11 +285,13 @@ class World {
             if (this.character.isPickupColliding(b, 8)) {
                 this.bottlesCount++;
                 this.statusBarBottles?.add?.(10);
+                sfx?.bottle();
                 return false;
             }
             return true;
         });
     }
+
 
     /* ---------------- Draw ---------------- */
     draw() {

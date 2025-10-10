@@ -154,9 +154,14 @@ class EndBoss extends MovableObject {
         if (this.activated || !this.isInView()) return;
         this.activated = true;
         this.setState('alert');
+        sfx?.bossAlert();
         this.alertUntil = Date.now() + this.ALERT_MS;
-        setTimeout(() => { if (!this.dead && this.state === 'alert') this.setState('walk'); this.alertUntil = null; }, this.ALERT_MS + 20);
+        setTimeout(() => {
+            if (!this.dead && this.state === 'alert') this.setState('walk');
+            this.alertUntil = null;
+        }, this.ALERT_MS + 20);
     }
+
 
     _handleChase() {
         const cx = this.world?.character?.x ?? this.x;
@@ -165,7 +170,6 @@ class EndBoss extends MovableObject {
 
         if (adx <= this.ATTACK_DIST) this.setState('attack'); else this.setState('walk');
 
-        // Behalte deine Blick-Logik bei (wie in deinem Original):
         if (dx < 0) { this.otherDirection = false; this.moveLeft(); }
         else { this.otherDirection = true; this.moveRight(); }
     }
@@ -173,6 +177,7 @@ class EndBoss extends MovableObject {
     /* -------------- Treffer -------------- */
     takeHit(dmg = 25) {
         if (this.dead || this.deadPlaying) return;
+        sfx?.bossHit();
         this.energy = Math.max(0, this.energy - dmg);
         this.speed = Math.min(this.speed + this.SPEED_HIT_BOOST, this.MAX_SPEED);
         this.setState('hurt');
@@ -180,6 +185,7 @@ class EndBoss extends MovableObject {
         setTimeout(() => { if (!this.dead) this.setState('attack'); }, this.HURT_MS);
         if (this.energy === 0) this.die();
     }
+
 
     die() {
         if (this.dead) return;

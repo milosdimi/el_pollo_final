@@ -44,6 +44,7 @@ class SmallChicken extends MovableObject {
     die() {
         if (this.dead) return;
         this.dead = true;
+        sfx?.chicken();  
         this.harmful = false;
         this.speed = 0;
         this._stopLoops();

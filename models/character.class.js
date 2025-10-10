@@ -6,6 +6,8 @@ class Character extends MovableObject {
     lastActiveAt = Date.now();
     LONG_IDLE_AFTER_MS = 3000;
     stompLockUntil = 0;
+    lastSnoreAt = 0;
+    _jumpHeld = false;
 
     offset = { top: 110, bottom: 30, left: 50, right: 50 };
 
@@ -88,18 +90,37 @@ class Character extends MovableObject {
         this._moveLoop = setInterval(() => this._moveStep(), 1000 / 60);
         this._animLoop = setInterval(() => this._animStep(), 100);
     }
-
     _moveStep() {
         if (this.world?.isPaused || this.isDead()) return;
         const kb = this.world?.keyboard || {};
         const endX = this.world?.level?.level_end_x ?? 3000;
+        const grounded = !this.isAboveGround();
 
-        if (kb.RIGHT && this.x < endX) { this.moveRight(); this.otherDirection = false; this.markActive(); }
-        if (kb.LEFT && this.x > 0) { this.moveLeft(); this.otherDirection = true; this.markActive(); }
-        if (kb.SPACE && !this.isAboveGround()) { this.jump(); this.markActive(); }
+        let moved = false;
+
+        if (kb.RIGHT && this.x < endX) {
+            this.moveRight(); this.otherDirection = false; this.markActive();
+            moved = true;
+        }
+        if (kb.LEFT && this.x > 0) {
+            this.moveLeft(); this.otherDirection = true; this.markActive();
+            moved = true;
+        }
+
+        if (kb.SPACE && grounded) {
+            if (!this._jumpHeld) { sfx?.jump(); this.jump(); this.markActive(); }
+            this._jumpHeld = true;
+        } else if (!kb.SPACE) {
+            this._jumpHeld = false;
+        }
+
+        if (moved && grounded && !this.isHurt()) sfx?.startWalk();
+        else sfx?.stopWalk?.();
 
         if (this.world) this.world.setCameraX(-this.x + 100);
     }
+
+
 
     _animStep() {
         if (this.world?.isPaused) return;
@@ -109,9 +130,19 @@ class Character extends MovableObject {
         if (this.isMovingKeyDown()) return this.playAnimation(this.IMAGES_WALKING);
 
         const idleFor = Date.now() - this.lastActiveAt;
-        const imgs = idleFor >= this.LONG_IDLE_AFTER_MS ? this.IMAGES_LONG_IDLE : this.IMAGES_IDLE;
+        const longIdle = idleFor >= this.LONG_IDLE_AFTER_MS;
+        const imgs = longIdle ? this.IMAGES_LONG_IDLE : this.IMAGES_IDLE;
         this.playAnimation(imgs);
+
+        if (longIdle) {
+            const now = Date.now();
+            if (now - (this.lastSnoreAt || 0) > 2500) {
+                sfx?.snore();
+                this.lastSnoreAt = now;
+            }
+        }
     }
+
 
     isMovingKeyDown() {
         const kb = this.world?.keyboard;
@@ -143,7 +174,7 @@ class Character extends MovableObject {
         this.x += dir * 35;
         this.speedY = 14;
         this.stompLockUntil = Date.now() + 500;
-        this.x = Math.max(0, this.x);  
+        this.x = Math.max(0, this.x);
     }
 
 

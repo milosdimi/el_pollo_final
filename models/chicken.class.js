@@ -46,9 +46,10 @@ class Chicken extends MovableObject {
     die() {
         if (this.dead) return;
         this.dead = true;
+        sfx?.chicken();                 
         this.harmful = false;
         this.speed = 0;
-        this._stopLoops();
+        this._stopLoops?.();
         this.img = this.imageCache[this.IMAGES_DEAD_BIG_CHICKEN[0]];
         setTimeout(() => { this.removeMe = true; }, 350);
     }

@@ -75,16 +75,24 @@ function initGame() {
   wireToolbar();
   wireAutoPause();
   ensureEndOverlay();
+
+  sfx.stopAll();
+  sfx.startMusic();
 }
 
 function restartGame() {
   if (world) world.dispose();
   document.getElementById('endOverlay')?.classList.add('hidden');
 
+  sfx.stopAll();
+
   world = new World(canvas, keyboard);
   wireToolbar();
   canvas?.focus?.();
+
+  sfx.startMusic();
 }
+
 
 /* Auto-Pause */
 function wireAutoPause() {

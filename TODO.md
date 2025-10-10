@@ -56,7 +56,7 @@
 - [*] **Toolbar**
   - [*] Buttons (Pause/Mute/FS/Reload)
   - [*] **Kein Fokusklau** (Space toggelt nicht mehr Buttons)
-  - [ ] **Soft-Reload** (nur Spiel neu starten, **ohne** Page-Refresh/Startscreen)
+  - [*] **Soft-Reload** (nur Spiel neu starten, **ohne** Page-Refresh/Startscreen)
 - [ ] **Controls/Info**
   - [ ] **Controls-Overlay** (Tasten/Touch-Controls anzeigen)
   - [ ] **Info-Popup** (kurze Hinweise)
@@ -73,18 +73,6 @@
 
 - [ ] **Level-Auswahl** (Startscreen) + **Level 2**
 - [ ] Partikel/Hit-FX (Staub beim Landen, Treffer-Funken)
-- [ ] Win/Lose-Screens mit Restart **ohne** Reload (Soft-Restart)
+- [*] Win/Lose-Screens mit Restart **ohne** Reload (Soft-Restart)
 
-    // Audio
-    coinSfx = new Audio('audio/coinRecievedEffect.mp3');
-    bottleSfx = new Audio('audio/bottleCollectedEffect.mp3');
-    bossHitSfx = new Audio('audio/bossHit.mp3');
-    music = new Audio('audio/background-music.mp3');
-    walkSfx = new Audio('audio/walkEffect.mp3');
-    jumpSfx = new Audio('audio/jump.mp3');
-    chickenSfx = new Audio('audio/chicken-noise-196746.mp3');
-    hurtSfx = new Audio('audio/auah.mp3');
-    snorkSfx = new Audio('audio/snorking.mp3');
-    bossAlertSfx = new Audio('audio/watch-out.mp3');
-    winSfx = new Audio('audio/win.mp3');
-    gameOverSfx = new Audio('audio/game_over.mp3');
+
