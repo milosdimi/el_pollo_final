@@ -106,13 +106,14 @@ function wireAutoPause() {
   });
 }
 
-/* Toolbar (Pause/FS/Reload) */
+/* Toolbar (Pause/FS/Reload/Mute) */
 function wireToolbar() {
   const $ = (id) => document.getElementById(id);
   const stage = $('stage');
   const btnPause = $('btnPause');
   const btnFS = $('btnFS');
   const btnReload = $('btnReload');
+  const btnMute = $('btnMute');
 
   function updateToolbarState() {
     const paused = !!world?.isPaused;
@@ -121,6 +122,7 @@ function wireToolbar() {
       btnPause.classList.toggle('is-active', paused);
     }
     if (btnFS) btnFS.textContent = document.fullscreenElement ? '🡼' : '⛶';
+    if (btnMute) btnMute.textContent = sfx?.isMuted?.() ? '🔇' : '🔊';
   }
 
   if (_toolbarWired) { updateToolbarState(); return; }
@@ -137,6 +139,7 @@ function wireToolbar() {
   btnPause?.addEventListener('click', () => { world?.togglePause(); updateToolbarState(); });
   btnFS?.addEventListener('click', toggleFS);
   btnReload?.addEventListener('click', () => restartGame());
+  btnMute?.addEventListener('click', () => { sfx?.toggleMute?.(); updateToolbarState(); });
 
   window.addEventListener('keydown', () => setTimeout(updateToolbarState, 0));
   document.addEventListener('fullscreenchange', updateToolbarState);
@@ -147,5 +150,7 @@ function wireToolbar() {
     if (e.repeat) return;
     if (e.code === 'KeyF' || e.keyCode === 70) toggleFS();
     if (e.code === 'KeyR' || e.keyCode === 82) restartGame();
+    if (e.code === 'KeyM' || e.keyCode === 77) { sfx?.toggleMute?.(); updateToolbarState(); }
   });
 }
+

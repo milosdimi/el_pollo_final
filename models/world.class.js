@@ -63,10 +63,11 @@ class World {
     }
 
     /* ----------- End States ------------ */
-    checkEndStates() {
+     checkEndStates() {
         if (this.character?.isDead?.()) {
             this.isPaused = true;
-            sfx?.gameOver();
+            sfx?.stopWalk?.();        
+            sfx?.gameOver?.();
             sfx?.pauseMusic?.();
             try { window.showEndOverlay && window.showEndOverlay('lose'); } catch { }
             return;
@@ -74,11 +75,13 @@ class World {
 
         if (this.endBoss && this.endBoss.dead && this.endBoss.removeMe) {
             this.isPaused = true;
-            sfx?.win();
+            sfx?.stopWalk?.();        
+            sfx?.win?.();
             sfx?.pauseMusic?.();
             try { window.showEndOverlay && window.showEndOverlay('win'); } catch { }
         }
     }
+
 
 
     /* ---------- Screen Shake ----------- */
@@ -125,12 +128,15 @@ class World {
         b.bornAt = Date.now();
         this.throwableObjects.push(b);
 
+        sfx?.throw?.();
+
         this.bottlesCount--;
         this.statusBarBottles?.add?.(-20);
         this.lastThrowAt = now;
         this.throwHeld = true;
         this.character.markActive?.();
     }
+
 
     _getBottleSpawn() {
         const dir = this.character.otherDirection ? -1 : 1;
