@@ -251,13 +251,21 @@ canvas {
     width: 56px;
     height: 56px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, .12);
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, .2);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
     margin: 6px;
     touch-action: none;
     cursor: pointer;
+}
+
+.mobile-pad .pad:hover {
+    background: rgba(255, 255, 255, .18);
+}
+
+.mobile-pad .pad:active {
+    background: rgba(255, 255, 255, .24);
 }
 
 .pad-jump,
@@ -322,70 +330,112 @@ canvas {
 
 /* Media Queries für Mobile */
 @media only screen and (max-width: 760px) {
+
+    /* kein Scroll */
     body {
         overflow: hidden;
-        /* Kein Scrollen */
+    }
+
+    /* Bühne & Canvas vollflächig */
+    .stage {
+        width: 100vw;
+        height: 100dvh;
+        /* dynamische Höhe (besser als 100vh auf Mobile) */
+        max-width: 100vw;
     }
 
     canvas {
-        width: 100%;
-        height: 100vh;
-        /* Fullscreen */
+        width: 100vw;
+        height: 100dvh;
+        max-width: none;
         max-height: none;
     }
 
+    /* Toolbar oben, auto-breit */
     .toolbar {
-        top: 10px;
-        width: 27%;
-        max-width: none;
-    }
-
-    .help {
-        display: none;
-        /* Tastenbeschreibung ausblenden */
-    }
-
-    .mobile-pad {
-        display: grid;
-        position: absolute;
-        bottom: 10px;
+        top: 8px;
         left: 50%;
         transform: translateX(-50%);
-        width: 90%;
-        max-width: 600px;
+        width: auto;
+        /* wichtig */
+        z-index: 6;
+    }
+
+    /* Legende, Titel, Footer verstecken */
+    .help {
+        display: none;
     }
 
     #title {
         display: none;
-        /* Titel auf Mobile ausblenden */
     }
 
     .site-footer {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
+        display: none;
+    }
+
+    /* Mobile-Pad als Overlay über dem Canvas */
+    .mobile-pad {
+        display: block;
+        position: absolute;
+        inset: 0;
+        /* füllt die Bühne */
+        pointer-events: none;
+        /* Container klickt nicht */
+        z-index: 6;
+    }
+
+    .mobile-pad .pad {
+        position: absolute;
+        pointer-events: auto;
+        /* nur die Buttons sind klickbar */
+        width: 68px;
+        height: 68px;
+        font-size: 20px;
+        border-radius: 16px;
         margin: 0;
-        padding: 5px 0;
-        background: rgba(0, 0, 0, 0.35);
-        border-radius: 0;
+    }
+
+    /* Links unten: ← → */
+    .pad-left {
+        left: 14px;
+        bottom: 18px;
+    }
+
+    .pad-right {
+        left: 96px;
+        bottom: 18px;
+    }
+
+    /* Rechts unten: ⤒ (Jump), 🍾 (Throw) */
+    .pad-jump {
+        right: 96px;
+        bottom: 18px;
+    }
+
+    .pad-throw {
+        right: 14px;
+        bottom: 18px;
+    }
+
+    /* Pause etwas darüber rechts */
+    .pad-pause {
+        right: 14px;
+        bottom: 102px;
+        width: 56px;
+        height: 56px;
+        display: none;
+    }
+
+    /* leichte Transparenz beim Drücken */
+    .mobile-pad .pad:active {
+        transform: translateY(1px) scale(.98);
     }
 }
 
+
 @media only screen and (max-height: 480px) {
-    canvas {
-        height: 100vh;
-    }
-
-    #title {
-        display: none;
-    }
-
     .toolbar {
         top: 5px;
-    }
-
-    .site-footer {
-        display: none;
-        /* Footer bei sehr kleiner Höhe ausblenden */
     }
 }
