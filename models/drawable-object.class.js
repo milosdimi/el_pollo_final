@@ -9,7 +9,7 @@ class DrawableObject {
   currentImage = 0;
 
   offset = { top: 0, bottom: 0, left: 0, right: 0 };
-  debug = false; // optional per-instance
+  debug = true; // debug box on/off
 
   loadImage(path) {
     const image = new Image();
@@ -64,7 +64,6 @@ class DrawableObject {
     return { x: this.x + o.left, y: this.y + o.top, w, h };
   }
 
-  // einfache AABB-Kollision auf Basis der Hitbox
   overlaps(other) {
     if (!other || typeof other !== 'object') return false;
     const a = this.getHitBox();
@@ -82,14 +81,11 @@ class DrawableObject {
     return this.y + this.height / 2;
   }
 
-  // intern: welche Klassen sind für Debug-Rahmen relevant
   _isDebugRelevant() {
     const name = this.constructor && this.constructor.name;
-    // Achtung: In deinem Projekt heißt der Boss meist "Endboss" (nicht "EndBoss")
     return ['Character', 'Chicken', 'SmallChicken', 'Endboss', 'Coin', 'Bottle', 'ThrowableObject'].includes(name);
   }
 
-  // optionaler Debug-Rahmen
   drawFrame(ctx) {
     const globalFlag = typeof window !== 'undefined' && window.DEBUG_HITBOX;
     const worldFlag = this.world && this.world.debugHitboxes;
@@ -98,13 +94,11 @@ class DrawableObject {
 
     ctx.save();
 
-    // Roh-Sprite Bounds – blau
     ctx.lineWidth = 2;
     ctx.setLineDash([]);
     ctx.strokeStyle = 'rgba(0, 102, 255, .9)';
     ctx.strokeRect(this.x, this.y, this.width, this.height);
 
-    // Offset-Hitbox – rot gestrichelt
     const hb = this.getHitBox();
     ctx.lineWidth = 2;
     ctx.setLineDash([6, 4]);

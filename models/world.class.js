@@ -1,38 +1,31 @@
 class World {
     character = new Character();
     level = (typeof buildLevel1 === 'function') ? buildLevel1() : level1;
-
     canvas; ctx; keyboard;
     camera_x = 0;
     alive = true;
     loopId = null;
-
     // HUD
     statusBarHealth = new StatusbarHealth();
     statusBarBoss = new StatusbarBoss();
     statusBarCoins = new StatusbarCoins();
     statusBarBottles = new StatusbarBottles();
-
     // Gameplay
     throwableObjects = [];
     bottlesCount = 0;
     coinsCount = 0;
     groundY = 400;
-    // Stomp-Tuning
-    STOMP_TOP_FACTOR = 0.8;   // Anteil der Gegnerhöhe (0.8 = großzügig)
-    STOMP_Y_PAD = 6;          // px Toleranz nach unten
-    STOMP_X_MIN = 2;          // minimale horizontale Überlappung in px
-
-
+    // Stomp per "messline"
+    STOMP_FEET_OFFSET = 30;     
+    STOMP_ENEMY_TOP_PAD = -2;   
+    STOMP_MIN_FALL = -2;        
     // Throw debounce
     THROW_COOLDOWN_MS = 350;
     lastThrowAt = 0;
     throwHeld = false;
-
     // Pause
     isPaused = false;
     _pauseHeld = false;
-
     // Screen shake
     _shakeStart = 0;
     _shakeEnd = 0;
@@ -72,7 +65,6 @@ class World {
             try { window.showEndOverlay && window.showEndOverlay('win'); } catch { }
         }
     }
-
 
     /* ---------- Screen Shake ----------- */
     triggerShake(ms = 220, mag = 10) {
@@ -192,16 +184,25 @@ class World {
         return enemies.filter(e => !e?.dead && this.character.isColliding(e));
     }
 
-    _getStomped(hits, a, charBottom) {
+    _getStomped(hits, a) {
+        const feetPrev = (this.character.prevY ?? this.character.y) + this.character.height - this.STOMP_FEET_OFFSET;
+        const feetNow = this.character.y + this.character.height - this.STOMP_FEET_OFFSET;
+
         return hits.filter(e => {
             if (e.isBoss) return false;
+
             const b = e.getHitBox();
-            const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-            const inTop = charBottom <= b.y + b.h * this.STOMP_TOP_FACTOR + this.STOMP_Y_PAD;
-            return overlapX > this.STOMP_X_MIN && inTop;
+            const overlapX =
+                Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+            if (overlapX <= this.STOMP_X_MIN) return false;
+
+            const enemyTop = b.y + this.STOMP_ENEMY_TOP_PAD;
+            const crossedTop = feetPrev <= enemyTop && feetNow >= enemyTop;
+            const falling = this.character.speedY <= this.STOMP_MIN_FALL;
+
+            return crossedTop && falling;
         });
     }
-
 
     _handleStomp(stomped, enemies) {
         stomped.forEach(e => e.die?.());
@@ -247,7 +248,6 @@ class World {
         return -(total - (this.canvas?.width || 0));
     }
 
-
     /* -------------- Pickups -------------- */
     checkCoinPickup() {
         if (!this.level?.coins || !this.character) return;
@@ -261,7 +261,6 @@ class World {
             return true;
         });
     }
-
 
     checkBottlePickup() {
         if (!this.level?.bottles || !this.character) return;

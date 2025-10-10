@@ -1,7 +1,9 @@
 let canvas;
 let world;
 const keyboard = new Keyboard();
+
 let _toolbarWired = false;
+let _autoPauseWired = false;
 
 /* Boot */
 function boot() {
@@ -16,7 +18,7 @@ function setupMenu() {
   if (!menu) { initGame(); return; }
 
   const btnPlay = document.getElementById('btnPlay');
-  btnPlay && (btnPlay.onclick = startGame);
+  if (btnPlay) btnPlay.onclick = startGame;
 
   bindMenuKeys(menu);
   setupEndButtons();
@@ -35,8 +37,14 @@ function setupEndButtons() {
   const end = document.getElementById('endOverlay');
   const btnBack = document.getElementById('btnBack');
   const btnRestart = document.getElementById('btnRestart');
-  btnBack && (btnBack.onclick = () => location.reload());
-  btnRestart && (btnRestart.onclick = () => location.reload());
+
+  if (btnRestart) btnRestart.onclick = () => restartGame();
+
+  if (btnBack) btnBack.onclick = () => {
+    end?.classList.add('hidden');
+    const menu = document.getElementById('menuOverlay');
+    if (menu) menu.classList.remove('hidden');
+  };
 }
 
 function ensureEndOverlay() {
@@ -65,17 +73,29 @@ function initGame() {
   if (world) world.dispose();
   world = new World(canvas, keyboard);
   wireToolbar();
+  wireAutoPause();
   ensureEndOverlay();
 }
 
 function restartGame() {
   if (world) world.dispose();
-  const end = document.getElementById('endOverlay');
-  end?.classList.add('hidden');
+  document.getElementById('endOverlay')?.classList.add('hidden');
 
   world = new World(canvas, keyboard);
   wireToolbar();
   canvas?.focus?.();
+}
+
+/* Auto-Pause */
+function wireAutoPause() {
+  if (_autoPauseWired) return;
+  _autoPauseWired = true;
+
+  window.addEventListener('blur', () => { if (world) world.isPaused = true; });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && world) world.isPaused = true;
+  });
 }
 
 /* Toolbar (Pause/FS/Reload) */
@@ -108,7 +128,7 @@ function wireToolbar() {
 
   btnPause?.addEventListener('click', () => { world?.togglePause(); updateToolbarState(); });
   btnFS?.addEventListener('click', toggleFS);
-  btnReload?.addEventListener('click', () => restartGame());   
+  btnReload?.addEventListener('click', () => restartGame());
 
   window.addEventListener('keydown', () => setTimeout(updateToolbarState, 0));
   document.addEventListener('fullscreenchange', updateToolbarState);
@@ -118,6 +138,6 @@ function wireToolbar() {
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     if (e.code === 'KeyF' || e.keyCode === 70) toggleFS();
-    if (e.code === 'KeyR' || e.keyCode === 82) restartGame();  
+    if (e.code === 'KeyR' || e.keyCode === 82) restartGame();
   });
 }

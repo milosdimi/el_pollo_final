@@ -7,7 +7,7 @@ class Character extends MovableObject {
     LONG_IDLE_AFTER_MS = 3000;
     stompLockUntil = 0;
 
-    offset = { top: 90, bottom: 40, left: 35, right: 35 };
+    offset = { top: 110, bottom: 30, left: 50, right: 50 };
 
     IMAGES_WALKING = [
         'img/2_character_pepe/2_walk/W-21.png',
@@ -132,9 +132,6 @@ class Character extends MovableObject {
 
         return this.speedY < 0 && botPrev <= b.y && botNow >= b.y;
     }
-
-
-
 
     bounce() {
         this.speedY = 12;
