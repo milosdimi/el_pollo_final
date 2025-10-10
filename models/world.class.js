@@ -1,6 +1,6 @@
 class World {
     character = new Character();
-    level = (typeof buildLevel1 === 'function') ? buildLevel1() : level1;
+    level = null
     canvas; ctx; keyboard;
     camera_x = 0;
     alive = true;
@@ -33,10 +33,11 @@ class World {
     _shakeX = 0;
     _shakeY = 0;
 
-    constructor(canvas, keyboard) {
+    constructor(canvas, keyboard, level) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.keyboard = keyboard;
+        this.level = level || (typeof buildLevel1 === 'function' ? buildLevel1() : level1);
         this.setWorld();
         this.draw();
         this.run();
@@ -63,10 +64,10 @@ class World {
     }
 
     /* ----------- End States ------------ */
-     checkEndStates() {
+    checkEndStates() {
         if (this.character?.isDead?.()) {
             this.isPaused = true;
-            sfx?.stopWalk?.();        
+            sfx?.stopWalk?.();
             sfx?.gameOver?.();
             sfx?.pauseMusic?.();
             try { window.showEndOverlay && window.showEndOverlay('lose'); } catch { }
@@ -75,7 +76,7 @@ class World {
 
         if (this.endBoss && this.endBoss.dead && this.endBoss.removeMe) {
             this.isPaused = true;
-            sfx?.stopWalk?.();        
+            sfx?.stopWalk?.();
             sfx?.win?.();
             sfx?.pauseMusic?.();
             try { window.showEndOverlay && window.showEndOverlay('win'); } catch { }

@@ -5,6 +5,21 @@ const keyboard = new Keyboard();
 let _toolbarWired = false;
 let _autoPauseWired = false;
 
+/* Level-Picker */
+function _readLevelPref() {
+  const u = new URL(location.href);
+  const q = u.searchParams.get('lvl');
+  if (q === '1' || q === '2') return q;
+  return localStorage.getItem('lvl') || '1';
+}
+let _selectedLevel = _readLevelPref();
+
+function _getLevelBuilder() {
+  if (_selectedLevel === '2' && typeof buildLevel2 === 'function') return buildLevel2;
+  if (typeof buildLevel1 === 'function') return buildLevel1;
+  return null;
+}
+
 /* Boot */
 function boot() {
   keyboard.bind();
@@ -23,15 +38,48 @@ function setupMenu() {
   bindMenuKeys(menu);
   setupEndButtons();
   ensureEndOverlay();
+  wireLevelPicker();
   menu.classList.remove('hidden');
 }
+
+function setLevel(n) {
+  if (n !== '1' && n !== '2') return;
+  _selectedLevel = n;
+  localStorage.setItem('lvl', n);
+
+  // URL aktualisieren (ohne Reload), damit Leiste stimmt
+  const u = new URL(location.href);
+  u.searchParams.set('lvl', n);
+  history.replaceState(null, '', u.toString());
+
+  // Buttons optisch updaten
+  const box = document.getElementById('levelPicker');
+  if (!box) return;
+  box.querySelectorAll('[data-lvl]').forEach(b => {
+    b.classList.toggle('is-active', b.getAttribute('data-lvl') === n);
+  });
+}
+
+function wireLevelPicker() {
+  const box = document.getElementById('levelPicker');
+  if (!box) return;
+  box.querySelectorAll('[data-lvl]').forEach(b => {
+    b.addEventListener('click', () => setLevel(b.getAttribute('data-lvl')));
+  });
+  setLevel(_selectedLevel); // initial sync
+}
+
 
 function bindMenuKeys(menu) {
   window.addEventListener('keydown', (e) => {
     if (menu.classList.contains('hidden')) return;
     if (e.code === 'Enter' || e.code === 'Space') startGame();
+    if (e.code === 'Digit1') setLevel('1');
+    if (e.code === 'Digit2') setLevel('2');
   });
 }
+
+
 
 function setupEndButtons() {
   const end = document.getElementById('endOverlay');
@@ -68,26 +116,38 @@ function startGame() {
   canvas?.focus?.();
 }
 
+
 function initGame() {
   canvas = document.getElementById('canvas');
   if (world) world.dispose();
-  world = new World(canvas, keyboard);
+
+  const make = _getLevelBuilder();
+  const lvl = make ? make() : null;
+
+  world = new World(canvas, keyboard, lvl);   // <— Level direkt mitgeben
   wireToolbar();
   wireAutoPause();
   ensureEndOverlay();
+
   sfx.stopAll();
-  sfx.startMusic();
+  if (!document.hidden) sfx.startMusic();
 }
 
 function restartGame() {
   if (world) world.dispose();
   document.getElementById('endOverlay')?.classList.add('hidden');
   sfx.stopAll();
-  world = new World(canvas, keyboard);
+
+  const make = _getLevelBuilder();
+  const lvl = make ? make() : null;
+
+  world = new World(canvas, keyboard, lvl);   // <— Level direkt mitgeben
   wireToolbar();
   canvas?.focus?.();
-  sfx.startMusic();
+
+  if (!document.hidden) sfx.startMusic();
 }
+
 
 /* Auto-Pause */
 function wireAutoPause() {

@@ -157,6 +157,30 @@ canvas {
     gap: 12px;
 }
 
+/* Level-Picker */
+.levels {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: .5rem 0;
+}
+
+.levels .btn.lvl {
+    opacity: .65;
+    transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
+}
+
+.levels .btn.lvl:hover {
+    opacity: .85;
+}
+
+.levels .btn.lvl.is-active {
+    opacity: 1;
+    box-shadow: 0 0 0 2px #fff inset, 0 0 12px rgba(255, 255, 255, .35);
+    transform: translateY(-1px);
+}
+
+
 @media only screen and (max-width: 760px) {
     canvas {
         width: 100%;

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" translate="no">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,13 +23,14 @@
     <script defer src="models/character.class.js"></script>
     <script defer src="models/throwable-object.class.js"></script>
     <!-- HUD -->
-    <script defer src="models/statusbar-healt.class.js"></script> 
+    <script defer src="models/statusbar-healt.class.js"></script>
     <script defer src="models/statusbar-coin.class.js"></script>
     <script defer src="models/statusbar-bottle.class.js"></script>
     <script defer src="models/statusbar-boss.class.js"></script>
     <!-- Level -->
     <script defer src="models/level.class.js"></script>
     <script defer src="levels/level1.js"></script>
+    <script defer src="levels/level2.js"></script>
     <!-- World & Game & Audio-->
     <script defer src="models/keyboard.class.js"></script>
     <script defer src="models/world.class.js"></script>
@@ -52,6 +54,12 @@
         <div id="menuOverlay" class="overlay">
             <img id="menuImg" alt="Start Screen" src="img/9_intro_outro_screens/start/startscreen_2.png" />
             <button id="btnPlay" class="btn primary" aria-label="Play">▶ Play</button>
+            <div id="levelPicker" class="levels">
+                <button class="btn lvl" data-lvl="1">Level 1</button>
+                <button class="btn lvl" data-lvl="2">Level 2</button>
+            </div>
+
+
         </div>
         <!-- End-Overlay (Win/Lose) -->
         <div id="endOverlay" class="overlay hidden">
