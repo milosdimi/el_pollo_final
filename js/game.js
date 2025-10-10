@@ -75,7 +75,6 @@ function initGame() {
   wireToolbar();
   wireAutoPause();
   ensureEndOverlay();
-
   sfx.stopAll();
   sfx.startMusic();
 }
@@ -83,26 +82,30 @@ function initGame() {
 function restartGame() {
   if (world) world.dispose();
   document.getElementById('endOverlay')?.classList.add('hidden');
-
   sfx.stopAll();
-
   world = new World(canvas, keyboard);
   wireToolbar();
   canvas?.focus?.();
-
   sfx.startMusic();
 }
-
 
 /* Auto-Pause */
 function wireAutoPause() {
   if (_autoPauseWired) return;
   _autoPauseWired = true;
 
-  window.addEventListener('blur', () => { if (world) world.isPaused = true; });
+  window.addEventListener('blur', () => {
+    if (world) world.isPaused = true;
+    sfx?.pauseMusic?.();
+    sfx?.stopWalk?.();
+  });
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && world) world.isPaused = true;
+    if (document.hidden) {
+      if (world) world.isPaused = true;
+      sfx?.pauseMusic?.();
+      sfx?.stopWalk?.();
+    }
   });
 }
 
@@ -132,7 +135,7 @@ function wireToolbar() {
     try {
       if (!document.fullscreenElement) { stage?.requestFullscreen?.(); }
       else { document.exitFullscreen?.(); }
-    } catch (e) { }
+    } catch { }
     updateToolbarState();
   }
 
@@ -153,4 +156,3 @@ function wireToolbar() {
     if (e.code === 'KeyM' || e.keyCode === 77) { sfx?.toggleMute?.(); updateToolbarState(); }
   });
 }
-

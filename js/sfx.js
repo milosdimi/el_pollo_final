@@ -72,7 +72,7 @@ window.sfx = window.sfx || new Sfx({
     coin: { src: 'audio/coinRecievedEffect.mp3' },
     bottle: { src: 'audio/bottleCollectedEffect.mp3' },
     bossHit: { src: 'audio/bossHit.mp3' },
-    music: { src: 'audio/background-music.mp3', loop: true, vol: 0.5 },
+    music: { src: 'audio/background-music.mp3', loop: true, vol: 0.2 },
     walk: { src: 'audio/walkEffect.mp3', vol: 0.8, loop: true },
     jump: { src: 'audio/jump.mp3' },
     chicken: { src: 'audio/chicken-noise-196746.mp3' },
@@ -83,7 +83,7 @@ window.sfx = window.sfx || new Sfx({
     gameOver: { src: 'audio/game_over.mp3' },
     throw:   { src: 'audio/throw.mp3' },
 }, {
-    music: 0.1, walk: 0.8, snore: 0.4,
-    coin: 0.8, bottle: 0.8, bossHit: 0.8, jump: 0.1,
-    chicken: 0.7, hurt: 0.9, bossAlert: 0.9, win: 0.9, gameOver: 0.9
+    music: 0.3, walk: 0.8, snore: 0.4,
+    coin: 0.1, bottle: 0.4, bossHit: 0.8, jump: 0.05,
+    chicken: 0.5, hurt: 0.2, bossAlert: 0.9, win: 0.9, gameOver: 0.9
 });
