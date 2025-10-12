@@ -7,6 +7,7 @@
   <title>Impressum • El Pollo Loco</title>
   <meta name="theme-color" content="#f3c53f">
   <meta name="color-scheme" content="light">
+  <meta name="robots" content="noindex,nofollow">
   <link rel="icon" type="image/png" href="./img/icons/chicken.png">
   <link rel="stylesheet" href="css/impressum.css">
 </head>
@@ -36,21 +37,21 @@
       E-Mail: <a href="mailto:dm@dimit.cc">dm@dimit.cc</a>
     </p>
 
-    <!-- MedienG – „kleine Offenlegung“ -->
+    <!-- MedienG – kleine Offenlegung -->
     <h2>Offenlegung gemäß § 25 MedienG (kleine Offenlegung)</h2>
     <p>
-      Medieninhaber und inhaltlich verantwortlich: Milos Dimitrijevic, Kufstein, Österreich.<br>
+      Medieninhaber und inhaltlich verantwortlich: Milos Dimitrijevic, 6330 Kufstein, Österreich.<br>
       Zweck der Website: Bereitstellung eines privaten Browser-Spiels („El Pollo Loco“) sowie begleitender
       Informationen.
     </p>
 
-    <!-- Unternehmensangaben – nur falls zutreffend -->
+    <!-- Unternehmensangaben -->
     <h2>Unternehmensangaben (falls zutreffend)</h2>
     <ul class="bullet">
-      <li>Rechtsform / Unternehmensgegenstand: Dimit</li>
-      <li>UID-Nr. (USt-IdNr.): ATU 79325758</li>
-      <li>Zuständige Gewerbebehörde: Bezirkshauptmannschaft Kufstein</li>
-      <li>Kammerzugehörigkeit: WKO Tirol</li>
+      <li><strong>Rechtsform / Unternehmensgegenstand:</strong> Dimit</li>
+      <li><strong>UID-Nr. (USt-IdNr.):</strong> ATU 79325758</li>
+      <li><strong>Zuständige Gewerbebehörde:</strong> Bezirkshauptmannschaft Kufstein</li>
+      <li><strong>Kammerzugehörigkeit:</strong> WKO Tirol</li>
     </ul>
 
     <!-- EU-Streitschlichtung -->
@@ -65,9 +66,10 @@
 
     <h2>Haftungsausschluss</h2>
     <p>
-      Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und
-      Aktualität der Inhalte wird keine Gewähr übernommen. Externe Links wurden zum Zeitpunkt der Verlinkung geprüft;
-      für deren Inhalte sind ausschließlich deren Betreiber verantwortlich.
+      Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Für Richtigkeit, Vollständigkeit und Aktualität
+      wird keine Gewähr übernommen.
+      Externe Links wurden zum Zeitpunkt der Verlinkung geprüft; für deren Inhalte sind ausschließlich die jeweiligen
+      Betreiber verantwortlich.
     </p>
 
     <h2>Urheberrecht</h2>
@@ -76,17 +78,17 @@
       Die Nutzung ist ausschließlich im Rahmen des Spiels gestattet.
     </p>
 
-        <h2>Bild- &amp; Soundnachweise</h2>
+    <h2>Bild- &amp; Soundnachweise</h2>
     <ul class="bullet">
-      <li>Eigenes Artwork / Spielgrafiken: Milos Dimitrijevic</li>
-      <li>Externe Assets:</li>
-      <li>Icons: Flaticon</li>
-      <li>Sounds/Musik: Freesound</li>
+      <li><strong>Eigenes Artwork / Spielgrafiken:</strong> Milos Dimitrijevic</li>
+      <li><strong>Externe Assets:</strong> siehe nachfolgende Quellen</li>
+      <li><strong>Icons:</strong> Flaticon</li>
+      <li><strong>Sounds/Musik:</strong> Freesound</li>
     </ul>
 
     <p class="note">
-      Hinweis: Dieses Impressum ist auf österreichisches Recht (ECG & MedienG) ausgerichtet. Falls die Website
-      (auch) aus Deutschland angeboten wird, können ergänzend TMG-Pflichten bestehen.
+      Hinweis: Dieses Impressum richtet sich nach österreichischem Recht (ECG &amp; MedienG). Sofern das Angebot
+      (auch) an Deutschland gerichtet ist, können ergänzende Informationspflichten nach dem TMG bestehen.
     </p>
   </main>
 
@@ -97,12 +99,12 @@
         <a href="index.html">Startseite</a>
         <a href="datenschutz.html">Datenschutz</a>
         <a href="impressum.html" aria-current="page">Impressum</a>
-
       </nav>
     </div>
   </footer>
 
   <script>
+    // Jahr & Stand-Datum automatisch setzen
     document.getElementById('year').textContent = new Date().getFullYear();
     const d = new Date();
     const pad = (n) => n.toString().padStart(2, '0');
