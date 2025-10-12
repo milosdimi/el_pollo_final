@@ -112,6 +112,7 @@ class EndBoss extends MovableObject {
     takeHit(dmg = 25) {
         if (this.dead || this.deadPlaying) return;
         sfx?.bossHit?.();
+        buzz(12);
         this.energy = Math.max(0, this.energy - dmg);
         this.speed = Math.min(this.speed + this.SPEED_HIT_BOOST, this.MAX_SPEED);
         this.setState('hurt');

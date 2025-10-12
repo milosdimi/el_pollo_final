@@ -1,6 +1,7 @@
 let canvas;
 let world;
 const keyboard = new Keyboard();
+const buzz = (ms) => navigator.vibrate?.(ms);
 
 let _toolbarWired = false;
 let _autoPauseWired = false;
@@ -27,6 +28,11 @@ function boot() {
   wireMobileControls();
 }
 window.addEventListener('DOMContentLoaded', boot);
+document.body.addEventListener('pointerdown', function once() {
+  try { sfx.startMusic(); sfx.toggleMute?.(false); } catch { }
+  document.body.removeEventListener('pointerdown', once);
+}, { once: true });
+
 
 /* Startmenü */
 function setupMenu() {
@@ -144,6 +150,7 @@ function startGame() {
   const menu = document.getElementById('menuOverlay');
   if (menu) menu.classList.add('hidden');
   initGame();
+  //tryFS();
   canvas?.focus?.();
 }
 
@@ -180,6 +187,15 @@ function restartGame() {
   if (!document.hidden) sfx.startMusic();
   syncPadToState();
 }
+ 
+// on mobile --> fullscreen
+async function tryFS() {
+  const el = document.getElementById('stage');
+  if (!document.fullscreenElement) {
+    try { await el?.requestFullscreen?.(); } catch { }
+  }
+}
+
 
 /* Auto-Pause */
 function wireAutoPause() {

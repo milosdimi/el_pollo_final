@@ -238,6 +238,7 @@ class World {
         if (hitter && !this.character.isHurt()) {
             this.character.hit();
             sfx?.hurt();
+            buzz(40);
             this.statusBarHealth.setPercentage(this.character.energy);
             this.character.applyKnockBack?.(hitter.x);
         }
@@ -279,6 +280,7 @@ class World {
                 this.coinsCount = (this.coinsCount || 0) + 1;
                 this.statusBarCoins?.add?.(10);
                 sfx?.coin();
+                buzz(8);
                 c.destroy?.();
                 return false;
             }

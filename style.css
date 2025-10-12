@@ -1,8 +1,10 @@
+/* Fonts */
 @font-face {
     font-family: 'WildMexico';
     src: url('fonts/wild-mexico.ttf') format('truetype');
 }
 
+/* Base */
 body {
     display: flex;
     justify-content: center;
@@ -21,18 +23,9 @@ body {
 h1 {
     font-size: 64px;
     letter-spacing: 3px;
-    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7);
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, .7);
     margin: 20px 0;
     z-index: 5;
-}
-
-canvas {
-    background-color: black;
-    display: block;
-    outline: none;
-    width: 100%;
-    height: auto;
-    touch-action: none;
 }
 
 #title {
@@ -40,6 +33,16 @@ canvas {
     top: 20px;
 }
 
+canvas {
+    background-color: #000;
+    display: block;
+    outline: none;
+    width: 100%;
+    height: auto;
+    touch-action: none;
+}
+
+/* Stage / Toolbar / Overlays */
 .stage {
     position: relative;
     display: inline-block;
@@ -55,8 +58,8 @@ canvas {
     gap: 8px;
     padding: 8px;
     border-radius: 12px;
-    background: rgba(0, 0, 0, 0.35);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, .35);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .25);
     z-index: 5;
 }
 
@@ -70,17 +73,17 @@ canvas {
     text-align: center;
     cursor: pointer;
     color: #fff;
-    background: rgba(255, 255, 255, 0.14);
-    transition: transform 0.08s ease, background 0.15s ease, opacity 0.15s ease;
+    background: rgba(255, 255, 255, .14);
+    transition: transform .08s ease, background .15s ease, opacity .15s ease;
     outline: none;
 }
 
 .toolbar .btns:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, .22);
 }
 
 .toolbar .btns:active {
-    transform: translateY(1px) scale(0.98);
+    transform: translateY(1px) scale(.98);
 }
 
 .toolbar .btns:focus-visible {
@@ -88,7 +91,7 @@ canvas {
 }
 
 .toolbar .btns.is-active {
-    background: rgba(255, 255, 255, 0.32);
+    background: rgba(255, 255, 255, .32);
 }
 
 .overlay {
@@ -98,7 +101,7 @@ canvas {
     align-items: center;
     justify-content: center;
     gap: 16px;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, .35);
     z-index: 5;
 }
 
@@ -111,7 +114,7 @@ canvas {
     inset: 0;
     width: 100%;
     height: 100%;
-    filter: brightness(0.96) drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
+    filter: brightness(.96) drop-shadow(0 6px 18px rgba(0, 0, 0, .45));
     z-index: 0;
 }
 
@@ -119,6 +122,7 @@ canvas {
     z-index: 1;
 }
 
+/* Buttons */
 .btn {
     font-family: 'WildMexico', Arial, sans-serif;
     font-size: 20px;
@@ -165,69 +169,79 @@ canvas {
     display: flex;
     gap: 8px;
     justify-content: center;
-    margin: 0.5rem 0;
+    margin: .5rem 0;
 }
 
 .levels .btn.lvl {
-    opacity: 0.65;
-    transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+    opacity: .65;
+    transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
 }
 
 .levels .btn.lvl:hover {
-    opacity: 0.85;
+    opacity: .85;
 }
 
 .levels .btn.lvl.is-active {
     opacity: 1;
-    box-shadow: 0 0 0 2px #fff inset, 0 0 12px rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 0 2px #fff inset, 0 0 12px rgba(255, 255, 255, .35);
     transform: translateY(-1px);
 }
 
-/* Mini-Legende unter dem Canvas */
+/* Mini-Legende */
 .help {
     display: flex;
-    gap: 0.75rem;
+    gap: .75rem;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     font: 500 14px/1.4 system-ui, sans-serif;
-    margin: 0.5rem 0 0;
-    opacity: 0.9;
+    margin: .5rem 0 0;
+    opacity: .9;
 }
 
 .help span {
-    background: rgba(255, 255, 255, 0.07);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, .07);
+    padding: .25rem .5rem;
+    border-radius: .5rem;
 }
 
 /* Info-Overlay Card */
 #infoOverlay .info-card {
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, .85);
     color: #fff;
     width: min(540px, 90vw);
     border-radius: 16px;
     padding: 16px 18px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
 }
 
 #infoOverlay h2 {
-    margin: 0 0 0.5rem;
+    margin: 0 0 .5rem;
     font: 700 22px/1.2 system-ui, sans-serif;
 }
 
 #infoOverlay h3 {
-    margin: 0.75rem 0 0.25rem;
+    margin: .75rem 0 .25rem;
     font: 700 16px/1.2 system-ui, sans-serif;
 }
 
 #infoOverlay ul {
-    margin: 0.25rem 0 0.75rem 1.1rem;
+    margin: .25rem 0 .75rem 1.1rem;
 }
 
 #infoOverlay .actions {
     display: flex;
     justify-content: flex-end;
+}
+
+/* Mobile pad (incl. disabled state) */
+.mobile-pad {
+    display: none;
+    position: relative;
+    max-width: 720px;
+    margin: .5rem auto 0;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .mobile-pad.is-off {
@@ -237,16 +251,6 @@ canvas {
 
 .mobile-pad.is-off .pad {
     pointer-events: none;
-}
-
-/* Mobile Pad */
-.mobile-pad {
-    display: none;
-    position: relative;
-    max-width: 720px;
-    margin: 0.5rem auto 0;
-    -webkit-user-select: none;
-    user-select: none;
 }
 
 .mobile-pad .pad {
@@ -276,24 +280,6 @@ canvas {
     width: 72px;
 }
 
-/* Grid-Layout für Pad */
-.mobile-pad {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    align-items: center;
-}
-
-.pad-left,
-.pad-right {
-    justify-self: start;
-}
-
-.pad-jump,
-.pad-throw,
-.pad-pause {
-    justify-self: end;
-}
-
 /* Footer */
 .site-footer {
     width: 100%;
@@ -301,7 +287,7 @@ canvas {
     justify-content: center;
     margin: 10px 0;
     color: #fff;
-    opacity: 0.9;
+    opacity: .9;
     font-size: 12px;
 }
 
@@ -309,7 +295,7 @@ canvas {
     display: flex;
     gap: 8px;
     align-items: center;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, .35);
     padding: 6px 10px;
     border-radius: 10px;
 }
@@ -330,11 +316,19 @@ canvas {
     text-decoration: underline;
 }
 
-/* MOBILE: greift bei schmal ODER niedriger Höhe */
+@media (min-width: 1200px) {
+    body {
+        gap: 12px;
+    }
+
+    .toolbar {
+        top: 16px;
+    }
+}
+
+/* Mobile: schmal ODER niedrige Höhe */
 @media (max-width: 760px),
 (max-height: 480px) {
-
-    /* Bühne/Canvas-Breite + freie Ränder berechnen */
     :root {
         --stageW: min(720px, 100vw, calc(100dvh * 1.5));
         --gutL: calc((100vw - var(--stageW)) / 2);
@@ -346,12 +340,10 @@ canvas {
         --padBase: 8px;
     }
 
-    /* kein Scroll auf Mobile */
     body {
         overflow: hidden;
     }
 
-    /* Canvas mittig, Breite wie --stageW */
     .stage {
         margin: 0 auto;
     }
@@ -363,7 +355,6 @@ canvas {
         display: block;
     }
 
-    /* Toolbar zentriert oben */
     .toolbar {
         top: 8px;
         left: 50%;
@@ -372,20 +363,17 @@ canvas {
         z-index: 7;
     }
 
-    /* Titel/Legende/Footer verbergen */
     #title,
     .help,
     .site-footer {
         display: none;
     }
 
-    /* Mobile-Pad fullscreen-Overlay, Buttons in die freien Seitenränder */
     .mobile-pad {
         display: block;
         position: fixed;
         inset: 0;
         pointer-events: none;
-        /* nur Buttons klickbar */
         z-index: 6;
     }
 
@@ -401,32 +389,66 @@ canvas {
         box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
     }
 
-    /* Left cluster (← →) — slide into the left gutter */
     .pad-left {
-        left: calc(max(var(--padBase), env(safe-area-inset-left, 0px)) + var(--gutL) * var(--edgeBias));
-        bottom: calc(var(--padBase) + env(safe-area-inset-bottom, 0px));
+        left: calc(max(var(--padBase), var(--safeL)) + var(--gutL) * var(--edgeBias));
+        bottom: calc(var(--padBase) + var(--safeB));
     }
 
     .pad-right {
-        left: calc(max(var(--padBase), env(safe-area-inset-left, 0px)) + var(--gutL) * var(--edgeBias) + 82px);
-        bottom: calc(var(--padBase) + env(safe-area-inset-bottom, 0px));
+        left: calc(max(var(--padBase), var(--safeL)) + var(--gutL) * var(--edgeBias) + 82px);
+        bottom: calc(var(--padBase) + var(--safeB));
     }
 
-    /* Right cluster (Throw / Jump) — slide into the right gutter */
     .pad-throw {
-        right: calc(max(var(--padBase), env(safe-area-inset-right, 0px)) + var(--gutR) * var(--edgeBias));
-        bottom: calc(var(--padBase) + env(safe-area-inset-bottom, 0px));
+        right: calc(max(var(--padBase), var(--safeR)) + var(--gutR) * var(--edgeBias));
+        bottom: calc(var(--padBase) + var(--safeB));
     }
 
     .pad-jump {
-        right: calc(max(var(--padBase), env(safe-area-inset-right, 0px)) + var(--gutR) * var(--edgeBias) + 82px);
-        bottom: calc(var(--padBase) + env(safe-area-inset-bottom, 0px));
+        right: calc(max(var(--padBase), var(--safeR)) + var(--gutR) * var(--edgeBias) + 82px);
+        bottom: calc(var(--padBase) + var(--safeB));
     }
 
-    /* Pause a bit higher on the right edge */
     .pad-pause {
         display: none;
     }
+}
 
 
+@media (max-height: 480px) {
+    .toolbar {
+        top: 5px;
+    }
+}
+
+/* Portrait-Hinweis (rotate) */
+@media (orientation: portrait) and (max-width: 760px) {
+
+    .stage::after,
+    .stage::before {
+        position: fixed;
+        inset: 0;
+        z-index: 9;
+        pointer-events: none;
+    }
+
+    .stage::after {
+        content: "";
+        background: rgba(0, 0, 0, .6);
+    }
+
+    .stage::before {
+        content: "Bitte Gerät drehen\nfür besseres Spielen";
+        display: grid;
+        place-items: center;
+        background:
+            url('img/icons/rotate-smartphone.png') no-repeat center 40%;
+        background-size: 72px 72px;
+        white-space: pre-line;
+        color: #fff;
+        text-align: center;
+        font: 700 18px/1.35 system-ui, sans-serif;
+        padding-top: 110px;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, .7);
+    }
 }
