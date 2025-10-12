@@ -32,6 +32,7 @@ canvas {
     outline: none;
     width: 100%;
     height: auto;
+    touch-action: none;
 }
 
 #title {
@@ -229,6 +230,15 @@ canvas {
     justify-content: flex-end;
 }
 
+.mobile-pad.is-off {
+    pointer-events: none;
+    opacity: .4;
+}
+
+.mobile-pad.is-off .pad {
+    pointer-events: none;
+}
+
 /* Mobile Pad */
 .mobile-pad {
     display: none;
@@ -417,4 +427,6 @@ canvas {
     .pad-pause {
         display: none;
     }
+
+
 }

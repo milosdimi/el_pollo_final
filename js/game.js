@@ -41,6 +41,8 @@ function setupMenu() {
   ensureEndOverlay();
   wireLevelPicker();
   wireInfoPopup();
+
+  setPadEnabled(false);
   menu.classList.remove('hidden');
 }
 
@@ -50,8 +52,8 @@ function wireInfoPopup() {
   const close = document.getElementById('btnInfoClose');
   if (!btn || !overlay) return;
 
-  const open = () => overlay.classList.remove('hidden');
-  const hide = () => overlay.classList.add('hidden');
+  const open = () => { overlay.classList.remove('hidden'); setPadEnabled(false); };
+  const hide = () => { overlay.classList.add('hidden'); syncPadToState(); };
 
   btn.addEventListener('click', open);
   close?.addEventListener('click', hide);
@@ -59,12 +61,10 @@ function wireInfoPopup() {
   window.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); });
 }
 
-
 function setLevel(n) {
   if (n !== '1' && n !== '2') return;
   _selectedLevel = n;
   localStorage.setItem('lvl', n);
-
   const u = new URL(location.href);
   u.searchParams.set('lvl', n);
   history.replaceState(null, '', u.toString());
@@ -85,7 +85,6 @@ function wireLevelPicker() {
   setLevel(_selectedLevel);
 }
 
-
 function bindMenuKeys(menu) {
   window.addEventListener('keydown', (e) => {
     if (menu.classList.contains('hidden')) return;
@@ -95,19 +94,34 @@ function bindMenuKeys(menu) {
   });
 }
 
+/* Pad-Enable */
+function setPadEnabled(on) {
+  document.getElementById('mobilePad')?.classList.toggle('is-off', !on);
+}
 
+/* Pad-Sync */
+function syncPadToState() {
+  const menuOpen = !document.getElementById('menuOverlay')?.classList.contains('hidden');
+  const endOpen = !document.getElementById('endOverlay')?.classList.contains('hidden');
+  const infoOpen = !document.getElementById('infoOverlay')?.classList.contains('hidden');
+  const paused = !!world?.isPaused;
+  const hidden = document.hidden;
+  const playing = !menuOpen && !endOpen && !infoOpen && !paused && !hidden;
+  setPadEnabled(playing);
+}
 
+/* End-Overlay */
 function setupEndButtons() {
   const end = document.getElementById('endOverlay');
   const btnBack = document.getElementById('btnBack');
   const btnRestart = document.getElementById('btnRestart');
 
   if (btnRestart) btnRestart.onclick = () => restartGame();
-
   if (btnBack) btnBack.onclick = () => {
     end?.classList.add('hidden');
     const menu = document.getElementById('menuOverlay');
     if (menu) menu.classList.remove('hidden');
+    syncPadToState();
   };
 }
 
@@ -121,6 +135,7 @@ function ensureEndOverlay() {
       ? 'img/You won, you lost/You Won B.png'
       : 'img/You won, you lost/You lost.png';
     end.classList.remove('hidden');
+    setPadEnabled(false);
   };
 }
 
@@ -131,7 +146,6 @@ function startGame() {
   initGame();
   canvas?.focus?.();
 }
-
 
 function initGame() {
   canvas = document.getElementById('canvas');
@@ -147,6 +161,8 @@ function initGame() {
 
   sfx.stopAll();
   if (!document.hidden) sfx.startMusic();
+
+  syncPadToState();
 }
 
 function restartGame() {
@@ -162,27 +178,23 @@ function restartGame() {
   canvas?.focus?.();
 
   if (!document.hidden) sfx.startMusic();
+  syncPadToState();
 }
-
 
 /* Auto-Pause */
 function wireAutoPause() {
   if (_autoPauseWired) return;
   _autoPauseWired = true;
 
-  window.addEventListener('blur', () => {
+  const pauseAll = () => {
     if (world) world.isPaused = true;
     sfx?.pauseMusic?.();
     sfx?.stopWalk?.();
-  });
+    syncPadToState();
+  };
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      if (world) world.isPaused = true;
-      sfx?.pauseMusic?.();
-      sfx?.stopWalk?.();
-    }
-  });
+  window.addEventListener('blur', pauseAll);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pauseAll(); });
 }
 
 /* Toolbar (Pause/FS/Reload/Mute) */
@@ -194,7 +206,7 @@ function wireToolbar() {
   const btnReload = $('btnReload');
   const btnMute = $('btnMute');
 
-  function updateToolbarState() {
+  const updateUI = () => {
     const paused = !!world?.isPaused;
     if (btnPause) {
       btnPause.textContent = paused ? '▶' : '⏯';
@@ -202,44 +214,48 @@ function wireToolbar() {
     }
     if (btnFS) btnFS.textContent = document.fullscreenElement ? '🡼' : '⛶';
     if (btnMute) btnMute.textContent = sfx?.isMuted?.() ? '🔇' : '🔊';
-  }
+  };
 
-  if (_toolbarWired) { updateToolbarState(); return; }
+  const toggleFS = () => {
+    try {
+      if (!document.fullscreenElement) stage?.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    } catch { }
+    updateUI();
+  };
+
+  const tick = () => { updateUI(); syncPadToState(); };
+
+  if (_toolbarWired) { tick(); return; }
   _toolbarWired = true;
 
-  function toggleFS() {
-    try {
-      if (!document.fullscreenElement) { stage?.requestFullscreen?.(); }
-      else { document.exitFullscreen?.(); }
-    } catch { }
-    updateToolbarState();
-  }
-
-  btnPause?.addEventListener('click', () => { world?.togglePause(); updateToolbarState(); });
+  btnPause?.addEventListener('click', () => { world?.togglePause(); tick(); });
   btnFS?.addEventListener('click', toggleFS);
   btnReload?.addEventListener('click', () => restartGame());
-  btnMute?.addEventListener('click', () => { sfx?.toggleMute?.(); updateToolbarState(); });
+  btnMute?.addEventListener('click', () => { sfx?.toggleMute?.(); updateUI(); });
 
-  window.addEventListener('keydown', () => setTimeout(updateToolbarState, 0));
-  document.addEventListener('fullscreenchange', updateToolbarState);
-  setInterval(updateToolbarState, 300);
-  updateToolbarState();
+  document.addEventListener('fullscreenchange', tick);
+  window.addEventListener('keydown', () => setTimeout(tick, 0));
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
-    if (e.code === 'KeyF' || e.keyCode === 70) toggleFS();
-    if (e.code === 'KeyR' || e.keyCode === 82) restartGame();
-    if (e.code === 'KeyM' || e.keyCode === 77) { sfx?.toggleMute?.(); updateToolbarState(); }
+    const code = e.code || `Key${String.fromCharCode(e.keyCode || 0)}`;
+    if (code === 'KeyF' || e.keyCode === 70) toggleFS();
+    if (code === 'KeyR' || e.keyCode === 82) restartGame();
+    if (code === 'KeyM' || e.keyCode === 77) { sfx?.toggleMute?.(); updateUI(); }
   });
+
+  setInterval(tick, 300);
+  tick();
 }
 
+/* Mobile-Controls */
 function wireMobileControls() {
   const pad = document.getElementById('mobilePad');
   if (!pad) return;
 
-  const press = (k) => { if (!keyboard) return; keyboard[k] = true; };
-  const release = (k) => { if (!keyboard) return; keyboard[k] = false; };
-
+  const press = (k) => { if (keyboard) keyboard[k] = true; };
+  const release = (k) => { if (keyboard) keyboard[k] = false; };
   const down = (k) => (e) => { e.preventDefault(); press(k); };
   const up = (k) => (e) => { e.preventDefault(); release(k); };
 
@@ -253,5 +269,3 @@ function wireMobileControls() {
     btn.addEventListener('mouseleave', up(key));
   });
 }
-
-
