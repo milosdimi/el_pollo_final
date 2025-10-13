@@ -82,7 +82,7 @@ body {
 
 .back-link:hover {
     transform: translateY(-1px);
-    background: #fffef8
+    background: #776d34;
 }
 
 .back-link:active {
@@ -194,7 +194,7 @@ body {
 }
 
 .footer-nav a:hover {
-    background: #fffef8;
+    background: #776d34;
     transform: translateY(-1px)
 }
 

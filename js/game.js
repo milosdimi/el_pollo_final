@@ -2,7 +2,7 @@ let canvas;
 let world;
 const keyboard = new Keyboard();
 const buzz = (ms) => navigator.vibrate?.(ms);
-
+const isMenuOpen = () => !document.getElementById('menuOverlay')?.classList.contains('hidden');
 let _toolbarWired = false;
 let _autoPauseWired = false;
 
@@ -28,11 +28,6 @@ function boot() {
   wireMobileControls();
 }
 window.addEventListener('DOMContentLoaded', boot);
-document.body.addEventListener('pointerdown', function once() {
-  try { sfx.startMusic(); sfx.toggleMute?.(false); } catch { }
-  document.body.removeEventListener('pointerdown', once);
-}, { once: true });
-
 
 /* Startmenü */
 function setupMenu() {
@@ -47,10 +42,15 @@ function setupMenu() {
   ensureEndOverlay();
   wireLevelPicker();
   wireInfoPopup();
+  wireToolbar();
+
+  sfx.pauseMusic();
 
   setPadEnabled(false);
   menu.classList.remove('hidden');
+  _syncUiForOverlays();
 }
+
 
 function wireInfoPopup() {
   const btn = document.getElementById('btnInfo');
@@ -91,6 +91,23 @@ function wireLevelPicker() {
   setLevel(_selectedLevel);
 }
 
+function _setToolbarDisabledWhileMenu(isMenuOpen) {
+  const bar = document.querySelector('.toolbar');
+  if (!bar) return;
+  bar.querySelectorAll('.btns').forEach(btn => {
+    const allow = btn.hasAttribute('data-active-in-menu') || btn.id === 'btnMute' || btn.id === 'btnInfo';
+    const disable = isMenuOpen && !allow;
+    btn.setAttribute('aria-disabled', disable ? 'true' : 'false');
+  });
+}
+
+
+function _syncUiForOverlays() {
+  const menuOpen = !document.getElementById('menuOverlay')?.classList.contains('hidden');
+  _setToolbarDisabledWhileMenu(menuOpen);
+}
+
+
 function bindMenuKeys(menu) {
   window.addEventListener('keydown', (e) => {
     if (menu.classList.contains('hidden')) return;
@@ -127,6 +144,7 @@ function setupEndButtons() {
     end?.classList.add('hidden');
     const menu = document.getElementById('menuOverlay');
     if (menu) menu.classList.remove('hidden');
+    _syncUiForOverlays();
     syncPadToState();
   };
 }
@@ -142,6 +160,7 @@ function ensureEndOverlay() {
       : 'img/You won, you lost/You lost.png';
     end.classList.remove('hidden');
     setPadEnabled(false);
+    _syncUiForOverlays();
   };
 }
 
@@ -150,6 +169,7 @@ function startGame() {
   const menu = document.getElementById('menuOverlay');
   if (menu) menu.classList.add('hidden');
   initGame();
+  _syncUiForOverlays();
   //tryFS();
   canvas?.focus?.();
 }
@@ -167,7 +187,7 @@ function initGame() {
   ensureEndOverlay();
 
   sfx.stopAll();
-  if (!document.hidden) sfx.startMusic();
+  if (!sfx.isMuted()) sfx.startMusic();
 
   syncPadToState();
 }
@@ -184,10 +204,10 @@ function restartGame() {
   wireToolbar();
   canvas?.focus?.();
 
-  if (!document.hidden) sfx.startMusic();
+  if (!sfx.isMuted()) sfx.startMusic();
   syncPadToState();
 }
- 
+
 // on mobile --> fullscreen
 async function tryFS() {
   const el = document.getElementById('stage');
@@ -240,30 +260,61 @@ function wireToolbar() {
     updateUI();
   };
 
-  const tick = () => { updateUI(); syncPadToState(); };
+  const tick = () => {
+    updateUI();
+    syncPadToState();
+    _syncUiForOverlays();
+  };
 
   if (_toolbarWired) { tick(); return; }
   _toolbarWired = true;
 
+  // Clicks
   btnPause?.addEventListener('click', () => { world?.togglePause(); tick(); });
   btnFS?.addEventListener('click', toggleFS);
   btnReload?.addEventListener('click', () => restartGame());
-  btnMute?.addEventListener('click', () => { sfx?.toggleMute?.(); updateUI(); });
+  btnMute?.addEventListener('click', () => {
+    sfx?.toggleMute?.();
+    if (isMenuOpen()) {
+      sfx.pauseMusic();
+    } else {
+      sfx.isMuted() ? sfx.pauseMusic() : sfx.startMusic();
+    }
+    updateUI();
+  });
 
+  // System events
   document.addEventListener('fullscreenchange', tick);
   window.addEventListener('keydown', () => setTimeout(tick, 0));
 
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
     const code = e.code || `Key${String.fromCharCode(e.keyCode || 0)}`;
+    const menuOpen = isMenuOpen();
+
+    if (menuOpen) {
+      if (code === 'KeyM' || e.keyCode === 77) {
+        sfx?.toggleMute?.();
+        sfx.pauseMusic();     // im Menü stumm bleiben
+        updateUI();
+      }
+      return;
+    }
+
     if (code === 'KeyF' || e.keyCode === 70) toggleFS();
     if (code === 'KeyR' || e.keyCode === 82) restartGame();
-    if (code === 'KeyM' || e.keyCode === 77) { sfx?.toggleMute?.(); updateUI(); }
+    if (code === 'KeyM' || e.keyCode === 77) {
+      sfx?.toggleMute?.();
+      sfx.isMuted() ? sfx.pauseMusic() : sfx.startMusic();
+      updateUI();
+    }
   });
 
   setInterval(tick, 300);
   tick();
 }
+
+
 
 /* Mobile-Controls */
 function wireMobileControls() {

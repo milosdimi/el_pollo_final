@@ -87,6 +87,12 @@ canvas {
   background: rgba(255, 255, 255, .32);
 }
 
+.toolbar .btns[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: .45;
+  filter: grayscale(0.3);
+}
+
 .overlay {
   position: absolute;
   inset: 0;
