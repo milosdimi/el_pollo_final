@@ -114,6 +114,7 @@ canvas {
   width: 100%;
   height: 100%;
   filter: brightness(.96) drop-shadow(0 6px 18px rgba(0, 0, 0, .45));
+  object-fit: contain;
   z-index: 0;
 }
 
@@ -145,8 +146,6 @@ canvas {
   border-radius: 12px;
   animation: pulse 1.2s ease-in-out infinite;
 }
-
-
 
 @keyframes pulse {
 
@@ -211,6 +210,8 @@ canvas {
   background: rgba(0, 0, 0, .85);
   color: #fff;
   width: min(540px, 90vw);
+  max-height: 92vh;
+  overflow: auto;
   border-radius: 16px;
   padding: 16px 18px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
@@ -504,5 +505,60 @@ canvas {
   :fullscreen .mobile-pad .pad,
   .stage:fullscreen .mobile-pad .pad {
     pointer-events: auto;
+  }
+}
+
+/* === Tablet (Touch) – Pad auch auf größeren Geräten anzeigen === */
+@media (pointer: coarse) and (min-width: 761px) {
+  :root {
+    --stageW: min(720px, 100vw, calc(100dvh * 1.5));
+    --gutL: calc((100vw - var(--stageW)) / 2);
+    --gutR: var(--gutL);
+    --safeL: env(safe-area-inset-left, 0px);
+    --safeR: env(safe-area-inset-right, 0px);
+    --safeB: env(safe-area-inset-bottom, 0px);
+    --edgeBias: -0.5;
+    --padBase: 10px;
+  }
+
+  .mobile-pad {
+    display: block;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 6;
+  }
+
+  .mobile-pad .pad {
+    position: absolute;
+    pointer-events: auto;
+    width: 68px;
+    height: 68px;
+    font-size: 20px;
+    border-radius: 16px;
+  }
+
+  .pad-left {
+    left: calc(max(var(--padBase), var(--safeL)) + var(--gutL) * var(--edgeBias));
+    bottom: calc(var(--padBase) + var(--safeB));
+  }
+
+  .pad-right {
+    left: calc(max(var(--padBase), var(--safeL)) + var(--gutL) * var(--edgeBias) + 82px);
+    bottom: calc(var(--padBase) + var(--safeB));
+  }
+
+  .pad-throw {
+    right: calc(max(var(--padBase), var(--safeR)) + var(--gutR) * var(--edgeBias));
+    bottom: calc(var(--padBase) + var(--safeB));
+  }
+
+  .pad-jump {
+    right: calc(max(var(--padBase), var(--safeR)) + var(--gutR) * var(--edgeBias) + 82px);
+    bottom: calc(var(--padBase) + var(--safeB));
+  }
+
+  .pad-pause {
+    display: none;
   }
 }
