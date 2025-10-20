@@ -58,7 +58,7 @@ canvas {
   border-radius: 12px;
   background: rgba(0, 0, 0, .35);
   box-shadow: 0 6px 16px rgba(0, 0, 0, .25);
-  z-index: 5;
+  z-index: 6;
 }
 
 .toolbar .btns {
@@ -111,7 +111,6 @@ canvas {
 .overlay img {
   position: absolute;
   inset: 0;
-  width: 100%;
   height: 100%;
   filter: brightness(.96) drop-shadow(0 6px 18px rgba(0, 0, 0, .45));
   object-fit: contain;
@@ -353,7 +352,7 @@ canvas {
     --safeL: env(safe-area-inset-left, 0px);
     --safeR: env(safe-area-inset-right, 0px);
     --safeB: env(safe-area-inset-bottom, 0px);
-    --edgeBias: -0.5;
+    --edgeBias: -0.1;
     --padBase: 8px;
   }
 
