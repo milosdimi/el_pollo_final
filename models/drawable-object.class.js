@@ -9,7 +9,7 @@ class DrawableObject {
   currentImage = 0;
 
   offset = { top: 0, bottom: 0, left: 0, right: 0 };
-  debug = true; // debug box on/off
+  debug = false; // debug box on/off
 
   loadImage(path) {
     const image = new Image();

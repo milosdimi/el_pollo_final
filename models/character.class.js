@@ -9,7 +9,7 @@ class Character extends MovableObject {
     lastSnoreAt = 0;
     _jumpHeld = false;
 
-    offset = { top: 110, bottom: 30, left: 50, right: 50 };
+    offset = { top: 110, bottom: 30, left: 20, right: 30 };
 
     IMAGES_WALKING = [
         'img/2_character_pepe/2_walk/W-21.png',

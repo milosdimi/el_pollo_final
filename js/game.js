@@ -155,14 +155,20 @@ function ensureEndOverlay() {
   const img = document.getElementById('endImg');
   window.showEndOverlay = (type) => {
     if (!end || !img) return;
+
     img.src = type === 'win'
       ? 'img/You won, you lost/You Won B.png'
       : 'img/You won, you lost/You lost.png';
+
+    img.classList.toggle('is-win', type === 'win');
+    img.classList.toggle('is-lose', type !== 'win');
+
     end.classList.remove('hidden');
     setPadEnabled(false);
     _syncUiForOverlays();
   };
 }
+
 
 /* Start & Init */
 function startGame() {
