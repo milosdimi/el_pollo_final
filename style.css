@@ -1,7 +1,7 @@
 /* === Fonts === */
 @font-face {
-  font-family: 'WildMexico';
-  src: url('fonts/wild-mexico.ttf') format('truetype');
+  font-family: "WildMexico";
+  src: url("fonts/wild-mexico.ttf") format("truetype");
 }
 
 /* === Base === */
@@ -12,7 +12,7 @@ body {
   flex-direction: column;
   min-height: 100vh;
   margin: 0;
-  background: #000 url('img/9_intro_outro_screens/start/desert.png') center/cover no-repeat;
+  background: #000 url("img/9_intro_outro_screens/start/desert.png") center/cover no-repeat;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   overflow-x: hidden;
 }
@@ -26,7 +26,7 @@ h1 {
 }
 
 #title {
-  font-family: 'WildMexico', Arial, sans-serif;
+  font-family: "WildMexico", Arial, sans-serif;
   position: absolute;
   top: 40px;
 }
@@ -90,7 +90,7 @@ canvas {
 .toolbar .btns[aria-disabled="true"] {
   pointer-events: none;
   opacity: .45;
-  filter: grayscale(0.3);
+  filter: grayscale(.3);
 }
 
 .overlay {
@@ -108,14 +108,41 @@ canvas {
   display: none;
 }
 
+/* Overlay-Bild */
 .overlay img {
   position: absolute;
-  inset: 0;
-  height: 100%;
-  filter: brightness(.96) drop-shadow(0 6px 18px rgba(0, 0, 0, .45));
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  filter: brightness(.96) drop-shadow(0 6px 18px rgba(0, 0, 0, .45));
   z-index: 0;
 }
+
+/* Varianten */
+.overlay.is-start img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Startscreen: vollflächig */
+.overlay.is-lose img {
+  height: 60%;
+  width: auto;
+}
+
+/* You Lost */
+.overlay.is-win img {
+  height: 28%;
+  width: auto;
+}
+
+/* You Win */
 
 .overlay>*:not(img) {
   z-index: 1;
@@ -123,7 +150,7 @@ canvas {
 
 /* === Buttons === */
 .btn {
-  font: 700 20px 'WildMexico', Arial, sans-serif;
+  font: 700 20px "WildMexico", Arial, sans-serif;
   padding: 10px 18px;
   border: 0;
   border-radius: 10px;
@@ -204,7 +231,7 @@ canvas {
   border-radius: .5rem;
 }
 
-/* === Info-Overlay Card === */
+/* === Info-Overlay Card (responsiver) === */
 #infoOverlay .info-card {
   background: rgba(0, 0, 0, .85);
   color: #fff;
@@ -215,18 +242,7 @@ canvas {
   padding: 16px 18px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
   font-family: inherit;
-}
-
-.btn.btn-ghost {
-  background: transparent;
-  box-shadow: none;
-  color: #ffd866;
-  border: 1px solid rgba(255, 255, 255, .25);
-  margin-right: 6px;
-}
-
-.btn.btn-ghost:hover {
-  background: rgba(255, 255, 255, .08);
+  overscroll-behavior: contain;
 }
 
 #infoOverlay h2 {
@@ -247,6 +263,46 @@ canvas {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.btn.btn-ghost {
+  background: transparent;
+  box-shadow: none;
+  color: #ffd866;
+  border: 1px solid rgba(255, 255, 255, .25);
+  margin-right: 6px;
+}
+
+.btn.btn-ghost:hover {
+  background: rgba(255, 255, 255, .08);
+}
+
+/* Extra: sehr kleine Geräte (iPhone SE & kleiner) */
+@media (max-width:360px) {
+  #infoOverlay .info-card {
+    width: 92vw;
+    max-height: 84vh;
+    padding: 12px 12px;
+    border-radius: 14px;
+  }
+
+  #infoOverlay h2 {
+    font-size: 18px;
+  }
+
+  #infoOverlay h3 {
+    font-size: 14px;
+  }
+
+  #infoOverlay .actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .btn {
+    font-size: 18px;
+    padding: 8px 14px;
+  }
 }
 
 /* === Mobile Pad (+ disabled) === */
@@ -436,7 +492,7 @@ canvas {
 }
 
 /* === Portrait-Hinweis (rotate) === */
-@media (orientation: portrait) and (max-width:760px) {
+@media (orientation:portrait) and (max-width:760px) {
 
   .stage::after,
   .stage::before {
@@ -461,7 +517,7 @@ canvas {
     font: 700 18px/1.35 inherit;
     padding-top: 110px;
     text-shadow: 0 2px 8px rgba(0, 0, 0, .7);
-    background: url('img/icons/rotate-smartphone.png') no-repeat center 40%;
+    background: url("img/icons/rotate-smartphone.png") no-repeat center 40%;
     background-size: 72px 72px;
   }
 }
@@ -508,7 +564,7 @@ canvas {
 }
 
 /* === Tablet (Touch) – Pad auch auf größeren Geräten anzeigen === */
-@media (pointer: coarse) and (min-width: 761px) {
+@media (pointer:coarse) and (min-width:761px) {
   :root {
     --stageW: min(720px, 100vw, calc(100dvh * 1.5));
     --gutL: calc((100vw - var(--stageW)) / 2);

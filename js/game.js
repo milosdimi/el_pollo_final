@@ -5,6 +5,7 @@ const buzz = (ms) => navigator.vibrate?.(ms);
 const isMenuOpen = () => !document.getElementById('menuOverlay')?.classList.contains('hidden');
 let _toolbarWired = false;
 let _autoPauseWired = false;
+let _pausedByInfo = false;
 
 /* Level-Picker */
 function _readLevelPref() {
@@ -58,8 +59,31 @@ function wireInfoPopup() {
   const close = document.getElementById('btnInfoClose');
   if (!btn || !overlay) return;
 
-  const open = () => { overlay.classList.remove('hidden'); setPadEnabled(false); };
-  const hide = () => { overlay.classList.add('hidden'); syncPadToState(); };
+  const open = () => {
+    overlay.classList.remove('hidden');
+    setPadEnabled(false);
+
+    // Spiel pausieren, aber merken, ob wir pausiert haben
+    if (world && !world.isPaused) {
+      _pausedByInfo = true;
+      world.isPaused = true;
+      sfx?.pauseMusic?.();
+      sfx?.stopWalk?.();
+    } else {
+      _pausedByInfo = false;
+    }
+  };
+
+  const hide = () => {
+    overlay.classList.add('hidden');
+
+    // Nur wieder fortsetzen, wenn wir zuvor pausiert haben
+    if (_pausedByInfo && world) {
+      world.isPaused = false;
+      if (!sfx?.isMuted?.()) sfx?.startMusic?.();
+    }
+    syncPadToState();
+  };
 
   btn.addEventListener('click', open);
   close?.addEventListener('click', hide);
