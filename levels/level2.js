@@ -42,9 +42,9 @@ function l2_coinArc(cx, cy, r, n) {
 function l2_makeCoins() {
   return [
     ...l2_coinLine(300, 230, 5, 90),
-    ...l2_coinArc(1500, 240, 140, 7),
+    ...l2_coinArc(1500, 240, 130, 7),
     ...l2_coinLine(2100, 230, 6, 80),
-    ...l2_coinArc(3000, 250, 160, 7)
+    ...l2_coinArc(3000, 240, 130, 7)
   ];
 }
 

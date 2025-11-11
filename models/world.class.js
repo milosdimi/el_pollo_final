@@ -276,7 +276,7 @@ class World {
     checkCoinPickup() {
         if (!this.level?.coins || !this.character) return;
         this.level.coins = this.level.coins.filter(c => {
-            if (this.character.isPickupColliding(c, 8)) {
+            if (this.character.isPickupColliding(c, 14)) {
                 this.coinsCount = (this.coinsCount || 0) + 1;
                 this.statusBarCoins?.add?.(10);
                 sfx?.coin();
