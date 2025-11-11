@@ -277,34 +277,6 @@ canvas {
   background: rgba(255, 255, 255, .08);
 }
 
-/* Extra: sehr kleine Geräte (iPhone SE & kleiner) */
-@media (max-width:360px) {
-  #infoOverlay .info-card {
-    width: 92vw;
-    max-height: 84vh;
-    padding: 12px 12px;
-    border-radius: 14px;
-  }
-
-  #infoOverlay h2 {
-    font-size: 18px;
-  }
-
-  #infoOverlay h3 {
-    font-size: 14px;
-  }
-
-  #infoOverlay .actions {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .btn {
-    font-size: 18px;
-    padding: 8px 14px;
-  }
-}
-
 /* === Mobile Pad (+ disabled) === */
 .mobile-pad {
   display: none;
@@ -560,6 +532,34 @@ canvas {
   :fullscreen .mobile-pad .pad,
   .stage:fullscreen .mobile-pad .pad {
     pointer-events: auto;
+  }
+}
+
+/* Extra: sehr kleine Geräte (iPhone SE & kleiner) */
+@media (max-width:360px) {
+  #infoOverlay .info-card {
+    width: 92vw;
+    max-height: 84vh;
+    padding: 12px 12px;
+    border-radius: 14px;
+  }
+
+  #infoOverlay h2 {
+    font-size: 18px;
+  }
+
+  #infoOverlay h3 {
+    font-size: 14px;
+  }
+
+  #infoOverlay .actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .btn {
+    font-size: 18px;
+    padding: 8px 14px;
   }
 }
 

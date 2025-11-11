@@ -75,7 +75,7 @@ class MovableObject extends DrawableObject {
     }
 
     hit() {
-        this.energy = Math.max(0, this.energy - 5);
+        this.energy = Math.max(0, this.energy - 20);
         if (this.energy > 0) this.lastHit = Date.now();
     }
 
