@@ -1,8 +1,15 @@
 /**
- * Hauptcharakter: Pepe
- * Steuert Bewegung, Animationen, Kollisionen, Stomp & Bounce
+ * @file character.class.js
+ * @description Hauptcharakter (Pepe) – Bewegung, Sprung, Animation
+ * @author Milos Dimitrijevic
  */
+
 class Character extends MovableObject {
+    /**
+     * Hauptcharakter des Spiels
+     * @class
+     * @extends MovableObject
+     */
     height = 250;
     y = 80;
     speed = 10;
