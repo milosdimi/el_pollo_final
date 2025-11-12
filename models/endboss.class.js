@@ -109,7 +109,7 @@ class EndBoss extends MovableObject {
     }
 
     /* --- Treffer / Tod --- */
-    takeHit(dmg = 25) {
+    takeHit(dmg = 15) {
         if (this.dead || this.deadPlaying) return;
         sfx?.bossHit?.();
         buzz(12);
