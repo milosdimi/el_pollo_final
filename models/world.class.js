@@ -167,7 +167,7 @@ class World {
 
             if (!(bossHit || enemyHit || groundHit)) return;
 
-            if (bossHit) { boss.takeHit?.(15); this.triggerShake(220, 10); }
+            if (bossHit) { boss.takeHit?.(17); this.triggerShake(220, 10); }
             if (enemyHit) enemyHit.die?.();
             b.splash();
         });
