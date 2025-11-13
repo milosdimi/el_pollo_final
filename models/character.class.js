@@ -19,7 +19,7 @@ class Character extends MovableObject {
     stompLockUntil = 0;
     lastSnoreAt = 0;
     _jumpHeld = false;
-    isJumping = false; 
+    isJumping = false;
 
     offset = { top: 110, bottom: 30, left: 20, right: 30 };
 
@@ -33,7 +33,7 @@ class Character extends MovableObject {
     ];
 
     IMAGES_JUMPING = [
-        'img/2_character_pepe/3_jump/J-31.png', 
+        'img/2_character_pepe/3_jump/J-31.png',
         'img/2_character_pepe/3_jump/J-32.png',
         'img/2_character_pepe/3_jump/J-33.png',
         'img/2_character_pepe/3_jump/J-34.png',
@@ -41,7 +41,7 @@ class Character extends MovableObject {
         'img/2_character_pepe/3_jump/J-36.png',
         'img/2_character_pepe/3_jump/J-37.png',
         'img/2_character_pepe/3_jump/J-38.png',
-        'img/2_character_pepe/3_jump/J-39.png' 
+        'img/2_character_pepe/3_jump/J-39.png'
     ];
 
     IMAGES_DEAD = [
@@ -93,6 +93,8 @@ class Character extends MovableObject {
         this.animate();
     }
 
+    /* ---------- Setup / Sprites ---------- */
+
     _loadSprites() {
         this.loadImage(this.IMAGES_WALKING[0]);
         this.loadImages(this.IMAGES_WALKING);
@@ -104,9 +106,17 @@ class Character extends MovableObject {
     }
 
     animate() {
-        this._moveLoop = setInterval(() => this._moveStep(), 1000 / 60);
-        this._animLoop = setInterval(() => this.playAnimationLogic(), 100);
+        this._moveLoop = setInterval(
+            () => this._moveStep(),
+            1000 / 60
+        );
+        this._animLoop = setInterval(
+            () => this.playAnimationLogic(),
+            100
+        );
     }
+
+    /* ---------------- Movement ---------------- */
 
     _moveStep() {
         if (this.world?.isPaused || this.isDead()) return;
@@ -115,9 +125,18 @@ class Character extends MovableObject {
         const endX = this.world?.level?.level_end_x ?? 3000;
         const grounded = !this.isAboveGround();
 
+        const moved = this._handleHorizontalMove(kb, endX);
+        this._handleJumpInput(kb, grounded);
+        this._handleWalkSound(moved, grounded);
+
+        if (this.world) {
+            this.world.setCameraX(-this.x + 100);
+        }
+    }
+
+    _handleHorizontalMove(kb, endX) {
         let moved = false;
 
-        // Rechts
         if (kb.RIGHT && this.x < endX) {
             this.moveRight();
             this.otherDirection = false;
@@ -125,7 +144,6 @@ class Character extends MovableObject {
             moved = true;
         }
 
-        // Links
         if (kb.LEFT && this.x > 0) {
             this.moveLeft();
             this.otherDirection = true;
@@ -133,85 +151,135 @@ class Character extends MovableObject {
             moved = true;
         }
 
-        // Sprung
-        if (kb.SPACE && grounded && !this._jumpHeld) {
-            sfx?.jump();
-            this.jump();
-            this.markActive();
-            this._jumpHeld = true;
-        } else if (!kb.SPACE) {
-            this._jumpHeld = false;
-        }
+        return moved;
+    }
 
-        // Sound
+    _handleJumpInput(kb, grounded) {
+        if (!kb.SPACE) {
+            this._jumpHeld = false;
+            return;
+        }
+        if (!grounded || this._jumpHeld) return;
+
+        this._performJump();
+        this._jumpHeld = true;
+    }
+
+    _performJump() {
+        sfx?.jump();
+        this.jump();
+        this.markActive();
+    }
+
+    _handleWalkSound(moved, grounded) {
         if (moved && grounded && !this.isHurt()) {
             sfx?.startWalk();
         } else {
             sfx?.stopWalk?.();
         }
-
-        // Kamera
-        if (this.world) this.world.setCameraX(-this.x + 100);
     }
+
+    /* -------------- Jump / Air -------------- */
 
     jump() {
         if (this.isAboveGround() || this.world?.isPaused) return;
-        this.speedY = 30;
-        this.isJumping = false;
+        this.speedY = 25;
+        this._startJumpAnim();   // direkt Sprungstart
     }
+
+    _startJumpAnim() {
+        this.isJumping = true;
+        this.currentImage = 0;
+        const first = this.IMAGES_JUMPING[0];
+        const img = this.imageCache[first];
+        if (img) this.img = img;
+    }
+
+    /* -------------- Animation-Logic -------------- */
 
     playAnimationLogic() {
         if (this.world?.isPaused) return;
 
-        // 1. Tod
         if (this.isDead()) {
-            this.playAnimation(this.IMAGES_DEAD);
+            this._playDeadAnim();
             return;
         }
-
-        // 2. Verletzt
         if (this.isHurt()) {
-            this.playAnimation(this.IMAGES_HURT);
+            this._playHurtAnim();
             return;
         }
 
-        // 3. In der Luft → Sprung-Animation
-        if (this.isAboveGround()) {
-            if (!this.isJumping) {
-                this.isJumping = true;
-                this.currentImage = 0; // Immer mit J-31 starten!
-                this.img = this.imageCache[this.IMAGES_JUMPING[0]];
-            }
-            this.playAnimation(this.IMAGES_JUMPING);
+        // solange isJumping ODER in der Luft → Jump-Anim
+        if (this.isJumping || this.isAboveGround()) {
+            this._playJumpOrLandAnim();
             return;
         }
 
-        // 4. Landung → Zustand zurücksetzen
+        this._playGroundAnim();
+    }
+
+    _playDeadAnim() {
+        this.playAnimation(this.IMAGES_DEAD);
+    }
+
+    _playHurtAnim() {
+        this.playAnimation(this.IMAGES_HURT);
+    }
+
+    /**
+     * Steuert Sprung-Animation + Landung
+     * - während Sprung / Flug: Jump-Frames
+     * - beim sicheren Landen: zurück zu Ground-Anim
+     */
+    _playJumpOrLandAnim() {
+        const inAir = this.isAboveGround();
+        const fallingOrDown = this.speedY <= 0;
+
+        if (!inAir && fallingOrDown) {
+            this.isJumping = false;
+            this._playGroundAnim();
+            return;
+        }
+
+        if (!this.isJumping) {
+            this._startJumpAnim();
+        }
+        this.playAnimation(this.IMAGES_JUMPING);
+    }
+
+    _playGroundAnim() {
         if (this.isJumping) {
             this.isJumping = false;
         }
 
-        // 5. Am Boden: Walk oder Idle
         if (this.isMovingKeyDown()) {
             this.playAnimation(this.IMAGES_WALKING);
             this.markActive();
-        } else {
-            const idleFor = Date.now() - this.lastActiveAt;
-            const images = idleFor >= this.LONG_IDLE_AFTER_MS ? this.IMAGES_LONG_IDLE : this.IMAGES_IDLE;
-            this.playAnimation(images);
+            return;
+        }
 
-            // Schnarchen bei Long Idle
-            if (idleFor >= this.LONG_IDLE_AFTER_MS) {
-                const now = Date.now();
-                if (now - (this.lastSnoreAt || 0) > 2500) {
-                    sfx?.snore();
-                    this.lastSnoreAt = now;
-                }
-            }
+        const idleFor = Date.now() - this.lastActiveAt;
+        const images =
+            idleFor >= this.LONG_IDLE_AFTER_MS
+                ? this.IMAGES_LONG_IDLE
+                : this.IMAGES_IDLE;
+
+        this.playAnimation(images);
+
+        if (idleFor >= this.LONG_IDLE_AFTER_MS) {
+            this._maybeSnore();
         }
     }
 
-    // === HELPER ===
+    _maybeSnore() {
+        const now = Date.now();
+        if (now - (this.lastSnoreAt || 0) <= 2500) return;
+        sfx?.snore();
+        this.lastSnoreAt = now;
+    }
+
+    /* -------------- Helper / State -------------- */
+
     isMovingKeyDown() {
         const kb = this.world?.keyboard;
         return !!(kb && (kb.RIGHT || kb.LEFT));
@@ -221,30 +289,43 @@ class Character extends MovableObject {
         this.lastActiveAt = Date.now();
     }
 
-    // === STOMP (optimiert!) ===
+    /* -------------- Stomp (Landing on enemies) -------------- */
+
     isStomping(enemy) {
         if (!enemy || enemy.dead || enemy.isBoss || enemy.removeMe) return false;
         if (!this.isColliding(enemy)) return false;
         if (this.speedY >= 0) return false; // Nur im Fallen!
 
         const enemyTop = enemy.y + (enemy.offset?.top || 0);
-        const pepeBottomPrev = (this.prevY ?? this.y) + this.height - (this.offset?.bottom || 0);
-        const pepeBottomNow = this.y + this.height - (this.offset?.bottom || 0);
+        const pepeBottomPrev =
+            (this.prevY ?? this.y) +
+            this.height -
+            (this.offset?.bottom || 0);
 
-        const crossedTop = pepeBottomPrev <= enemyTop && pepeBottomNow >= enemyTop;
-        const overlapX = Math.min(this.x + this.width, enemy.x + enemy.width) - Math.max(this.x, enemy.x);
+        const pepeBottomNow =
+            this.y +
+            this.height -
+            (this.offset?.bottom || 0);
+
+        const crossedTop =
+            pepeBottomPrev <= enemyTop &&
+            pepeBottomNow >= enemyTop;
+
+        const overlapX =
+            Math.min(this.x + this.width, enemy.x + enemy.width) -
+            Math.max(this.x, enemy.x);
+
         const minOverlapX = 20;
-
         return crossedTop && overlapX >= minOverlapX;
     }
 
-    // === BOUNCE ===
+    /* -------------- Bounce / Knockback -------------- */
+
     bounce() {
         this.speedY = 12;
         this.stompLockUntil = Date.now() + 250;
     }
 
-    // === KNOCKBACK ===
     applyKnockBack(fromX) {
         const dir = this.x < fromX ? -1 : 1;
         this.x += dir * 35;
@@ -253,7 +334,8 @@ class Character extends MovableObject {
         this.x = Math.max(0, this.x);
     }
 
-    // === CLEANUP ===
+    /* -------------- Cleanup -------------- */
+
     destroy() {
         if (this._moveLoop) clearInterval(this._moveLoop);
         if (this._animLoop) clearInterval(this._animLoop);
