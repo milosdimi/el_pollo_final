@@ -47,6 +47,7 @@ canvas {
   overflow: hidden;
 }
 
+/* Glasige Toolbar */
 .toolbar {
   position: absolute;
   top: 10px;
@@ -55,44 +56,74 @@ canvas {
   display: flex;
   gap: 8px;
   padding: 8px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, .35);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, .25);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, .38);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   z-index: 6;
 }
 
 .toolbar .btns {
   appearance: none;
-  border: 0;
-  border-radius: 10px;
-  width: 30px;
-  height: 30px;
-  font-size: 15px;
+  border: 1px solid rgba(255, 255, 255, .32);
+  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
   color: #fff;
-  background: rgba(255, 255, 255, .14);
+  background: radial-gradient(circle at 20% 0,
+      rgba(255, 255, 255, .45),
+      rgba(255, 255, 255, .16));
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, .55),
+    0 0 0 1px rgba(0, 0, 0, .4) inset;
   cursor: pointer;
   outline: none;
-  transition: transform .08s ease, background .15s ease, opacity .15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform .08s ease,
+    background .15s ease,
+    opacity .15s ease,
+    box-shadow .15s ease,
+    border-color .15s ease;
 }
 
 .toolbar .btns:hover {
-  background: rgba(255, 255, 255, .22);
+  background: radial-gradient(circle at 20% 0,
+      rgba(255, 255, 255, .75),
+      rgba(255, 255, 255, .25));
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, .65),
+    0 0 0 1px rgba(255, 255, 255, .2) inset;
 }
 
 .toolbar .btns:active {
-  transform: translateY(1px) scale(.98);
+  transform: translateY(1px) scale(.97);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, .7),
+    0 0 0 1px rgba(255, 255, 255, .12) inset;
 }
 
 .toolbar .btns.is-active {
-  background: rgba(255, 255, 255, .32);
+  background: radial-gradient(circle at 20% 0,
+      #ffeaa8,
+      #f3c53f);
+  border-color: rgba(255, 255, 255, .85);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, .5) inset,
+    0 0 14px rgba(255, 208, 90, .65);
 }
 
 .toolbar .btns[aria-disabled="true"] {
   pointer-events: none;
-  opacity: .45;
-  filter: grayscale(.3);
+  opacity: .4;
+  filter: grayscale(.4);
 }
 
+/* Overlays (Start, Win, Lose, Info) */
 .overlay {
   position: absolute;
   inset: 0;
@@ -101,7 +132,7 @@ canvas {
   justify-content: center;
   gap: 16px;
   background: rgba(0, 0, 0, .35);
-  z-index: 5;
+  z-index: 6;
 }
 
 .overlay.hidden {
@@ -148,28 +179,59 @@ canvas {
   z-index: 1;
 }
 
-/* === Buttons === */
+/* === Buttons – Liquid / Glass Style === */
 .btn {
   font: 700 20px "WildMexico", Arial, sans-serif;
-  padding: 10px 18px;
-  border: 0;
-  border-radius: 10px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .55);
   cursor: pointer;
-  background: #ffd866;
-  box-shadow: 0 4px 0 #c9a23b;
+  background: radial-gradient(circle at 15% 0,
+      #fff7d0,
+      #ffd866 45%,
+      #f3c53f 75%,
+      #c9872f 100%);
   color: #000;
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, .65),
+    0 0 0 1px rgba(0, 0, 0, .35) inset,
+    0 1px 0 rgba(255, 255, 255, .7);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+  transform: translateY(0);
+  transition:
+    transform .08s ease,
+    box-shadow .12s ease,
+    filter .12s ease,
+    background .16s ease;
+}
+
+.btn:hover {
+  filter: brightness(1.03);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, .75),
+    0 0 0 1px rgba(0, 0, 0, .4) inset;
 }
 
 .btn:active {
-  transform: translateY(1px);
-  box-shadow: 0 3px 0 #c9a23b;
+  transform: translateY(2px);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, .75),
+    0 0 0 1px rgba(0, 0, 0, .45) inset;
 }
 
+/* Haupt-CTA – etwas größer + pulse */
 .btn.primary {
-  background: #ffb347;
-  box-shadow: 0 4px 0 #c9872f;
+  background: radial-gradient(circle at 10% 0,
+      #ffffff,
+      #ffeaa8 30%,
+      #ffb347 70%,
+      #c9872f 100%);
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, .8),
+    0 0 0 1px rgba(0, 0, 0, .5) inset,
+    0 0 22px rgba(255, 210, 120, .8);
   font-size: 22px;
-  border-radius: 12px;
+  border-radius: 999px;
   animation: pulse 1.2s ease-in-out infinite;
 }
 
@@ -177,17 +239,34 @@ canvas {
 
   0%,
   100% {
-    transform: scale(1)
+    transform: translateY(0) scale(1);
   }
 
   50% {
-    transform: scale(1.08)
+    transform: translateY(-1px) scale(1.06);
   }
 }
 
 .overlay-actions {
   display: flex;
   gap: 12px;
+}
+
+/* Ghost-Buttons im Info-Overlay */
+.btn.btn-ghost {
+  background: rgba(0, 0, 0, .35);
+  border: 1px solid rgba(255, 255, 255, .3);
+  color: #ffd866;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, .6),
+    0 0 0 1px rgba(0, 0, 0, .5) inset;
+  margin-right: 6px;
+  font-size: 16px;
+  text-shadow: none;
+}
+
+.btn.btn-ghost:hover {
+  background: rgba(0, 0, 0, .55);
 }
 
 /* === Level-Picker === */
@@ -199,17 +278,29 @@ canvas {
 }
 
 .levels .btn.lvl {
-  opacity: .65;
-  transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
+  opacity: .7;
+  font-size: 18px;
+  padding: 8px 18px;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, .65),
+    0 0 0 1px rgba(0, 0, 0, .35) inset;
+  transition:
+    transform .12s ease,
+    opacity .12s ease,
+    box-shadow .12s ease,
+    filter .12s ease;
 }
 
 .levels .btn.lvl:hover {
-  opacity: .85;
+  opacity: .9;
+  filter: brightness(1.05);
 }
 
 .levels .btn.lvl.is-active {
   opacity: 1;
-  box-shadow: 0 0 0 2px #fff inset, 0 0 12px rgba(255, 255, 255, .35);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, .75) inset,
+    0 0 18px rgba(255, 230, 150, .85);
   transform: translateY(-1px);
 }
 
@@ -226,55 +317,77 @@ canvas {
 }
 
 .help span {
-  background: rgba(255, 255, 255, .07);
+  background: rgba(255, 255, 255, .12);
   padding: .25rem .5rem;
-  border-radius: .5rem;
+  border-radius: .75rem;
+  border: 1px solid rgba(255, 255, 255, .18);
 }
 
-/* === Info-Overlay Card (responsiver) === */
+/* === Info-Overlay Card (responsiver + kompakte Steuerung) === */
 #infoOverlay .info-card {
-  background: rgba(0, 0, 0, .85);
+  background: rgba(0, 0, 0, .82);
   color: #fff;
   width: min(540px, 90vw);
   max-height: 92vh;
   overflow: auto;
-  border-radius: 16px;
-  padding: 16px 18px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+  border-radius: 18px;
+  padding: 16px 18px 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .8);
   font-family: inherit;
   overscroll-behavior: contain;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 #infoOverlay h2 {
-  margin: 0 0 .5rem;
   font: 700 22px/1.2 inherit;
 }
 
 #infoOverlay h3 {
-  margin: .75rem 0 .25rem;
+  margin: .75rem 0 .35rem;
   font: 700 16px/1.2 inherit;
 }
 
+/* Falls irgendwo noch UL verwendet wird */
 #infoOverlay ul {
   margin: .25rem 0 .75rem 1.1rem;
+}
+
+/* Steuerungs-Grid */
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px 14px;
+  margin: 8px 0 14px;
+  font-size: 15px;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-chip {
+  min-width: 60px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .35);
+  background: rgba(255, 255, 255, .08);
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .3px;
+}
+
+.key-label {
+  opacity: .9;
 }
 
 #infoOverlay .actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-}
-
-.btn.btn-ghost {
-  background: transparent;
-  box-shadow: none;
-  color: #ffd866;
-  border: 1px solid rgba(255, 255, 255, .25);
-  margin-right: 6px;
-}
-
-.btn.btn-ghost:hover {
-  background: rgba(255, 255, 255, .08);
 }
 
 /* === Mobile Pad (+ disabled) === */
@@ -296,26 +409,43 @@ canvas {
   pointer-events: none;
 }
 
+/* Glasige Touch-Pads */
 .mobile-pad .pad {
   font: 700 18px/1 inherit;
   width: 56px;
   height: 56px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .12);
+  border-radius: 18px;
+  background: radial-gradient(circle at 15% 0,
+      rgba(255, 255, 255, .45),
+      rgba(255, 255, 255, .08));
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, .2);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
+  border: 1px solid rgba(255, 255, 255, .35);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, .75),
+    0 0 0 1px rgba(0, 0, 0, .6) inset;
   margin: 6px;
   touch-action: none;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background .12s ease,
+    box-shadow .12s ease,
+    transform .08s ease;
 }
 
 .mobile-pad .pad:hover {
-  background: rgba(255, 255, 255, .18);
+  background: radial-gradient(circle at 15% 0,
+      rgba(255, 255, 255, .7),
+      rgba(255, 255, 255, .18));
 }
 
 .mobile-pad .pad:active {
-  background: rgba(255, 255, 255, .24);
+  transform: translateY(2px);
+  background: radial-gradient(circle at 15% 0,
+      rgba(255, 255, 255, .85),
+      rgba(255, 255, 255, .25));
 }
 
 .pad-jump,
@@ -331,7 +461,8 @@ canvas {
   margin: 10px 0;
   color: #fff;
   opacity: .9;
-  font-size: 12px;
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 .footer-inner {
@@ -352,7 +483,7 @@ canvas {
 .footer-links a {
   color: #fff;
   text-decoration: none;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .footer-links a:hover {
@@ -428,7 +559,7 @@ canvas {
     width: 68px;
     height: 68px;
     font-size: 20px;
-    border-radius: 16px;
+    border-radius: 20px;
   }
 
   .pad-left {
@@ -590,7 +721,7 @@ canvas {
     width: 68px;
     height: 68px;
     font-size: 20px;
-    border-radius: 16px;
+    border-radius: 20px;
   }
 
   .pad-left {
