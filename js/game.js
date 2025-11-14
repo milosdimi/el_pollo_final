@@ -546,16 +546,11 @@ function wireMobileControls() {
 
   const press = (k) => { if (keyboard) keyboard[k] = true; };
   const release = (k) => { if (keyboard) keyboard[k] = false; };
+  const down = (k) => (e) => { e.preventDefault(); press(k); };
+  const up = (k) => (e) => { e.preventDefault(); release(k); };
 
-  const down = (k) => (e) => {
-    e.preventDefault();
-    press(k);
-  };
-
-  const up = (k) => (e) => {
-    e.preventDefault();
-    release(k);
-  };
+  // Disable context menu on the whole pad
+  pad.addEventListener('contextmenu', (e) => e.preventDefault());
 
   pad.querySelectorAll('[data-k]').forEach(btn => {
     const key = btn.getAttribute('data-k');
@@ -565,5 +560,7 @@ function wireMobileControls() {
     btn.addEventListener('mousedown', down(key));
     btn.addEventListener('mouseup', up(key));
     btn.addEventListener('mouseleave', up(key));
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
   });
 }
+
