@@ -1,13 +1,13 @@
 /**
  * @file character.class.js
- * @description Hauptcharakter (Pepe) – Bewegung, Sprung, Animation
- * @author Milos Dimitrijevic
+ * @description Main player character (Pepe) – movement, jumping, animations.
+ * @author
  */
 
 class Character extends MovableObject {
     /**
-     * Hauptcharakter des Spiels
-     * @class
+     * Main player character.
+     * Handles movement, jumping, idle/long-idle and combat reactions.
      * @extends MovableObject
      */
     height = 250;
@@ -18,6 +18,7 @@ class Character extends MovableObject {
     LONG_IDLE_AFTER_MS = 3000;
     stompLockUntil = 0;
     lastSnoreAt = 0;
+
     _jumpHeld = false;
     isJumping = false;
 
@@ -105,6 +106,9 @@ class Character extends MovableObject {
         this.loadImages(this.IMAGES_LONG_IDLE);
     }
 
+    /**
+     * Starts movement and animation loops.
+     */
     animate() {
         this._moveLoop = setInterval(
             () => this._moveStep(),
@@ -116,7 +120,7 @@ class Character extends MovableObject {
         );
     }
 
-    /* ---------------- Movement ---------------- */
+    /* ---------- Movement ---------- */
 
     _moveStep() {
         if (this.world?.isPaused || this.isDead()) return;
@@ -179,12 +183,15 @@ class Character extends MovableObject {
         }
     }
 
-    /* -------------- Jump / Air -------------- */
+    /* ---------- Jump / Air ---------- */
 
+    /**
+     * Starts a jump if character is on the ground.
+     */
     jump() {
         if (this.isAboveGround() || this.world?.isPaused) return;
-        this.speedY = 25;
-        this._startJumpAnim();   // direkt Sprungstart
+        this.speedY = 30;
+        this._startJumpAnim(); // immediately show jump sprite
     }
 
     _startJumpAnim() {
@@ -195,8 +202,11 @@ class Character extends MovableObject {
         if (img) this.img = img;
     }
 
-    /* -------------- Animation-Logic -------------- */
+    /* ---------- Animation Logic ---------- */
 
+    /**
+     * Chooses and plays the correct animation based on state.
+     */
     playAnimationLogic() {
         if (this.world?.isPaused) return;
 
@@ -209,7 +219,7 @@ class Character extends MovableObject {
             return;
         }
 
-        // solange isJumping ODER in der Luft → Jump-Anim
+        // Jump animation while jumping OR in the air
         if (this.isJumping || this.isAboveGround()) {
             this._playJumpOrLandAnim();
             return;
@@ -227,14 +237,13 @@ class Character extends MovableObject {
     }
 
     /**
-     * Steuert Sprung-Animation + Landung
-     * - während Sprung / Flug: Jump-Frames
-     * - beim sicheren Landen: zurück zu Ground-Anim
+     * Handles jump animation and transition back to ground state.
      */
     _playJumpOrLandAnim() {
         const inAir = this.isAboveGround();
         const fallingOrDown = this.speedY <= 0;
 
+        // Landed: back on ground, no upward speed
         if (!inAir && fallingOrDown) {
             this.isJumping = false;
             this._playGroundAnim();
@@ -248,6 +257,7 @@ class Character extends MovableObject {
     }
 
     _playGroundAnim() {
+        // Make sure we leave jump state when on ground
         if (this.isJumping) {
             this.isJumping = false;
         }
@@ -278,54 +288,73 @@ class Character extends MovableObject {
         this.lastSnoreAt = now;
     }
 
-    /* -------------- Helper / State -------------- */
+    /* ---------- Helpers / State ---------- */
 
+    /**
+     * Checks if any movement key (LEFT/RIGHT) is pressed.
+     * @returns {boolean}
+     */
     isMovingKeyDown() {
         const kb = this.world?.keyboard;
         return !!(kb && (kb.RIGHT || kb.LEFT));
     }
 
+    /**
+     * Marks character as active (used for idle/long-idle timing).
+     */
     markActive() {
         this.lastActiveAt = Date.now();
     }
 
-    /* -------------- Stomp (Landing on enemies) -------------- */
+    /* ---------- Stomp (landing on enemies) ---------- */
 
+    /**
+     * Checks if this character is stomping on the given enemy.
+     * @param {MovableObject} enemy
+     * @returns {boolean}
+     */
     isStomping(enemy) {
         if (!enemy || enemy.dead || enemy.isBoss || enemy.removeMe) return false;
         if (!this.isColliding(enemy)) return false;
-        if (this.speedY >= 0) return false; // Nur im Fallen!
+        if (this.speedY >= 0) return false; // only while falling
 
         const enemyTop = enemy.y + (enemy.offset?.top || 0);
-        const pepeBottomPrev =
+        const bottomPrev =
             (this.prevY ?? this.y) +
             this.height -
             (this.offset?.bottom || 0);
 
-        const pepeBottomNow =
+        const bottomNow =
             this.y +
             this.height -
             (this.offset?.bottom || 0);
 
         const crossedTop =
-            pepeBottomPrev <= enemyTop &&
-            pepeBottomNow >= enemyTop;
+            bottomPrev <= enemyTop &&
+            bottomNow >= enemyTop;
 
         const overlapX =
             Math.min(this.x + this.width, enemy.x + enemy.width) -
             Math.max(this.x, enemy.x);
 
-        const minOverlapX = 20;
-        return crossedTop && overlapX >= minOverlapX;
+        const MIN_OVERLAP_X = 20;
+        return crossedTop && overlapX >= MIN_OVERLAP_X;
     }
 
-    /* -------------- Bounce / Knockback -------------- */
+    /* ---------- Bounce / Knockback ---------- */
 
+    /**
+     * Small bounce used after stomping an enemy.
+     */
     bounce() {
         this.speedY = 12;
         this.stompLockUntil = Date.now() + 250;
     }
 
+    /**
+     * Knockback when the character gets hit.
+     * @param {number} fromX X-position of the attacker.
+     */
     applyKnockBack(fromX) {
         const dir = this.x < fromX ? -1 : 1;
         this.x += dir * 35;
@@ -334,8 +363,11 @@ class Character extends MovableObject {
         this.x = Math.max(0, this.x);
     }
 
-    /* -------------- Cleanup -------------- */
+    /* ---------- Cleanup ---------- */
 
+    /**
+     * Stops all timers and cleans up the character.
+     */
     destroy() {
         if (this._moveLoop) clearInterval(this._moveLoop);
         if (this._animLoop) clearInterval(this._animLoop);
